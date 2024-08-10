@@ -4,7 +4,7 @@
  * @author Riprod
  * @version 0.8.0
  */
-import { SocketData, SongData } from '../types';
+import { AUDIO_REQUESTS, SocketData, SongData } from '../types';
 import WebSocketService from '../helpers/WebSocketService';
 
 type SongDataUpdateCallback = (data: SongData) => void;
@@ -21,6 +21,7 @@ export class MusicStore {
   private async setupWebSocket() {
     const socket = await WebSocketService; // Ensure WebSocketService is initialized
     socket.on('client', this.handleClientData.bind(this));
+    this.requestMusicData()
   }
 
   static getInstance(): MusicStore {
@@ -30,7 +31,7 @@ export class MusicStore {
     return MusicStore.instance;
   }
 
-  private handleClientData(msg: SocketData): void {
+  private async handleClientData(msg: SocketData): Promise<void> {
     if (msg.type === 'song') {
       const data = msg.data as SongData;
       this.songData = data;
@@ -38,7 +39,7 @@ export class MusicStore {
     }
   }
 
-  private notifySongDataUpdate(): void {
+  private async notifySongDataUpdate(): Promise<void> {
     this.songDataUpdateCallbacks.forEach(callback => callback(this.songData));
   }
 
@@ -51,6 +52,13 @@ export class MusicStore {
 
   getSongData(): SongData {
     return this.songData;
+  }
+
+  async requestMusicData(): Promise<void> {
+    if (WebSocketService.is_ready()) {
+      const data = { app: 'utility', type: 'get', request: AUDIO_REQUESTS.SONG };
+      WebSocketService.post(data);
+    }
   }
 
   updateSongData(updatedData: Partial<SongData>): void {

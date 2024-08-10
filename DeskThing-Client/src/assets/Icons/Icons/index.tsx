@@ -21,7 +21,7 @@ export const Icon = ({
   titleId,
   desc,
   stroke="currentColor",
-  fill = 'none',
+  fill = 'currentColor',
   descId,
   strokeWidth = 1,
   className,

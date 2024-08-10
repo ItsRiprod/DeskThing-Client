@@ -4,25 +4,26 @@ import Dashboard from './Dashboard';
 import Web from './Web';
 import Landing from './Landing';
 
-import { AppStore } from '../../stores';
+import { UIStore } from '../../stores';
 
 const Apps = () => {
-  const appStore = AppStore.getInstance();
-  const [currentView, setCurrentView] = useState<string>(appStore.getCurrentView());  
+  const uiStore = UIStore.getInstance();
+  const [currentView, setCurrentView] = useState<string>(uiStore.getCurrentView());  
 
   useEffect(() => {
-    const handleAppUpdate = () => {
-      setCurrentView(appStore.getCurrentView())
+    const handleViewUpdate = (view: string) => {
+      setCurrentView(view)
+      console.log(view)
     };
   
-    const unsubscribe = appStore.onAppUpdates(handleAppUpdate);
+    const unsubscribe = uiStore.on('currentView', handleViewUpdate);
     return () => {
       unsubscribe();
     };
-  }, [appStore]);
+  });
 
   const renderView = () => {
-    switch (appStore.getCurrentView()) {
+    switch (currentView) {
       case 'dashboard':
         return <Dashboard />;
       case 'landing':

@@ -5,7 +5,7 @@ export type SongData = {
     playlist_id: string | null
     track_name: string
     shuffle_state: boolean | null
-    repeat_state: string | null //off, all, track
+    repeat_state: 'off' | 'all' | 'track' //off, all, track
     is_playing: boolean
     can_fast_forward: boolean // Whether or not there an an option to 'fastforward 30 sec'
     can_skip: boolean

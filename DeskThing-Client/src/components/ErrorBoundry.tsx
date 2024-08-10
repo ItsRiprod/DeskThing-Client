@@ -1,3 +1,9 @@
+/**
+ * @file ErrorBoundry.tsx
+ * @description Error Boundary component for handling errors in the application.
+ * @author Riprod
+ * @version 0.8.0
+ */
 import React, { ErrorInfo, ReactNode, useEffect } from "react";
 
 interface ErrorBoundaryProps {

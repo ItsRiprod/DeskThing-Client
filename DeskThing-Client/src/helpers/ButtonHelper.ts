@@ -68,13 +68,13 @@ class ButtonHelper {
 
     private wheelEventHandler = (event: WheelEvent) => {
         if (event.deltaX < 0) {
-            this.notify(Button.SCROLL_LEFT, EventFlavor.Short);
+            this.notify('Scroll', EventFlavor.Left);
         } else if (event.deltaX > 0) {
-            this.notify(Button.SCROLL_RIGHT, EventFlavor.Short);
+            this.notify('Scroll', EventFlavor.Right);
         } else if (event.deltaY < 0) {
-            this.notify(Button.SCROLL_UP, EventFlavor.Short);
+            this.notify('Scroll', EventFlavor.Up);
         } else if (event.deltaY > 0) {
-            this.notify(Button.SCROLL_DOWN, EventFlavor.Short);
+            this.notify('Scroll', EventFlavor.Down);
         }
     };
 
@@ -92,19 +92,19 @@ class ButtonHelper {
         const identifier = event.key;
 
         // Only set down if it is not already down or already a long press
-        if (this.buttonStates[identifier] != EventFlavor.LongPress && this.buttonStates[identifier] != EventFlavor.Down) {
+        if (this.buttonStates[identifier] != EventFlavor.Long && this.buttonStates[identifier] != EventFlavor.Down) {
             this.notify(button, EventFlavor.Down, identifier);
             this.buttonStates[identifier] = EventFlavor.Down;
         }
-        if (button === Button.SCROLL_PRESS || button === Button.FRONT_BUTTON) {
+        if (button === 'Enter' || button === 'Escape') {
             event.preventDefault();
         }
 
         // Ensure that you dont double-call a long press
         if (!this.longPressTimeouts.has(identifier)) {
             const timeout = window.setTimeout(() => {
-                this.buttonStates[identifier] = EventFlavor.LongPress;
-                this.notify(button, EventFlavor.LongPress, identifier);
+                this.buttonStates[identifier] = EventFlavor.Long;
+                this.notify(button, EventFlavor.Long, identifier);
             }, 400);
 
             this.longPressTimeouts.set(identifier, timeout);
@@ -115,11 +115,12 @@ class ButtonHelper {
         const button = mapButton(event.code);
         const identifier = event.key;
         // Dont notify if the most recent action was a longpress
-        if (this.buttonStates[identifier] != EventFlavor.LongPress) {
-            this.notify(button, EventFlavor.Up, identifier);
+        if (this.buttonStates[identifier] != EventFlavor.Long) {
+            this.notify(button, EventFlavor.Short, identifier);
         }
-
+        
         // Set the most recent press state 
+        this.notify(button, EventFlavor.Up, identifier);
         this.buttonStates[identifier] = EventFlavor.Up;
 
         // Clear the event timeout to cancel a long press and cleanup
@@ -153,7 +154,7 @@ class ButtonHelper {
         this.notify(button, EventFlavor.Up, identifier);
     };
 
-    // Isnt needed because the swipe can be calculated from the mouseup event
+    // isn't needed because the swipe can be calculated from the mouseup event
     //private mouseMoveEventHandler = (event: MouseEvent) => {
     //  // This is where we could handle real-time swipe preview if needed
     //};
@@ -161,6 +162,8 @@ class ButtonHelper {
     private touchStartHandler = (event: TouchEvent) => {
         this.touchStartX = event.touches[0].clientX;
         this.touchStartY = event.touches[0].clientY;
+        this.touchEndX = event.touches[0].clientX;
+        this.touchEndY = event.touches[0].clientY;
     };
 
     /*
@@ -181,15 +184,15 @@ class ButtonHelper {
     private handleSwipe(deltaX: number, deltaY: number) {
         if (Math.abs(deltaX) > 400 && Math.abs(deltaX) > Math.abs(deltaY)) {
             if (deltaX > 0) {
-                this.notify(Button.SWIPE, EventFlavor.LeftSwipe);
+                this.notify('Swipe', EventFlavor.Left);
             } else {
-                this.notify(Button.SWIPE, EventFlavor.RightSwipe);
+                this.notify('Swipe', EventFlavor.Right);
             }
         } else if (Math.abs(deltaY) > 200) {
             if (deltaY > 0) {
-                this.notify(Button.SWIPE, EventFlavor.DownSwipe);
+                this.notify('Swipe', EventFlavor.Down);
             } else {
-                this.notify(Button.SWIPE, EventFlavor.UpSwipe);
+                this.notify('Swipe', EventFlavor.Up);
             }
         }
     }

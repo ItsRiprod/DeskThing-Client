@@ -5,11 +5,16 @@
  * @version 0.8.0
  */
 import WebSocketService from '../helpers/WebSocketService';
-import { Action, ButtonMapping, SocketData } from '../types';
+import { Action, Button, ButtonMapping, EventFlavor, SocketData, SongData } from '../types';
+import musicStore from './musicStore';
+
+type MappingCallback = () => void
 
 export class ControlStore {
   private static instance: ControlStore;
   private buttonMapping: ButtonMapping = {};
+  private listener: (() => void)[] = []
+  private ActionListeners: MappingCallback[] = []
 
   private constructor() {
     this.initializeTrays();
@@ -19,7 +24,8 @@ export class ControlStore {
   private async setupWebSocket() {
     await new Promise(resolve => setTimeout(resolve, 100));
     const socket = await WebSocketService; // Ensure WebSocketService is initialized
-    socket.on('client', this.handleClientData.bind(this));
+    this.listener.push(socket.on('client', this.handleClientData.bind(this)))
+    this.listener.push(musicStore.subscribeToSongDataUpdate(this.updateButtonStates.bind(this)))
   }
 
   static getInstance(): ControlStore {
@@ -32,32 +38,68 @@ export class ControlStore {
   private initializeTrays(): void {
     // Setting up the default maps
     const initialTrayConfig: ButtonMapping = {
-        tray1: { name: 'Shuffle', id: 'shuffle', description: 'Shuffle', source: 'server' },
-        tray2: { name: 'Rewind', id: 'rewind', description: 'Rewind', source: 'server' },
-        tray3: { name: 'PlayPause', id: 'playPause', description: 'PlayPause', source: 'server' },
-        tray4: { name: 'Skip', id: 'skip', description: 'Skip', source: 'server' },
-        tray5: { name: 'Repeat', id: 'repeat', description: 'Repeat', source: 'server' },
-        button1: { name: 'Pref1', id: 'pref1', description: 'Pref1', source: 'server' },
-        button2: { name: 'Pref2', id: 'pref2', description: 'Pref2', source: 'server' },
-        button3: { name: 'Pref3', id: 'pref3', description: 'Pref3', source: 'server' },
-        button4: { name: 'Pref4', id: 'pref4', description: 'Pref4', source: 'server' },
-        button1_long: { name: 'Swap', id: 'swap', description: 'Swap', source: 'server' },
-        button2_long: { name: 'Swap', id: 'swap', description: 'Swap', source: 'server' },
-        button3_long: { name: 'Swap', id: 'swap', description: 'Swap', source: 'server' },
-        button4_long: { name: 'Swap', id: 'swap', description: 'Swap', source: 'server' },
-        dial_scroll_right: { name: 'VolUp', id: 'volUp', description: 'VolUp', source: 'server' },
-        dial_scroll_left: { name: 'VolDown', id: 'volDown', description: 'VolDown', source: 'server' },
-        dial_press: { name: 'PlayPause', id: 'playPause', description: 'PlayPause', source: 'server' },
-        dial_press_long: { name: 'Skip', id: 'skip', description: 'Skip', source: 'server' },
-        face_press: { name: 'Repeat', id: 'repeat', description: 'Repeat', source: 'server' },
-        face_long: { name: 'Repeat', id: 'repeat', description: 'Repeat', source: 'server' }
-    };
+      Action1: {
+          [EventFlavor.Down]: { flair: '', name: 'Shuffle', id: 'shuffle', description: 'Shuffle', source: 'server' }
+      },
+      Action2: {
+          [EventFlavor.Down]: { flair: '', name: 'Rewind', id: 'rewind', description: 'Rewind', source: 'server' }
+      },
+      Action3: {
+          [EventFlavor.Down]: { flair: '', name: 'PlayPause', id: 'play', description: 'Plays or Pauses Audio', source: 'server' }
+      },
+      Action4: {
+          [EventFlavor.Down]: { flair: '', name: 'Skip', id: 'skip', description: 'Skip', source: 'server' }
+      },
+      Action5: {
+          [EventFlavor.Down]: { flair: '', name: 'Repeat', id: 'repeat', description: 'Repeat', source: 'server' }
+      },
+      Digit1: {
+          [EventFlavor.Short]: { flair: '', name: 'Pref', id: 'pref', description: 'Changed Pref', source: 'server' },
+          [EventFlavor.Long]: { flair: '', name: 'Swap', id: 'swap', description: 'Swap', source: 'server' }
+        },
+        Digit2: {
+          [EventFlavor.Short]: { flair: '', name: 'Pref', id: 'pref', description: 'Changed Pref', source: 'server' },
+          [EventFlavor.Long]: { flair: '', name: 'Swap', id: 'swap', description: 'Swap', source: 'server' }
+        },
+        Digit3: {
+        [EventFlavor.Short]: { flair: '', name: 'Pref', id: 'pref', description: 'Changed Pref', source: 'server' },
+        [EventFlavor.Long]: { flair: '', name: 'Swap', id: 'swap', description: 'Swap', source: 'server' }
+      },
+      Digit4: {
+          [EventFlavor.Short]: { flair: '', name: 'Pref', id: 'pref', description: 'Changed Pref', source: 'server' },
+          [EventFlavor.Long]: { flair: '', name: 'Swap', id: 'swap', description: 'Swap', source: 'server' }
+      },
+      KeyM: {
+          [EventFlavor.Short]: { flair: '', name: 'Dashboard', id: 'dashboard', description: 'Open Dashboard', source: 'server' },
+          [EventFlavor.Long]: { flair: '', name: 'Utility', id: 'utility', description: 'Open Utility', source: 'server' }
+      },
+      Scroll: {
+          [EventFlavor.Right]: { flair: '', name: 'VolUp', id: 'volUp', description: 'VolUp', source: 'server' },
+          [EventFlavor.Up]: { flair: '', name: 'VolUp', id: 'volUp', description: 'VolUp', source: 'server' },
+          [EventFlavor.Left]: { flair: '', name: 'VolDown', id: 'volDown', description: 'VolDown', source: 'server' },
+          [EventFlavor.Down]: { flair: '', name: 'VolDown', id: 'volDown', description: 'VolDown', source: 'server' }
+      },
+      Enter: {
+          [EventFlavor.Down]: { flair: '', name: 'PlayPause', id: 'playPause', description: 'PlayPause', source: 'server' },
+          [EventFlavor.Long]: { flair: '', name: 'Skip', id: 'skip', description: 'Skip', source: 'server' }
+      },
+      Escape: {
+          [EventFlavor.Down]: { flair: '', name: 'Repeat', id: 'repeat', description: 'Repeat', source: 'server' },
+          [EventFlavor.Long]: { flair: '', name: 'Repeat', id: 'repeat', description: 'Repeat', source: 'server' }
+      },
+      Swipe: {
+        [EventFlavor.Up]: { flair: '', name: 'Hide AppsList', id: 'hide', description: 'Hides the apps list', source: 'server' },
+        [EventFlavor.Down]: { flair: '', name: 'Show AppsList', id: 'show', description: 'Shows the apps list', source: 'server' },
+        [EventFlavor.Left]: { flair: '', name: 'Swipe Left', id: 'swipeL', description: 'Goes to left app', source: 'server' },
+        [EventFlavor.Right]: { flair: '', name: 'Swipe Right', id: 'swipeR', description: 'Goes to right app', source: 'server' },
+      }
+  };
     this.handleConfigUpdate(initialTrayConfig);
   }
 
   private handleConfigUpdate(data: ButtonMapping): void {
-    for (const [key, action] of Object.entries(data)) {
-        this.buttonMapping[key] = action;
+    for (const [button, eventFlavors] of Object.entries(data)) {
+      this.buttonMapping[button] = eventFlavors;
     }
   }
 
@@ -67,12 +109,80 @@ export class ControlStore {
     }
   }
 
-  getButtonMapping(button: string): Action | undefined {
-    return this.buttonMapping[button];
+  getButtonMapping(button: Button, flavor: EventFlavor): Action | undefined {
+    return this.buttonMapping[button]?.[flavor];
   }
 
-  getButtButtonMappings(): ButtonMapping {
+  on(callback: MappingCallback): () => void {
+    this.ActionListeners.push(callback)
+
+    return () => this.removeListener(callback);
+  }
+
+  private removeListener(callback: MappingCallback) {
+    this.ActionListeners.filter(listener => listener !== callback);
+  }
+
+  /**
+   * Updates the flair for a specific Action.
+   * @param id The Action's ID to update.
+   * @param source The Action's source.
+   * @param flair The new flair value.
+   */
+  updateFlair(id: string, source: string, flair: string): void {
+    let updated = false;
+
+    // Iterate through all buttons and their respective flavors
+    for (const [button, eventFlavors] of Object.entries(this.buttonMapping)) {
+        for (const [flavor, action] of Object.entries(eventFlavors)) {
+            if (action.id === id && action.source === source) {
+                action.flair = flair;
+                updated = true;
+            }
+        }
+    }
+
+    // If any action was updated, notify listeners
+    if (updated) {
+        this.notifyListeners();
+    }
+  }
+
+  async updateButtonStates(songData: SongData): Promise<void> {
+    if (songData.is_playing) {
+      this.updateFlair('play', 'server', 'Pause')
+    } else {
+      this.updateFlair('play', 'server', '')
+    }
+    if (songData.shuffle_state) {
+      this.updateFlair('shuffle', 'server', '')
+    } else {
+      this.updateFlair('shuffle', 'server', 'Disabled')
+    }
+    if (songData.repeat_state == 'off') {
+      this.updateFlair('repeat', 'server', 'Disabled')
+    } else if (songData.repeat_state == 'all') {
+      this.updateFlair('repeat', 'server', '')
+    } else {
+      this.updateFlair('repeat', 'server', 'Active')
+    }
+  }
+
+  getButtonMappings(): ButtonMapping {
     return this.buttonMapping;
+  }
+
+  destroy(): void {
+    if (this.listener && typeof this.listener === 'object') {
+        Object.values(this.listener).forEach(unsubscribe => {
+          unsubscribe();
+        });
+    }
+}
+
+
+  notifyListeners() {
+    this.ActionListeners.forEach(callback => callback());
   }
 }
 

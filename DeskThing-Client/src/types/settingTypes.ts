@@ -12,7 +12,7 @@ export interface Manifest {
     homepage?: string
     repository?: string
   }
-  
+
 export interface App {
     name: string
     enabled: boolean
@@ -36,3 +36,7 @@ export interface Settings {
     };
   }
 
+
+export type Property = 'currentView' | 'appsListMode' | 'miniplayerMode' | 'availableViews'
+
+export type ViewMode = 'hidden' | 'peek' | 'full';

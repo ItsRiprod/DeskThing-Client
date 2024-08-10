@@ -4,7 +4,8 @@ function IconLogoLoading(props: IconProps): JSX.Element {
   const strokeWidth = props.strokeWidth || 1.5;
 
   return (
-    <Icon {...props} color="currentColor" fill="currentColor" viewBox="0 0 24 48">
+    <Icon {...props}>
+      <svg viewBox="0 0 24 24">
       <style>
         {`
 .gear {
@@ -76,6 +77,7 @@ function IconLogoLoading(props: IconProps): JSX.Element {
 
 </g>
 </g>
+</svg>
     </Icon>
   );
 }

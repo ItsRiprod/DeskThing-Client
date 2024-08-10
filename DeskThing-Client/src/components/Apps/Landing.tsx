@@ -1,3 +1,9 @@
+/**
+ * @file Landing.tsx
+ * @description Landing component for the DeskThing-Client.
+ * @author Riprod
+ * @version 0.8.0
+ */
 import { IconLogo, IconLogoGearLoading } from '../../assets/Icons';
 import React, { useState, useEffect } from 'react';
 import socket from '../../helpers/WebSocketService';

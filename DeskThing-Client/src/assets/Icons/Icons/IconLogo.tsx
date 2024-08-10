@@ -17,9 +17,9 @@ function IconLogo(props): JSX.Element {
   </style>
 
     <g className="logo_text_asd" xmlns="http://www.w3.org/2000/svg">
-      <g fill-rule="nonzero" stroke="none">
+      <g fillRule="nonzero" stroke="none">
         <ellipse className="icon_dot_asd" cx="17.44" cy="3.1" rx="0.5" ry="0.5" fill="#1ed760" />
-        <text y="6.45" className="font-THEBOLDFONT logo_text_slide_asd" font-size="3.52" fill="currentColor">D e s k T h i n g</text>
+        <text y="6.45" className="font-THEBOLDFONT logo_text_slide_asd" fontSize="3.52" fill="currentColor">D e s k T h i n g</text>
       </g>
     </g></svg></Icon>
 }

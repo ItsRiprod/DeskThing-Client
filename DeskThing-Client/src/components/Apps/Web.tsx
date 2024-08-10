@@ -1,4 +1,9 @@
-// Will do ✨Later ✨ 
+/**
+ * @file Web.tsx
+ * @description Web component for the DeskThing-Client.
+ * @author Riprod
+ * @version 0.8.0
+ */
 
 interface WebViewProps {
     currentView: string

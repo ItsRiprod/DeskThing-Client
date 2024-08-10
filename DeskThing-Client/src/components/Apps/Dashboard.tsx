@@ -1,3 +1,9 @@
+/**
+ * @file Dashboard.tsx
+ * @description Dashboard component for the DeskThing-Client.
+ * @author Riprod
+ * @version 0.8.0
+ */
 import { IconCarThing } from '../../assets/Icons';
 import React, { useState, useEffect } from 'react';
 import socket from '../../helpers/WebSocketService';
