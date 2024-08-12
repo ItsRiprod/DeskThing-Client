@@ -6,22 +6,20 @@
  */
 
 import { useEffect, useState } from "react";
-import { AppStore, UIStore } from "../../stores";
+import { AppStore } from "../../stores";
 import { App, Settings } from "../../types";
 import Landing from "./Landing";
 import WebSocketService from "../../helpers/WebSocketService";
 
 const Utility: React.FC = () => {
-    const uiStore = UIStore.getInstance()
     const appStore = AppStore.getInstance()
     const socket = WebSocketService
-    const [miniplayer, setMiniplayer] = useState<boolean>(uiStore.getMiniplayerMode() != 'hidden')
     const [apps, setApps] = useState<App[]>(appStore.getApps())
     const [settings, setSettings] = useState<Settings>(appStore.getSettings())
     const [selectedApp, setSelectedApp] = useState<string>('')
     const [currentSetting, setCurrentSetting] = useState<string>('')
 
-    const sendSettingsUpdate = (app: string, setting: string, value: string) => {
+    const sendSettingsUpdate = (app: string, setting: string, value: string | number) => {
         if (socket.is_ready()) {
           const data = {
             app: app,
@@ -35,13 +33,11 @@ const Utility: React.FC = () => {
           socket.post(data);
         }
 
+        appStore.requestUpdatedData()
         
       }
 
     useEffect(() => {
-        const updateMiniplayer = (state: string) => {
-            setMiniplayer(state != 'hidden')
-        }
 
         const updateApps = (apps: App[]) => {
             setApps(apps)
@@ -52,15 +48,13 @@ const Utility: React.FC = () => {
             setSettings(settings)
         }
         
-        const uiListener = uiStore.on('miniplayerMode', updateMiniplayer)
         const appListener = appStore.onAppUpdates(updateApps)
         const settingListener = appStore.onSettingsUpdates(updateSettings)
         return () => {
-            uiListener()
             appListener()
             settingListener()
         }
-    }, [uiStore, appStore])
+    }, [appStore])
 
     const selectApp = (appName: string) => {
         setSelectedApp(appName)
@@ -100,7 +94,7 @@ const Utility: React.FC = () => {
                                 {currentSetting == setting && settings[selectedApp][setting].options.map((option, index) => (
                                     <button 
                                         key={index} 
-                                        className={`${settings[selectedApp][setting].value == option.value && 'border-x-green-500'} w-full my-4 rounded-xl border-x flex justify-between p-5`}
+                                        className={`${settings[selectedApp][setting].value == option.value && 'border-x-green-500 bg-green-800 bg-opacity-20'} w-full my-4 rounded-xl border-x-2 flex justify-between p-5`}
                                         onClick={() => sendSettingsUpdate(selectedApp, setting, option.value)}>
                                         <p>{option.label}</p>
                                         <p>{option.value}</p>

@@ -31,6 +31,7 @@ const Player: React.FC = () => {
 
         const miniListener = uiStore.on('miniplayerMode', setMiniplayerMode)
         const songListener = musicStore.subscribeToSongDataUpdate(handleSongDataUpdate)
+        musicStore.requestMusicData()
 
         return () => {
             miniListener()

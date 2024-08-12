@@ -35,6 +35,7 @@ export class AppStore {
   private async initialize() {
     const socket = await WebSocketService;
     this.listeners.push(socket.on('client', this.handleClientData.bind(this)));
+    this.requestUpdatedData()
   }
 
   // Notify all registered callbacks of the song data update
@@ -67,6 +68,14 @@ export class AppStore {
 
   getSettings(): Settings {
     return this.settings;
+  }
+
+  requestUpdatedData(): void {
+    const socket = WebSocketService;
+    socket.post({
+      app: 'server',
+      type: 'get'
+    })
   }
 
   updateApps(newApp: App) {

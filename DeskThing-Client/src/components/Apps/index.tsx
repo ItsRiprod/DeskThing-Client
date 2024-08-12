@@ -10,14 +10,14 @@ import { UIStore } from '../../stores';
 const Apps = () => {
   const uiStore = UIStore.getInstance();
   const [currentView, setCurrentView] = useState<string>(uiStore.getCurrentView());  
-  const [miniplayerState, setMiniplayerState] = useState<boolean>(uiStore.getMiniplayerMode() != 'hidden')
+  const [miniplayerState, setMiniplayerState] = useState<string>(uiStore.getMiniplayerMode())
 
   useEffect(() => {
     const handleViewUpdate = (view: string) => {
       setCurrentView(view)
     };
     const handleMiniplayer = (state: string) => {
-      setMiniplayerState(state != 'hidden')
+      setMiniplayerState(state)
     };
   
     const unsubscribe = uiStore.on('currentView', handleViewUpdate);
@@ -44,7 +44,7 @@ const Apps = () => {
   };
 
   return (
-      <div className={`max-w-screen w-screen bg-black max-h-screen h-screen ${miniplayerState && 'pb-32'}`}>
+      <div className={`max-w-screen w-screen bg-black max-h-screen h-screen ${miniplayerState == 'peek' ? 'pb-32' : miniplayerState == 'hidden' ? 'pb-0' : 'pb-20'}`}>
           {renderView()}
       </div>
     )
