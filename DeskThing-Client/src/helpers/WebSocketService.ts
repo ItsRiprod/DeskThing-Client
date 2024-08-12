@@ -1,3 +1,4 @@
+import MessageStore from "../stores/messageStore"
 import ManifestStore, { ServerManifest } from "../stores/manifestStore";
 import { SocketData } from "../types";
 // Computer local IP
@@ -11,10 +12,17 @@ import { SocketData } from "../types";
 
 type SocketEventListener = (msg: SocketData) => void;
 
-class WebSocketService {
+export class WebSocketService {
   private static instance: WebSocketService
   listeners: { [app: string]: SocketEventListener[] } = {};
   webSocket: WebSocket;
+  private ipList: string[] = [
+    'localhost',
+    '192.168.7.1'
+  ];
+
+  private attempts: number = 0
+  private currentIpIndex: number = 0;
 
   constructor() {
     ManifestStore.on((manifest) => this.handleManifestChange(manifest));
@@ -31,7 +39,8 @@ class WebSocketService {
   private handleManifestChange(manifest: ServerManifest | null): void {
     if (manifest) {
       console.log('Reconnecting due to manifest update')
-      this.reconnect();
+      MessageStore.sendMessage(`WS: Reconnecting Websocket to port ${manifest.ip}`)
+      this.reconnect(manifest.ip);
     }
   }
 
@@ -41,32 +50,42 @@ class WebSocketService {
     }
 
     try {
-      this.webSocket = create_socket();
+      this.webSocket = this.createSocket();
       if (this.webSocket) {
         this.connect(this.webSocket);
       }
     } catch (error) {
       console.error('Failed to initialize WebSocket:', error);
+      MessageStore.sendMessage(`WS: Failed to initialize websocket`)
     }
   }
 
-  private reconnect(): void {
-    this.connect(create_socket());
+  private reconnect(manifestIp: string | null = null): void {
+    if (manifestIp && !this.ipList.includes(manifestIp)) {
+      this.ipList.push(manifestIp);
+    }
+    this.currentIpIndex = (this.currentIpIndex + 1) % this.ipList.length;
+    this.connect(this.createSocket());
   }
 
   connect(webSocket: WebSocket): void {
     this.webSocket = webSocket;
     // browser socket, WebSocket IPC transport
     webSocket.onopen = (): void => {
+      this.attempts = 0
+      MessageStore.sendMessage(`WS: Connected`)
       this.registerEventHandler();
     };
 
     webSocket.onclose = () => {
       this.webSocket.close();
-      setTimeout(this.reconnect.bind(this), 1000);
+      this.attempts++;
+      MessageStore.sendMessage(`WS: Unable to connect to ${this.ipList[this.currentIpIndex]}`)
+      setTimeout(this.reconnect.bind(this), this.attempts * 1000);
       return;
     };
     webSocket.onerror = () => {
+      MessageStore.sendMessage(`WS: Encountered an error`);
       //setTimeout(this.reconnect.bind(this), 1000);
       this.webSocket.close();
       return;
@@ -127,16 +146,28 @@ class WebSocketService {
       this.listeners[app].splice(index, 1);
     }
   }
-}
-
-function create_socket(): WebSocket {
-  const manifest = ManifestStore.getManifest();
-  if (manifest) {
-    const { ip, port } = manifest;
-    const BASE_URL = `ws://${ip}:${port}`;
-    return new WebSocket(BASE_URL);
-  } else {
-    throw new Error('Manifest is not available.');
+  private createSocket(): WebSocket {
+    const manifest = ManifestStore.getManifest();
+    if (manifest) {
+      const { ip, port } = manifest;
+      if (!this.ipList.includes(ip)) {
+        this.ipList.push(ip);
+        this.currentIpIndex = this.ipList.length -1
+      }
+      if (this.attempts > 5) {
+        const oldip = this.ipList[this.currentIpIndex];
+        const BASE_URL = `ws://${oldip}:${port}`;
+        MessageStore.sendMessage(`WS: Starting on port ${BASE_URL} attempt #${this.attempts}`);
+        return new WebSocket(BASE_URL);
+      } else {
+        const BASE_URL = `ws://${ip}:${port}`;
+        MessageStore.sendMessage(`WS: Starting on port ${BASE_URL} attempt #${this.attempts}`);
+        return new WebSocket(BASE_URL);
+      }
+    } else {
+      MessageStore.sendMessage(`WS: Manifest not available!`);
+      throw new Error('Manifest is not available.');
+    }
   }
 }
 

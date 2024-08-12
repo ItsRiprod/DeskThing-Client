@@ -6,6 +6,7 @@
  */
 import WebSocketService from '../helpers/WebSocketService';
 import { Action, Button, ButtonMapping, EventFlavor, SocketData, SongData } from '../types';
+import messageStore from './messageStore';
 import musicStore from './musicStore';
 
 type MappingCallback = () => void
@@ -38,20 +39,53 @@ export class ControlStore {
   private initializeTrays(): void {
     // Setting up the default maps
     const initialTrayConfig: ButtonMapping = {
-      Action1: {
-          [EventFlavor.Down]: { flair: '', name: 'Shuffle', id: 'shuffle', description: 'Shuffle', source: 'server' }
+      Pad1: {
+        [EventFlavor.Down]: { flair: '', name: 'VolUp', id: 'volUp', description: 'VolUp', source: 'server' }
       },
-      Action2: {
+      Pad2: {
+        [EventFlavor.Down]: { flair: '', name: 'Swipe Left', id: 'swipeL', description: 'Goes to left app', source: 'server' }
+      },
+      Pad3: {
+        [EventFlavor.Down]: { flair: '', name: 'Swipe Right', id: 'swipeR', description: 'Goes to right app', source: 'server' }
+      },
+      Pad4: {
+        [EventFlavor.Down]: { flair: '', name: 'VolDown', id: 'volDown', description: 'VolDown', source: 'server' }
+      },
+      Pad5: {
+        [EventFlavor.Down]: { flair: '', name: 'Hide AppsList', id: 'hide', description: 'Hides the apps list', source: 'server' }
+      },
+      Pad6: {
+        [EventFlavor.Down]: { flair: '', name: 'Show AppsList', id: 'show', description: 'Shows the apps list', source: 'server' }
+      },
+      Pad7: {
+        [EventFlavor.Down]: { flair: '', name: 'Repeat', id: 'repeat', description: 'Repeat', source: 'server' }
+      },
+      Pad8: {
+        [EventFlavor.Down]: { flair: '', name: 'PlayPause', id: 'play', description: 'Plays or Pauses Audio', source: 'server' }
+      },
+      Pad9: {
+        [EventFlavor.Down]: { flair: '', name: 'Fullscreen', id: 'fullscreen', description: 'Fullscreens the application', source: 'server' }
+      },
+      DynamicAction1: {
+        [EventFlavor.Down]: { flair: '', name: 'Repeat', id: 'repeat', description: 'Repeat', source: 'server' }  
+      },
+      DynamicAction2: {
+        [EventFlavor.Down]: { flair: '', name: 'Shuffle', id: 'shuffle', description: 'Shuffle', source: 'server' }  
+      },
+      DynamicAction3: {
           [EventFlavor.Down]: { flair: '', name: 'Rewind', id: 'rewind', description: 'Rewind', source: 'server' }
       },
-      Action3: {
-          [EventFlavor.Down]: { flair: '', name: 'PlayPause', id: 'play', description: 'Plays or Pauses Audio', source: 'server' }
-      },
-      Action4: {
-          [EventFlavor.Down]: { flair: '', name: 'Skip', id: 'skip', description: 'Skip', source: 'server' }
+      DynamicAction4: {
+        [EventFlavor.Down]: { name: 'Hidden Button', id: 'hidden', description: 'Hides the button. Has no action', source: 'server', flair: '' }
       },
       Action5: {
-          [EventFlavor.Down]: { flair: '', name: 'Repeat', id: 'repeat', description: 'Repeat', source: 'server' }
+        [EventFlavor.Down]: { name: 'Hidden Button', id: 'hidden', description: 'Hides the button. Has no action', source: 'server', flair: '' }
+      },
+      Action6: {
+          [EventFlavor.Down]: { flair: '', name: 'PlayPause', id: 'play', description: 'Plays or Pauses Audio', source: 'server' }
+      },
+      Action7: {
+          [EventFlavor.Down]: { flair: '', name: 'Skip', id: 'skip', description: 'Skip', source: 'server' }
       },
       Digit1: {
           [EventFlavor.Short]: { flair: '', name: 'Pref', id: 'pref', description: 'Changed Pref', source: 'server' },
@@ -105,6 +139,7 @@ export class ControlStore {
 
   private handleClientData(msg: SocketData): void {
     if (msg.type === 'button_mappings') {
+      messageStore.sendMessage('ControlStore: Received Button Mappings')
       this.handleConfigUpdate(msg.data as ButtonMapping);
     }
   }
@@ -133,8 +168,8 @@ export class ControlStore {
     let updated = false;
 
     // Iterate through all buttons and their respective flavors
-    for (const [button, eventFlavors] of Object.entries(this.buttonMapping)) {
-        for (const [flavor, action] of Object.entries(eventFlavors)) {
+    for (const [_button, eventFlavors] of Object.entries(this.buttonMapping)) {
+        for (const [_flavor, action] of Object.entries(eventFlavors)) {
             if (action.id === id && action.source === source) {
                 action.flair = flair;
                 updated = true;

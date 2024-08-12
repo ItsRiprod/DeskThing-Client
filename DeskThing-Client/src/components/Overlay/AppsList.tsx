@@ -41,7 +41,7 @@ const AppSelector: React.FC = () => {
   }
 
   return (
-    <div className={`absolute z-50 w-screen pb-5 justify-around flex flex-wrap overflow-hidden top-0 left-0 ${state == 'full' ? ' h-screen overflow-y-auto bg-gray-800' : state == 'peek' ? 'bg-gray-900' : '-translate-y-28'} transition-all`}>
+    <div className={`absolute z-50 w-screen pb-5 justify-around flex flex-wrap overflow-hidden top-0 left-0 ${state == 'full' ? ' h-screen overflow-y-auto bg-gray-800' : state == 'peek' ? 'bg-gray-900' : '-translate-y-28 overflow-hidden max-h-28'} transition-all`}>
       {apps.map((app, index) => 
         app.manifest?.isLocalApp || app.manifest?.isWebApp ?
         (<button

@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Action, Button, EventFlavor } from "../types";
 import { ControlStore, ManifestStore } from "../stores";
-import ActionHelper from "../helpers/ActionHelper";
+import ActionHelper from "./ActionHelper";
 import { Icon, IconProps } from "../assets/Icons/Icons";
 import { 
+    IconArrowLeft, 
+    IconArrowRight, 
     IconPlayPause, 
     IconPlay, 
     IconPref, 
@@ -13,8 +15,14 @@ import {
     IconRepeat, 
     IconSwap,
     IconCarThing,
-    IconRepeatActive
-} from '../assets/Icons/';
+    IconRepeatActive,
+    IconFullscreen,
+    IconFullscreenReverse,
+    IconVolDown,
+    IconVolUp,
+    IconArrowDown,
+    IconArrowUp
+} from '../assets/Icons';
 
 // Map action IDs to icon components
 const iconMap: { [key: string]: React.FC<IconProps> } = {
@@ -27,6 +35,14 @@ const iconMap: { [key: string]: React.FC<IconProps> } = {
     'repeat': IconRepeat,
     'repeatActive': IconRepeatActive,
     'swap': IconSwap,
+    'volDown': IconVolDown,
+    'volUp': IconVolUp,
+    'fullscreen': IconFullscreen,
+    'fullscreenReverse': IconFullscreenReverse,
+    'hide': IconArrowUp,
+    'show': IconArrowDown,
+    'swipeL': IconArrowLeft,
+    'swipeR': IconArrowRight,
     'default': IconCarThing,
 };
 
@@ -91,7 +107,7 @@ const ActionIcon: React.FC<IconHelperProps> = ({ Button, flavor = EventFlavor.Do
         console.log('Handling Click', Button, flavor, action)
         ActionHelper.executeAction(Button, flavor);
     };
-
+    let show = true
     let className = "";
     let IconComponent: React.FC<IconProps> | null = null;
 
@@ -99,15 +115,21 @@ const ActionIcon: React.FC<IconHelperProps> = ({ Button, flavor = EventFlavor.Do
         if (action.flair.includes("Disabled")) {
             className = "text-gray-500";
         }
+        if (action.id.includes("hidden")) {
+            className = "text-gray-500 hidden";
+            show = false
+        }
 
         // Exclude "Disabled" from the iconMap lookup
         const flairWithoutDisabled = action.flair.replace("Disabled", "").trim();
         IconComponent = iconMap[action.id + flairWithoutDisabled] || iconMap['default'];
     }
 
-    return (
-        <button onClick={handleClick} className={className}>
-            {IconComponent ? (
+    return show && (
+
+        
+        <button onClick={handleClick} className={`${className}`}>
+        {IconComponent ? (
                 <IconComponent {...props} />
             ) : (
                 <Icon>
@@ -118,8 +140,8 @@ const ActionIcon: React.FC<IconHelperProps> = ({ Button, flavor = EventFlavor.Do
                     )}
                 </Icon>
             )}
-        </button>
-    );
+            </button>
+        )
 };
 
 export default ActionIcon;

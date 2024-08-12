@@ -8,11 +8,22 @@ export enum EventFlavor {
 }
 
 export type Button =
-  | 'Action1'
-  | 'Action2'
-  | 'Action3'
-  | 'Action4'
+  | 'Pad1'
+  | 'Pad2'
+  | 'Pad3'
+  | 'Pad4'
+  | 'Pad5'
+  | 'Pad6'
+  | 'Pad7'
+  | 'Pad8'
+  | 'Pad9'
+  | 'DynamicAction1'
+  | 'DynamicAction2'
+  | 'DynamicAction3'
+  | 'DynamicAction4'
   | 'Action5'
+  | 'Action6'
+  | 'Action7'
   | `Key${string}` // This matches any key, like KeyA, KeyB, KeyM, etc.
   | `Digit${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 0}` // Matches Digit1, Digit2, etc.
   | 'Enter'

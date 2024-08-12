@@ -4,12 +4,22 @@
  * @author Riprod
  * @version 0.8.0
  */
-import { IconCarThing } from '../../assets/Icons';
 import React, { useState, useEffect } from 'react';
 import socket from '../../helpers/WebSocketService';
 import { SocketData } from '../../types/websocketTypes';
 const Default: React.FC = (): JSX.Element => {
-  const [time, setTime] = useState('00:00');
+  const [time, setTime] = useState<string>('00:00 AM');
+  const [serverTime, setServerTime] = useState<Date | null>(null);
+
+  const formatTime = (date: Date): string => {
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 || 12; // Convert 24-hour to 12-hour format
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+    return `${formattedHours}:${formattedMinutes} ${ampm}`;
+  };
+
   const requestPreferences = () => {
     if (socket.is_ready()) {
       const data = {
@@ -23,11 +33,15 @@ const Default: React.FC = (): JSX.Element => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const listener = (msg: SocketData) => {
       if (msg.type === 'time') {
-        setTime(msg.data as string);
+        const [timeString, ampm] = (msg.data as string).split(' ');
+        const [hours, minutes] = timeString.split(':').map(Number);
+        const now = new Date();
+        const serverDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours % 12 + (ampm === 'PM' ? 12 : 0), minutes);
+        setServerTime(serverDate);
       }
     };
 
-    requestPreferences()
+    requestPreferences();
 
     const removeListener = socket.on('client', listener);
 
@@ -36,9 +50,23 @@ const Default: React.FC = (): JSX.Element => {
     };
   }, []);
 
+  useEffect(() => {
+    const updateClock = () => {
+      if (serverTime) {
+        const now = new Date();
+        const elapsedMilliseconds = now.getTime() - serverTime.getTime();
+        const updatedTime = new Date(serverTime.getTime() + elapsedMilliseconds);
+        setTime(formatTime(updatedTime));
+      }
+    };
+
+    const interval = setInterval(updateClock, 1000);
+
+    return () => clearInterval(interval);
+  }, [serverTime]);
   return (
-    <div className="view_default">
-      <IconCarThing iconSize={445} text={time} fontSize={150}/>
+    <div className="w-full h-full flex flex-col items-center justify-center text-9xl font-semibold font-geistMono">
+      {time}
     </div>
   );
 };

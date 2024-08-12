@@ -25,7 +25,7 @@ export class UIStore {
   private appListener: (() => void)[] = []
   
   private appsListMode: ViewMode = 'hidden';
-  private miniplayerMode: ViewMode = 'hidden';
+  private miniplayerMode: ViewMode = 'peek';
 
   private peekTimeout: NodeJS.Timeout | null = null;
 
@@ -169,6 +169,7 @@ export class UIStore {
 
   async setAvailableViews(views: App[]): Promise<void> {
     this.views = views;
+    console.log(views)
     this.notifyStateUpdates('availableViews', this.views)
   }
 

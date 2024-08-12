@@ -4,7 +4,7 @@
  * @author Riprod
  * @version 0.8.0
  */
-import { IconLogo, IconLogoGearLoading } from '../../assets/Icons';
+import { IconLogo, IconLogoGear } from '../../assets/Icons';
 import React, { useState, useEffect } from 'react';
 import socket from '../../helpers/WebSocketService';
 import { ManifestStore, ServerManifest } from '../../stores';
@@ -37,9 +37,9 @@ const Landing: React.FC = (): JSX.Element => {
   }, []);
 
   return (
-    <div className="">
+    <div className="w-full flex flex-col justify-center h-full text-center items-center">
       <div className="flex items-center font-THEBOLDFONT">
-        <IconLogoGearLoading iconSize={124} /><IconLogo width={250} height={119}/>
+        <IconLogoGear iconSize={124} /><IconLogo width={250} height={119}/>
       </div>
       {manifest && (
           <div>

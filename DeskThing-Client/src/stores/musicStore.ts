@@ -6,6 +6,7 @@
  */
 import { AUDIO_REQUESTS, SocketData, SongData } from '../types';
 import WebSocketService from '../helpers/WebSocketService';
+import { findAlbumArtColor, getContrastingColor } from '../utils/colorUtil';
 
 type SongDataUpdateCallback = (data: SongData) => void;
 
@@ -34,8 +35,25 @@ export class MusicStore {
   private async handleClientData(msg: SocketData): Promise<void> {
     if (msg.type === 'song') {
       const data = msg.data as SongData;
-      this.songData = data;
-      this.notifySongDataUpdate();
+      
+      if (data.thumbnail != null && data.thumbnail != this.songData.thumbnail) {
+        this.songData = data;
+        const imageElement = new Image();
+        imageElement.src = data.thumbnail;
+        imageElement.onload = () => {
+          findAlbumArtColor(imageElement).then((avgColor) => {
+            document.documentElement.style.setProperty('--album-color', avgColor);
+            getContrastingColor(avgColor).then((contrastColor) => {
+              document.documentElement.style.setProperty('--text-color', contrastColor);
+              this.notifySongDataUpdate();
+            })
+          });
+        };
+      } else {
+        this.songData = data;
+        this.notifySongDataUpdate();
+      }
+
     }
   }
 

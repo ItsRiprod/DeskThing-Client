@@ -1,5 +1,5 @@
 import socket from './WebSocketService';
-import { AppStore, ControlStore, MusicStore, UIStore } from '../stores';
+import { AppStore, ControlStore, MessageStore, MusicStore, UIStore } from '../stores';
 import { Action, AUDIO_REQUESTS, Button, EventFlavor } from '../types';
 
 export class ActionHandler {
@@ -9,6 +9,13 @@ export class ActionHandler {
   private appStore = AppStore.getInstance();
 
   private constructor() {
+    this.musicStore = MusicStore.getInstance();
+    this.uiStore = UIStore.getInstance();
+    this.appStore = AppStore.getInstance();
+
+    this.uiStore.shiftViewLeft = this.uiStore.shiftViewLeft.bind(this.uiStore);
+    this.uiStore.shiftViewRight = this.uiStore.shiftViewRight.bind(this.uiStore);
+    this.uiStore.setCurrentView = this.uiStore.setCurrentView.bind(this.uiStore);
   }
 
   static getInstance(): ActionHandler {
@@ -49,7 +56,7 @@ export class ActionHandler {
   private async handleServerAction(action: Action, val: number = null): Promise<void> {
     const handler = this.actionMap[action.id];
     if (handler) {
-      handler.call(this, val);
+      handler(val);
     } else {
       console.warn(`No handler found for action: ${action.id}`);
     }
@@ -75,13 +82,15 @@ export class ActionHandler {
 
 
   private handleShowAction(): void {
-    const mode = this.uiStore.getAppsListMode();
+    if (MessageStore.handleNext('d')) return
+    const uiStore = UIStore.getInstance()
+    const mode = uiStore.getAppsListMode()
     switch (mode) {
       case 'hidden':
-        this.uiStore.setAppsListMode('peek');
+        uiStore.setAppsListMode('peek');
         break;
       case 'peek':
-        this.uiStore.setAppsListMode('full');
+        uiStore.setAppsListMode('full');
         break;
       // If already fullscreen, do nothing
       case 'full':
@@ -91,13 +100,15 @@ export class ActionHandler {
 
   // Handle "hide" action (swiping down)
   private handleHideAction(): void {
-    const mode = this.uiStore.getAppsListMode();
+    if (MessageStore.handleNext('u')) return
+    const uiStore = UIStore.getInstance()
+    const mode = uiStore.getAppsListMode()
     switch (mode) {
       case 'full':
-        this.uiStore.setAppsListMode('peek');
+        uiStore.setAppsListMode('peek');
         break;
       case 'peek':
-        this.uiStore.setAppsListMode('hidden');
+        uiStore.setAppsListMode('hidden');
         break;
       // If already hidden, do nothing
       case 'hidden':
@@ -117,17 +128,21 @@ export class ActionHandler {
     this.musicStore.updateSongData({ is_playing: !songData.is_playing });
   };
 
-  private Skip = () => {
+  Skip = () => {
     const songData = this.musicStore.getSongData();
     this.handleSendCommand(AUDIO_REQUESTS.NEXT, songData.id);
   };
 
-  private Rewind = () => {
+  Seek = (ms: number) => {
+    this.handleSendCommand(AUDIO_REQUESTS.SEEK, ms)
+  };
+
+  Rewind = () => {
     const songData = this.musicStore.getSongData();
     this.handleSendCommand(AUDIO_REQUESTS.PREVIOUS, songData.id);
   };
 
-  private Shuffle = () => {
+  Shuffle = () => {
     const songData = this.musicStore.getSongData();
     if (songData.shuffle_state) {
       ControlStore.getInstance().updateFlair('shuffle', 'server', 'Disabled')
@@ -138,7 +153,7 @@ export class ActionHandler {
     this.musicStore.updateSongData({ shuffle_state: !songData.shuffle_state });
   };
 
-  private Repeat = () => {
+  Repeat = () => {
     const songData = this.musicStore.getSongData();
     let newRepeatState;
     switch (songData.repeat_state) {
@@ -162,7 +177,7 @@ export class ActionHandler {
   };
 
 
-  private Pref = (num: number) => {
+  Pref = (num: number) => {
     this.uiStore.setCurrentView(this.getAppByButtonIndex(num - 1));
   }
 
@@ -173,18 +188,18 @@ export class ActionHandler {
     }
     return 'dashboard'; // Default to dashboard if no valid app found
   };
-  private Swap = async (index: number = 5) => {
+  Swap = async (index: number = 5) => {
     const currentView = this.uiStore.getCurrentView();
     this.uiStore.setPrefIndex(currentView, index);
   }
-  private VolUp = () => {
+  VolUp = () => {
     const volume = this.musicStore.getSongData().volume
     if (volume <= 95) {
       this.handleSendCommand(AUDIO_REQUESTS.VOLUME, volume + 5)
       this.musicStore.updateSongData({ volume: volume + 5 })
     }
   }
-  private VolDown = () => {
+  VolDown = () => {
     const volume = this.musicStore.getSongData().volume
     if (volume >= 5) {
       this.handleSendCommand(AUDIO_REQUESTS.VOLUME, volume - 5)
@@ -204,8 +219,58 @@ export class ActionHandler {
     }
   }
 
+  toggleFullscreen = () => {
+    const doc = document as any;
+    const docEl = document.documentElement as any;
+    try {
+
+      if (!doc.fullscreenElement && !doc.webkitFullscreenElement && !doc.mozFullScreenElement && !doc.msFullscreenElement) {
+        // Enter fullscreen
+        if (docEl.requestFullscreen) {
+          docEl.requestFullscreen();
+        } else if (docEl.webkitRequestFullscreen) { // Safari
+          docEl.webkitRequestFullscreen();
+        } else if (docEl.mozRequestFullScreen) { // Firefox
+          docEl.mozRequestFullScreen();
+        } else if (docEl.msRequestFullscreen) { // IE/Edge
+          docEl.msRequestFullscreen();
+        }
+        MessageStore.getInstance().sendMessage(`ACTION: Entering fullscreen`);
+        ControlStore.getInstance().updateFlair('fullscreen', 'server', 'Reverse')
+      } else {
+        // Exit fullscreen
+        if (doc.exitFullscreen) {
+          doc.exitFullscreen();
+        } else if (doc.webkitExitFullscreen) { // Safari
+          doc.webkitExitFullscreen();
+        } else if (doc.mozCancelFullScreen) { // Firefox
+          doc.mozCancelFullScreen();
+        } else if (doc.msExitFullscreen) { // IE/Edge
+          doc.msExitFullscreen();
+        }
+        MessageStore.getInstance().sendMessage(`ACTION: Leaving`);
+        ControlStore.getInstance().updateFlair('fullscreen', 'server', '')
+      }
+    } catch (error) {
+      MessageStore.getInstance().sendMessage(`ACTION: Error! ${error}`);
+
+    }
+  };
+  
+  swipeL() {
+    if (MessageStore.handleNext('l')) return
+    const uiStore = UIStore.getInstance()
+    uiStore.shiftViewLeft()
+  } 
+  swipeR() {
+    if (MessageStore.handleNext('r')) return
+    const uiStore = UIStore.getInstance()
+    uiStore.shiftViewRight()
+  } 
+
   // THESE ARE ALL FUNCTIONS
   private actionMap = {
+    'fullscreen': this.toggleFullscreen,
     'shuffle': this.Shuffle,
     'rewind': this.Rewind,
     'play': this.PlayPause,
@@ -217,8 +282,8 @@ export class ActionHandler {
     'volUp': this.VolUp,
     'hide': this.handleHideAction,
     'show': this.handleShowAction,
-    'swipeL': this.uiStore.shiftViewLeft,
-    'swipeR': this.uiStore.shiftViewRight,
+    'swipeL': this.swipeL,
+    'swipeR': this.swipeR,
     'dashboard': () => this.uiStore.setCurrentView('dashboard'),
     'utility': () => this.uiStore.setCurrentView('utility'),
     'landing': () => this.uiStore.setCurrentView('landing')

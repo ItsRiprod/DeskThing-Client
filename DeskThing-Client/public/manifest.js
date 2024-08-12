@@ -1,8 +1,8 @@
 window.manifest = {
-  "name": "FernThing Client",
-  "id": "fernthing",
-  "short_name": "FT",
-  "description": "The base fernUI for the FernThing",
+  "name": "Deskthing Client",
+  "id": "deskthing",
+  "short_name": "DT",
+  "description": "The base DeskthingUI for the DeskThing",
   "builtFor": "Spotify Car Thing",
   "reactive": true,
   "author": "Riprod",
