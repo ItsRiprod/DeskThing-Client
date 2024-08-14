@@ -100,7 +100,7 @@ export class ActionHandler {
 
   // Handle "hide" action (swiping down)
   private handleHideAction(): void {
-    if (MessageStore.handleNext('u')) return
+    MessageStore.handleNext('u')
     const uiStore = UIStore.getInstance()
     const mode = uiStore.getAppsListMode()
     switch (mode) {

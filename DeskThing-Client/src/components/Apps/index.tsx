@@ -5,6 +5,11 @@ import Web from './Web';
 import Landing from './Landing';
 import Player from './Player';
 
+/* Legacy Apps - will remove */
+import Spotify from './Legacy/Spotify'
+import Weather from './Legacy/Weather'
+import Local from './Legacy/Local';
+
 import { UIStore } from '../../stores';
 
 const Apps = () => {
@@ -31,14 +36,22 @@ const Apps = () => {
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
-        return <Dashboard />;
+        return <Dashboard />
       case 'landing':
-        return <Landing />;
+        return <Landing />
       case 'utility':
-        return <Utility />;
+        return <Utility />
       case 'player':
-        return <Player />;
+        return <Player />
+        /* legacy apps - will remove */
+      case 'spotify':
+        return <Spotify />
+      case 'weather':
+        return <Weather />
+      case 'local':
+        return <Local />
       default:
+        console.log('Unknown view:', currentView);
         return <Web currentView={currentView} />
       }
   };

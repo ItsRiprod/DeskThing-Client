@@ -1,3 +1,4 @@
+export { default as IconAlbum } from './Icons/IconAlbum'
 export { default as IconArrowRight } from './Icons/IconArrowRight'
 export { default as IconArrowLeft } from './Icons/IconArrowLeft'
 export { default as IconArrowUp } from './Icons/IconArrowUp'

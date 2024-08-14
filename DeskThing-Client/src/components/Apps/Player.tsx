@@ -76,7 +76,7 @@ const Player: React.FC = () => {
                 <div
                     ref={buttonRef}
                     onClick={handleSongClick}
-                    className={`m-5 ${verticle && 'h-[100vw]'} rounded-tl-3xl rounded-br-3xl overflow-hidden bg-black`}
+                    className={`m-5 ${verticle && 'h-[100vw]'} rounded-tl-[25%] rounded-br-[25%] rounded-xl overflow-hidden bg-black`}
                     style={{
                         backgroundImage: `url(${songData.thumbnail})`,
                         backgroundSize: 'cover',
