@@ -48,7 +48,7 @@ export class MessageStore {
 
   private async handleMessageData(msg: SocketData): Promise<void> {
             if (msg.type == 'message') {
-                const message = msg.data.toString()
+                const message = msg.payload.toString()
                 this.messages.push(message)
                 this.notifyMessage(message)
             }
@@ -74,7 +74,7 @@ export class MessageStore {
     this.messages.push(message)
     this.notifyMessage(message)
     if (this.socket) {
-        this.socket.post({ app: 'server', type: 'message', data: message })
+        this.socket.post({ app: 'server', type: 'message', payload: message })
     }
   }
 

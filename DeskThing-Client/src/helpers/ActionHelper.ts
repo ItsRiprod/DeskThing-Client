@@ -32,7 +32,7 @@ export class ActionHandler {
   executeAction = async (button: Button, flavor: EventFlavor): Promise<void> => {
     const action = ControlStore.getInstance().getButtonMapping(button, flavor);
     if (!action) {
-      // console.warn(`No action found for button: ${button} ${EventFlavor[flavor]}`);
+      console.warn(`No action found for button: ${button} ${EventFlavor[flavor]}`);
       return;
     }
 
@@ -72,7 +72,7 @@ export class ActionHandler {
       const socketData = {
         app: source,
         type: 'button',
-        data: { id: id, val: val }
+        payload: { id: id, val: val }
       }
       await socket.post(socketData);
     } catch (error) {
@@ -213,7 +213,7 @@ export class ActionHandler {
         type: type,
         request: request,
         app: app,
-        data: payload
+        payload: payload
       };
       socket.post(data);
     }

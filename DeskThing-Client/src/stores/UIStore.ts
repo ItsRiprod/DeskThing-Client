@@ -23,7 +23,7 @@ export class UIStore {
   private views: App[] = [];
 
   private appListener: (() => void)[] = []
-  
+
   private appsListMode: ViewMode = 'hidden';
   private miniplayerMode: ViewMode = 'peek';
 
@@ -64,12 +64,18 @@ export class UIStore {
    */
 
   private async updateAvailableViews(apps: App[]): Promise<void> {
-    const availableViews = apps
-      .filter(app => app.manifest?.isWebApp || app.manifest?.isLocalApp)
-      .sort((a, b) => a.prefIndex - b.prefIndex);
+    const filteredApps = apps.filter(app => app.manifest?.isWebApp || app.manifest?.isLocalApp);
 
-      this.setAvailableViews(availableViews);
-      
+
+    const availableViews = filteredApps
+      .sort((a, b) => a.prefIndex - b.prefIndex)
+      .map((app, index) => {
+        app.prefIndex = index; // Reassign prefIndex sequentially
+        return app;
+      });
+
+    this.setAvailableViews(availableViews);
+
   }
 
   getAvailableViews(): App[] {
@@ -146,7 +152,7 @@ export class UIStore {
     // Sort the views by the updated prefIndexes
     this.views.sort((a, b) => a.prefIndex - b.prefIndex)
 
-     // Reassign indexes to ensure continuity
+    // Reassign indexes to ensure continuity
     this.views.forEach((app, index) => app.prefIndex = index);
 
     this.notifyStateUpdates('availableViews', this.views)
@@ -160,16 +166,15 @@ export class UIStore {
         app: 'server',
         type: 'set',
         request: 'update_pref_index',
-        data: { app: appName, index: newPrefIndex },
+        payload: { app: appName, index: newPrefIndex },
       };
       socket.post(data);
     }
   }
-  
+
 
   async setAvailableViews(views: App[]): Promise<void> {
     this.views = views;
-    console.log(views)
     this.notifyStateUpdates('availableViews', this.views)
   }
 
@@ -189,25 +194,25 @@ export class UIStore {
     this.stateCallbacks.clear()
   }
 
-    /**
-   * Peek Timeout Management
-   */
+  /**
+ * Peek Timeout Management
+ */
 
-    private startPeekTimeout(): void {
-      this.clearPeekTimeout(); // Clear any existing timeout before starting a new one
-      this.peekTimeout = setTimeout(() => {
-        if (this.appsListMode === 'peek') {
-          this.setAppsListMode('hidden');
-        }
-      }, 5000); // 5 seconds
-    }
-  
-    private clearPeekTimeout(): void {
-      if (this.peekTimeout) {
-        clearTimeout(this.peekTimeout);
-        this.peekTimeout = null;
+  private startPeekTimeout(): void {
+    this.clearPeekTimeout(); // Clear any existing timeout before starting a new one
+    this.peekTimeout = setTimeout(() => {
+      if (this.appsListMode === 'peek') {
+        this.setAppsListMode('hidden');
       }
+    }, 5000); // 5 seconds
+  }
+
+  private clearPeekTimeout(): void {
+    if (this.peekTimeout) {
+      clearTimeout(this.peekTimeout);
+      this.peekTimeout = null;
     }
+  }
 }
 
 export default UIStore.getInstance();

@@ -56,8 +56,8 @@ const Spotify: React.FC = () => {
             const data = {
                 app: app,
                 type: 'set',
-                request: 'update_setting',
-                data: {
+                request: 'settings',
+                payload: {
                     setting: setting,
                     value: value,
                 }

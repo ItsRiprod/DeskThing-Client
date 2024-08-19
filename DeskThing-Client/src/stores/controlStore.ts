@@ -140,7 +140,7 @@ export class ControlStore {
   private handleClientData(msg: SocketData): void {
     if (msg.type === 'button_mappings') {
       messageStore.sendMessage('ControlStore: Received Button Mappings')
-      this.handleConfigUpdate(msg.data as ButtonMapping);
+      this.handleConfigUpdate(msg.payload as ButtonMapping);
     }
   }
 

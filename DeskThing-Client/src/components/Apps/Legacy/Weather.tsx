@@ -62,11 +62,11 @@ const Weather: React.FC = () => {
     handleGetWeatherData();
     handleGetForecastData();
     const listener = (msg: SocketData) => {
-      if (msg.type === 'weather_data' && typeof msg.data === 'object') {
-        handleWeatherData(msg.data as WeatherData[]);
+      if (msg.type === 'weather_data' && typeof msg.payload === 'object') {
+        handleWeatherData(msg.payload as WeatherData[]);
       }
-      if (msg.type === 'forecast_data' && Array.isArray(msg.data)) {
-        handleForecastData(msg.data as ForecastData[]);
+      if (msg.type === 'forecast_data' && Array.isArray(msg.payload)) {
+        handleForecastData(msg.payload as ForecastData[]);
       }
     };
 

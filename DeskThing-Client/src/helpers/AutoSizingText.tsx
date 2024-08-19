@@ -17,7 +17,6 @@ const AutoSizingText = ({
     const adjustTextSize = (index: number) => {
       const preRenderDiv = ref.current;
       const parentDiv = parentRef.current;
-      console.log('Setting the sizes', preRenderDiv.offsetWidth, parentDiv.offsetWidth, textSizesDescending[index], textSizeIndex)
       setTextSizeIndex(index)
       if (preRenderDiv && parentDiv) {
         // Check if the text is too large for the parent container

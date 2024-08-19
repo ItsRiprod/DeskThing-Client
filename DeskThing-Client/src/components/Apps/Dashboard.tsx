@@ -34,7 +34,7 @@ const Default: React.FC = (): JSX.Element => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const listener = (msg: SocketData) => {
       if (msg.type === 'time') {
-        const [timeString, ampm] = (msg.data as string).split(' ');
+        const [timeString, ampm] = (msg.payload as string).split(' ');
         const [hours, minutes] = timeString.split(':').map(Number);
         const now = new Date();
         const serverDate = new Date(Date.UTC(

@@ -24,9 +24,9 @@ const Utility: React.FC = () => {
           const data = {
             app: app,
             type: 'set',
-            request: 'update_setting',
-            data: {
-              setting: setting,
+            request: 'settings',
+            payload: {
+              id: setting,
               value: value,
             }
           };

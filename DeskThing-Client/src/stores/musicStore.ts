@@ -34,8 +34,7 @@ export class MusicStore {
 
   private async handleClientData(msg: SocketData): Promise<void> {
     if (msg.type === 'song') {
-      const data = msg.data as SongData;
-      
+      const data = msg.payload as SongData;
       if (data.thumbnail != null && data.thumbnail != this.songData.thumbnail) {
         this.songData = data;
         const imageElement = new Image();

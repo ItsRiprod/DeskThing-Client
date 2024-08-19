@@ -57,12 +57,12 @@ class WebSocketControl {
       const msg = JSON.parse(event.data);
 
       // Debugging and sending it to the deskthing ui 
-      socket.post({app: 'server', type: 'device', data: event.data})
+      socket.post({app: 'server', type: 'device', payload: event.data})
       this.listeners.forEach((listener: WebSocketControlCallback) => listener(msg));
     };
   };
 
-  post(body: Record<string, any>): void {  
+  post(body: Record<string, any>): void { 
     this.webSocket.send(JSON.stringify(body));
   }
 

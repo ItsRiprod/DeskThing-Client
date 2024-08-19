@@ -8,12 +8,12 @@ import musicStore from '../../../stores/musicStore';
 
 const Local: React.FC = () => {
     const appStore = AppStore.getInstance();
-  const [songData, setSongData] = useState<SongData>();
-  const [imgData, setImgData] = useState<string>();
-  const [offset, setOffset] = useState<number>();
-  const [opacity, setOpacity] = useState<number>(100);
-  const [transitioning, setTransitioning] = useState(true);
-  const [imageLoaded, setImageLoaded] = useState(false);
+    const [songData, setSongData] = useState<SongData>();
+    const [imgData, setImgData] = useState<string>();
+    const [offset, setOffset] = useState<number>();
+    const [opacity, setOpacity] = useState<number>(100);
+    const [transitioning, setTransitioning] = useState(true);
+    const [imageLoaded, setImageLoaded] = useState(false);
 
 
   useEffect(() => {      
@@ -62,14 +62,7 @@ const Local: React.FC = () => {
           socket.post(data);
         }
       } else {
-        if (socket.is_ready()) {
-          const data = { app: 'utility', type: 'get', request: 'song' };
-          socket.post(data);
-        }
-      }
-      if (socket.is_ready()) {
-        const data = { app: 'utility', type: 'get', request: 'song' };
-        socket.post(data);
+        musicStore.requestMusicData()
       }
     };
 
@@ -82,8 +75,8 @@ const Local: React.FC = () => {
       const data = {
         app: app,
         type: 'set',
-        request: 'update_setting',
-        data: {
+        request: 'settings',
+        payload: {
           setting: setting,
           value: value,
         }
