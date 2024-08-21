@@ -35,8 +35,8 @@ export class MusicStore {
   private async handleClientData(msg: SocketData): Promise<void> {
     if (msg.type === 'song') {
       const data = msg.payload as SongData;
-      if (data.thumbnail != null && data.thumbnail != this.songData.thumbnail) {
-        this.songData = data;
+      if (data.thumbnail && data.thumbnail != this.songData.thumbnail) {
+        this.songData = { ...this.songData, ...data };
         const imageElement = new Image();
         imageElement.src = data.thumbnail;
         imageElement.onload = () => {
@@ -49,7 +49,10 @@ export class MusicStore {
           });
         };
       } else {
-        this.songData = data;
+        if (!data.thumbnail && data.id != this.songData.id && this.songData.track_name != undefined) {
+          this.requestMusicData();
+        }
+        this.songData = { ...this.songData ,...data };
         this.notifySongDataUpdate();
       }
 
@@ -72,6 +75,7 @@ export class MusicStore {
   }
 
   async requestMusicData(): Promise<void> {
+    console.log('requesting music data')
     if (WebSocketService.is_ready()) {
       const data = { app: 'utility', type: 'get', request: AUDIO_REQUESTS.SONG };
       WebSocketService.post(data);

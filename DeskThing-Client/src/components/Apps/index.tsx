@@ -7,7 +7,6 @@ import Player from './Player';
 
 /* Legacy Apps - will remove */
 import Spotify from './Legacy/Spotify'
-import Weather from './Legacy/Weather'
 import Local from './Legacy/Local';
 
 import { UIStore } from '../../stores';
@@ -46,8 +45,6 @@ const Apps = () => {
         /* legacy apps - will remove */
       case 'spotify':
         return <Spotify />
-      case 'weather':
-        return <Weather />
       case 'local':
         return <Local />
       default:

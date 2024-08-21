@@ -81,7 +81,7 @@ export class WebSocketService {
       this.webSocket.close();
       this.attempts++;
       MessageStore.sendMessage(`WS: Unable to connect to ${this.ipList[this.currentIpIndex]}`)
-      setTimeout(this.reconnect.bind(this), this.attempts * 1000);
+      setTimeout(this.reconnect.bind(this), this.attempts > 5 ? 30000 : 2000);
       return;
     };
     webSocket.onerror = () => {

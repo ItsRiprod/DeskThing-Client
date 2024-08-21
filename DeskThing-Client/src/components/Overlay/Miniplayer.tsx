@@ -95,7 +95,7 @@ const Miniplayer: React.FC = () => {
                 <div
                     onClick={handleTrackbarClick}
                     className="w-full h-fit">
-                    <CountUpTimer songData={musicData} expand={showActions} />
+                    <CountUpTimer expand={showActions} />
                 </div>
                 <div className={`flex xs:flex-nowrap ${showActions && 'flex-wrap'} transition-all justify-between bg-black ${state == 'hidden' ? 'h-0' : 'h-fit'}`}>
                     {state != 'hidden' &&

@@ -5,15 +5,14 @@ import { MusicStore } from '../stores';
 import ActionHelper from './ActionHelper';
 
 interface CountUpTimerProps {
-  songData: SongData
   expand: boolean
 }
 
 const CountUpTimer: React.FC<CountUpTimerProps> = ({
-  songData,
   expand = false
 }) => {
   const musicStore = MusicStore.getInstance()
+  const [songData, setSongData] = useState<SongData>(musicStore.getSongData());
   const [ms, setMs] = useState(0);
   const [msEnd, setMsEnd] = useState(6000);
   const [touching, setTouching] = useState(false);
@@ -26,6 +25,7 @@ const CountUpTimer: React.FC<CountUpTimerProps> = ({
         if (ms < msEnd) {
           setMs((prev) => prev + 1000);
         } else {
+          console.log('Sending request because song is over')
             musicStore.requestMusicData()
             setMs(0);
         }
@@ -42,6 +42,17 @@ const CountUpTimer: React.FC<CountUpTimerProps> = ({
       setSongID(songData.id)
     }
   }, [songData]);
+
+  useEffect(() => {
+    const handleSongData = (songData: SongData) => {
+      setSongData(songData);
+      setSongID('')
+    };
+
+    const Listener = musicStore.subscribeToSongDataUpdate(handleSongData);
+
+    return () => Listener();
+  }, [musicStore])
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     e.stopPropagation();
