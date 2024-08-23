@@ -1,4 +1,4 @@
-import MessageStore from "../stores/messageStore"
+import LogStore from "../stores/logStore"
 import ManifestStore, { ServerManifest } from "../stores/manifestStore";
 import { SocketData } from "../types";
 // Computer local IP
@@ -39,7 +39,7 @@ export class WebSocketService {
   private handleManifestChange(manifest: ServerManifest | null): void {
     if (manifest) {
       console.log('Reconnecting due to manifest update')
-      MessageStore.sendMessage(`WS: Reconnecting Websocket to port ${manifest.ip}`)
+      LogStore.sendMessage('WS', `Reconnecting Websocket to port ${manifest.ip}`)
       this.reconnect(manifest.ip);
     }
   }
@@ -56,11 +56,11 @@ export class WebSocketService {
       }
     } catch (error) {
       console.error('Failed to initialize WebSocket:', error);
-      MessageStore.sendMessage(`WS: Failed to initialize websocket`)
+      LogStore.sendError('WS', `Failed to initialize websocket`)
     }
   }
 
-  private reconnect(manifestIp: string | null = null): void {
+  reconnect(manifestIp: string | null = null): void {
     if (manifestIp && !this.ipList.includes(manifestIp)) {
       this.ipList.push(manifestIp);
     }
@@ -73,19 +73,19 @@ export class WebSocketService {
     // browser socket, WebSocket IPC transport
     webSocket.onopen = (): void => {
       this.attempts = 0
-      MessageStore.sendMessage(`WS: Connected`)
+      LogStore.sendMessage('WS', `Connected`)
       this.registerEventHandler();
     };
 
     webSocket.onclose = () => {
       this.webSocket.close();
       this.attempts++;
-      MessageStore.sendMessage(`WS: Unable to connect to ${this.ipList[this.currentIpIndex]}`)
+      LogStore.sendError('WS', `Unable to connect to ${this.ipList[this.currentIpIndex]}`)
       setTimeout(this.reconnect.bind(this), this.attempts > 5 ? 30000 : 2000);
       return;
     };
     webSocket.onerror = () => {
-      MessageStore.sendMessage(`WS: Encountered an error`);
+      LogStore.sendError('WS', `Encountered an error`);
       //setTimeout(this.reconnect.bind(this), 1000);
       this.webSocket.close();
       return;
@@ -157,15 +157,15 @@ export class WebSocketService {
       if (this.attempts > 5) {
         const oldip = this.ipList[this.currentIpIndex];
         const BASE_URL = `ws://${oldip}:${port}`;
-        MessageStore.sendMessage(`WS: Starting on port ${BASE_URL} attempt #${this.attempts}`);
+        LogStore.sendMessage('WS', `Starting on port ${BASE_URL} attempt #${this.attempts}`);
         return new WebSocket(BASE_URL);
       } else {
         const BASE_URL = `ws://${ip}:${port}`;
-        MessageStore.sendMessage(`WS: Starting on port ${BASE_URL} attempt #${this.attempts}`);
+        LogStore.sendMessage('WS', `Starting on port ${BASE_URL} attempt #${this.attempts}`);
         return new WebSocket(BASE_URL);
       }
     } else {
-      MessageStore.sendMessage(`WS: Manifest not available!`);
+      LogStore.sendError('WS', `Manifest not available!`);
       throw new Error('Manifest is not available.');
     }
   }

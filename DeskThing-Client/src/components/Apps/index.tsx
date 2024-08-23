@@ -54,7 +54,7 @@ const Apps = () => {
   };
 
   return (
-      <div className={`max-w-screen w-screen bg-black max-h-screen h-screen ${miniplayerState == 'peek' ? 'pb-32' : miniplayerState == 'hidden' ? 'pb-0' : 'pb-20'}`}>
+      <div className={`max-w-screen w-screen bg-black max-h-screen h-screen ${miniplayerState == 'peek' ? 'pb-28' : miniplayerState == 'hidden' ? 'pb-0' : 'pb-20'}`}>
           {renderView()}
       </div>
     )

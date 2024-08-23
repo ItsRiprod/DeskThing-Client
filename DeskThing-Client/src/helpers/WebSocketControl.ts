@@ -1,5 +1,5 @@
 // Opens websocket 8890 so that the carthing doesnt crash
-import messageStore from 'src/stores/messageStore';
+import LogStore from '../stores/logStore';
 import socket from './WebSocketService'
 
 type WebSocketControlCallback = (msg: any) => void;
@@ -30,13 +30,13 @@ class WebSocketControl {
     this.webSocket = webSocket;
     // browser socket, WebSocket IPC transport
     webSocket.onopen = (): void => {
-      messageStore.sendMessage('CONTROL: Successfully setup!')
+      LogStore.sendMessage('CONTROL', 'Successfully setup!')
       this.registerEventHandler();
     };
 
     webSocket.onclose = () => {
       this.webSocket.close();
-      messageStore.sendMessage('CONTROL: Socket Closed!')
+      LogStore.sendMessage('CONTROL', 'Socket Closed!')
       setTimeout(this.reconnect.bind(this), 100000);
       return;
     };

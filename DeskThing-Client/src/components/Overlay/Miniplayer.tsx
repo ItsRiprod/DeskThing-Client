@@ -80,7 +80,11 @@ const Miniplayer: React.FC = () => {
         uiStore.setMiniplayerMode('full')
     }
     const handleShrink = () => {
-        uiStore.setMiniplayerMode('hidden')
+        if (uiStore.getMiniplayerMode() == 'full') {
+            uiStore.setMiniplayerMode('peek')
+        } else {
+            uiStore.setMiniplayerMode('hidden')
+        }
     }
     const handleTrackbarClick = () => {
         if (state == 'hidden') {
@@ -109,7 +113,7 @@ const Miniplayer: React.FC = () => {
                                     backgroundPosition: 'center',
                                 }} />}
                             {state == 'peek' && <div onClick={() => setShowActions(true)} className={`overflow-hidden max-w-full font-geist grow pl-5 pt-5 ${showActions && 'hidden'}`} ref={textContainerRef}>
-                                <h1 className={`font-semibold text-wrap text-sm overflow-x-scroll`}>
+                                <h1 className={`font-semibold text-wrap text-sm overflow-x-scroll overflow-y-hidden`}>
                                     <AutoSizingText textContent={musicData.track_name} textSizesDescending={['text-4xl', 'text-2xl', 'text-xl', 'text-sm', 'text-xs']} />
                                 </h1>
                                 <p className={'text-sm'}>

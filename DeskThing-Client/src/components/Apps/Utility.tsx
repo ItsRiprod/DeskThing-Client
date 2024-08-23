@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { AppStore } from "../../stores";
+import { AppStore, log, LOG_TYPES, LogStore } from "../../stores";
 import { App, Settings } from "../../types";
 import Landing from "./Landing";
 import WebSocketService from "../../helpers/WebSocketService";
@@ -14,10 +14,13 @@ import WebSocketService from "../../helpers/WebSocketService";
 const Utility: React.FC = () => {
     const appStore = AppStore.getInstance()
     const socket = WebSocketService
+    const logStore = LogStore.getInstance()
+    const [logs, setLogs] = useState<log[]>(logStore.getAllLogs())
     const [apps, setApps] = useState<App[]>(appStore.getApps())
     const [settings, setSettings] = useState<Settings>(appStore.getSettings())
     const [selectedApp, setSelectedApp] = useState<string>('')
     const [currentSetting, setCurrentSetting] = useState<string>('')
+    const [logFilter, setLogFilter] = useState<LOG_TYPES | 'all'>('all');
 
     const sendSettingsUpdate = (app: string, setting: string, value: string | number) => {
         if (socket.is_ready()) {
@@ -50,9 +53,13 @@ const Utility: React.FC = () => {
         
         const appListener = appStore.onAppUpdates(updateApps)
         const settingListener = appStore.onSettingsUpdates(updateSettings)
+        const removeLogListener = logStore.on('all', (log: log) => {
+            setLogs(oldLogs => [...oldLogs, log])
+        })
         return () => {
             appListener()
             settingListener()
+            removeLogListener()
         }
     }, [appStore])
 
@@ -67,10 +74,22 @@ const Utility: React.FC = () => {
         }
     }
 
+    const clearLogs = () => {
+        logStore.clearLogs();
+        setLogs([]);
+    }
+
+    const filterLogs = (type: LOG_TYPES | 'all') => {
+        setLogFilter(type);
+    }
+
     return (
 
         <div className={`flex w-full max-h-full h-full flex-col sm:flex-row bg-black`}>
             <div className="border w-32 h-full border-slate-500 flex flex-row sm:flex-col rounded-lg py-5 overflow-y-scroll overflow-x-hidden pb-10 m-2">
+                <button className={`p-5 rounded-xl border-l-2 ${selectedApp == 'logs' ? 'border-green-500 bg-slate-800' : '' }`} onClick={() => selectApp('logs')}>
+                    Logs
+                </button>
                 {apps.map((app, index) => (
                     <button key={index} className={`p-5 rounded-xl border-l-2 ${selectedApp == app.name ? 'border-green-500 bg-slate-800' : '' }`} onClick={() => selectApp(app.name)}>
                         {app.name}
@@ -103,6 +122,33 @@ const Utility: React.FC = () => {
                             </div>
                         </div>
                     ))
+                :
+                selectedApp == 'logs' && logs.length > 0 ? (
+                    <div className="w-full">
+                        <div className="w-full flex justify-between mb-3">
+                            <button className={`border-2 border-slate-500 rounded-xl p-5`} onClick={clearLogs}>
+                                <p>Clear Logs</p>
+                            </button>
+                            <button className={`${logFilter == 'log' ? 'bg-slate-800 border-green-500': 'border-slate-500'} border-2 rounded-xl p-5`} onClick={() => filterLogs('log')}>
+                                <p>Logs</p>
+                            </button>
+                            <button className={`${logFilter == 'error' ? 'bg-slate-800 border-green-500': 'border-slate-500'} border-2 rounded-xl p-5`} onClick={() => filterLogs('error')}>
+                                <p>Errors</p>
+                            </button>
+                            <button className={`${logFilter == 'message' ? 'bg-slate-800 border-green-500': 'border-slate-500'} border-2 rounded-xl p-5`} onClick={() => filterLogs('message')}>
+                                <p>Messages</p>
+                            </button>
+                            <button className={`${logFilter == 'all' ? 'bg-slate-800 border-green-500': 'border-slate-500'} border-2 rounded-xl p-5`} onClick={() => filterLogs('all')}>
+                                <p>All</p>
+                            </button>
+                        </div>
+                        {logs.map((log, index) => (
+                            <div key={index} className={`${logFilter != 'all' && log.type != logFilter && 'hidden'} ${log.type == 'error' && 'bg-red-500'} ${log.type == 'log' && 'bg-slate-900'} ${log.type == 'message' && 'bg-slate-500'} w-full border-x-2 mb-1 rounded-2xl h-fit overflow-hidden hover:overflow-fit`}>
+                                <p className="p-5">{log.app}:{' ' + log.payload}</p>
+                            </div>
+                        ))}
+                    </div>
+                )   
                 :
                 (
                     <Landing />

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import WebSocketService from '../../helpers/WebSocketService'
-import { ManifestStore, AppStore, MessageStore, MusicStore } from '../../stores'
+import { ManifestStore, AppStore, LogStore, MusicStore, log } from '../../stores'
 import { App, EventFlavor, Settings, SocketData, SongData } from '../../types'
 import ActionHelper from '../../helpers/ActionHelper'
 
@@ -10,7 +10,7 @@ interface WebViewProps {
 
 const Web: React.FC<WebViewProps> = ({ currentView }) => {
   const appStore = AppStore.getInstance()
-  const messageStore = MessageStore.getInstance()
+  const logStore = LogStore.getInstance()
   const musicStore = MusicStore.getInstance()
   const manifestStore = ManifestStore.getInstance()
   const socket = WebSocketService
@@ -44,8 +44,8 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
     const onMusicUpdate = (song: SongData) => {
       returnMessage({ type: 'song', payload: song })
     }
-    const onMessageUpdate = (message: string) => {
-      returnMessage({ type: 'message', payload: message })
+    const onMessageUpdate = (message: log) => {
+      returnMessage({ type: 'message', payload: message.payload })
     }
     const onSettingsUpdate = (settings: Settings) => {
       returnMessage({ type: 'settings', payload: settings })
@@ -84,7 +84,7 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
                 if (unsubscribeRefs.current.message) {
                   unsubscribeRefs.current.message()
                 }
-                unsubscribeRefs.current.message = messageStore.onMessage(onMessageUpdate)
+                unsubscribeRefs.current.message = logStore.on('message', onMessageUpdate)
                 break
               case 'settings':
                 if (unsubscribeRefs.current.settings) {
@@ -127,7 +127,7 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
                 onMusicUpdate(musicStore.getSongData())
                 break
               case 'messages':
-                returnMessage({type: 'messages', payload: messageStore.getMessages()})
+                returnMessage({type: 'messages', payload: logStore.getMessages()})
                 break
               case 'settings':
                 onSettingsUpdate(appStore.getSettings())
@@ -140,7 +140,7 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
               ActionHelper.executeAction(data.payload.button, EventFlavor[data.payload.flavor as keyof typeof EventFlavor])
             } else {
               console.error('Error! Button or flavor not found!')
-              messageStore.sendMessage('Error! Button or flavor not found!')
+              logStore.sendMessage(currentView, 'Error! Button or flavor not found!')
             }
             break
           }
@@ -191,7 +191,7 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
   }
 
   return (
-    <div className='max-h-screen h-screen pb-14 overflow-hidden'>
+    <div className='max-h-screen h-screen overflow-hidden'>
         <div className="touch-none w-full h-0 flex justify-center items-center bg-red-200">
             <div
               ref={swipeRef}
@@ -209,6 +209,8 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
           src={`http://${ip}:${port}/${currentView}`}
           style={{ width: '100%', height: '100%', border: 'none' }}
           title="Web View"
+          height="100%"
+          width="100%"
         />
         
     </div>

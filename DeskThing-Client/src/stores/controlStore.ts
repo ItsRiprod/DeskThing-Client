@@ -6,7 +6,7 @@
  */
 import WebSocketService from '../helpers/WebSocketService';
 import { Action, Button, ButtonMapping, EventFlavor, SocketData, SongData } from '../types';
-import messageStore from './messageStore';
+import logStore from './logStore';
 import musicStore from './musicStore';
 
 type MappingCallback = () => void
@@ -114,12 +114,12 @@ export class ControlStore {
           [EventFlavor.Down]: { flair: '', name: 'VolDown', id: 'volDown', description: 'VolDown', source: 'server' }
       },
       Enter: {
-          [EventFlavor.Down]: { flair: '', name: 'PlayPause', id: 'playPause', description: 'PlayPause', source: 'server' },
+          [EventFlavor.Down]: { flair: '', name: 'playPause', id: 'play', description: 'PlayPause', source: 'server' },
           [EventFlavor.Long]: { flair: '', name: 'Skip', id: 'skip', description: 'Skip', source: 'server' }
       },
       Escape: {
-          [EventFlavor.Down]: { flair: '', name: 'Repeat', id: 'repeat', description: 'Repeat', source: 'server' },
-          [EventFlavor.Long]: { flair: '', name: 'Repeat', id: 'repeat', description: 'Repeat', source: 'server' }
+          [EventFlavor.Short]: { flair: '', name: 'Show AppsList', id: 'show', description: 'Shows the apps list', source: 'server' },
+          [EventFlavor.Long]: { flair: '', name: 'Hide AppsList', id: 'hide', description: 'Hides the apps list', source: 'server' }
       },
       Swipe: {
         [EventFlavor.Up]: { flair: '', name: 'Hide AppsList', id: 'hide', description: 'Hides the apps list', source: 'server' },
@@ -139,7 +139,7 @@ export class ControlStore {
 
   private handleClientData(msg: SocketData): void {
     if (msg.type === 'button_mappings') {
-      messageStore.sendMessage('ControlStore: Received Button Mappings')
+      logStore.sendLog('controlStore', 'ControlStore: Received Button Mappings')
       this.handleConfigUpdate(msg.payload as ButtonMapping);
     }
   }

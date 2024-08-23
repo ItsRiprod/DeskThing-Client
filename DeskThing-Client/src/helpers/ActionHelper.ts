@@ -1,5 +1,5 @@
 import socket from './WebSocketService';
-import { AppStore, ControlStore, MessageStore, MusicStore, UIStore } from '../stores';
+import { AppStore, ControlStore, LogStore, MusicStore, UIStore } from '../stores';
 import { Action, AUDIO_REQUESTS, Button, EventFlavor } from '../types';
 
 export class ActionHandler {
@@ -32,11 +32,13 @@ export class ActionHandler {
   executeAction = async (button: Button, flavor: EventFlavor): Promise<void> => {
     const action = ControlStore.getInstance().getButtonMapping(button, flavor);
     if (!action) {
+      LogStore.getInstance().sendLog('ACTION', `No action found for button: ${button} ${EventFlavor[flavor]}`);
       console.warn(`No action found for button: ${button} ${EventFlavor[flavor]}`);
       return;
     }
-
+    
     const { source, id } = action;
+    LogStore.getInstance().sendLog('ACTION', `Running action ${id} for button: ${button} ${EventFlavor[flavor]}`);
 
     // Extract the first number from the button's name
     const buttonNumber = button.match(/\d+/);
@@ -82,7 +84,7 @@ export class ActionHandler {
 
 
   private handleShowAction(): void {
-    if (MessageStore.handleNext('d')) return
+    if (LogStore.handleNext('d')) return
     const uiStore = UIStore.getInstance()
     const mode = uiStore.getAppsListMode()
     switch (mode) {
@@ -100,7 +102,7 @@ export class ActionHandler {
 
   // Handle "hide" action (swiping down)
   private handleHideAction(): void {
-    MessageStore.handleNext('u')
+    LogStore.handleNext('u')
     const uiStore = UIStore.getInstance()
     const mode = uiStore.getAppsListMode()
     switch (mode) {
@@ -235,7 +237,7 @@ export class ActionHandler {
         } else if (docEl.msRequestFullscreen) { // IE/Edge
           docEl.msRequestFullscreen();
         }
-        MessageStore.getInstance().sendMessage(`ACTION: Entering fullscreen`);
+        LogStore.getInstance().sendMessage('ACTION', `Entering fullscreen`);
         ControlStore.getInstance().updateFlair('fullscreen', 'server', 'Reverse')
       } else {
         // Exit fullscreen
@@ -248,22 +250,22 @@ export class ActionHandler {
         } else if (doc.msExitFullscreen) { // IE/Edge
           doc.msExitFullscreen();
         }
-        MessageStore.getInstance().sendMessage(`ACTION: Leaving`);
+        LogStore.getInstance().sendMessage('ACTION', `Leaving`);
         ControlStore.getInstance().updateFlair('fullscreen', 'server', '')
       }
     } catch (error) {
-      MessageStore.getInstance().sendMessage(`ACTION: Error! ${error}`);
+      LogStore.getInstance().sendError('ACTION', `Error! ${error}`);
 
     }
   };
   
   swipeL() {
-    if (MessageStore.handleNext('l')) return
+    if (LogStore.handleNext('l')) return
     const uiStore = UIStore.getInstance()
     uiStore.shiftViewLeft()
   } 
   swipeR() {
-    if (MessageStore.handleNext('r')) return
+    if (LogStore.handleNext('r')) return
     const uiStore = UIStore.getInstance()
     uiStore.shiftViewRight()
   } 

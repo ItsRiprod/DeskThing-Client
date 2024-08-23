@@ -1,29 +1,30 @@
 import React, { useEffect, useState, useRef } from "react"
-import { MessageStore } from "../../stores"
+import { log, LogStore } from "../../stores"
 import { IconX } from "../../assets/Icons"
 
-type messageData = {
-    message: string,
+type logData = {
+    log: log,
     id: number
 }
 
 const Notification: React.FC = () => {
-    const messageStore = MessageStore.getInstance()
-    const [messages, setMessages] = useState<messageData[]>([])
-    const [visibleMessage, setVisibleMessage] = useState<messageData | null>(null);
+    const logStore = LogStore.getInstance()
+    const [messages, setMessages] = useState<logData[]>([])
+    const [visibleMessage, setVisibleMessage] = useState<logData | null>(null);
     const [progress, setProgress] = useState<number>(0);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const progressRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
-        const handleMessage = (message: string) => {
+        const handleLog = (log: log) => {
+            if (log.type === 'log') return
             setMessages((oldData) => [
                 ...oldData,
-                { message: message, id: Date.now() }
+                { log: log, id: Date.now() }
             ])
         }
 
-        const listener = messageStore.onMessage(handleMessage)
+        const listener = logStore.on('all', handleLog)
 
         return () => {
             listener()
@@ -34,7 +35,7 @@ const Notification: React.FC = () => {
                 clearInterval(progressRef.current);
               }
         }
-    }, [messageStore])
+    }, [logStore])
 
     useEffect(() => {
         if (messages.length > 0 && !visibleMessage) {
@@ -45,7 +46,7 @@ const Notification: React.FC = () => {
 
     const startTimer = () => {
         setProgress(0);
-        const duration = 2000;
+        const duration = 1000;
 
         timeoutRef.current = setTimeout(() => {
             removeMessage();
@@ -100,15 +101,15 @@ const Notification: React.FC = () => {
                     onMouseLeave={handleResumeTimer}
                     onTouchEnd={handleResumeTimer}
                     onTouchStart={handlePauseTimer}
-                    className="bg-gray-800 text-white flex items-center w-fit p-4 rounded shadow-lg"
+                    className={`${visibleMessage.log.type == 'log' ? 'bg-gray-800' : visibleMessage.log.type == 'message' ? 'bg-slate-500' : 'bg-red-700'} text-white flex items-center w-fit p-4 rounded shadow-lg`}
                 >
                     <div
                       className="absolute top-0 left-0 w-full h-1 bg-gray-700"
                       style={{ width: `${progress}%` }}
                     />
-                    <p className="text-cyan-500 font-semibold font-geistMono mr-2 ">{messages && messages.length > 1 && 'x' + messages.length}</p>
+                    <p className={`${visibleMessage.log.type == 'log' ? 'text-cyan-500' : visibleMessage.log.type == 'message' ? 'text-cyan-500' : 'text-white'} font-semibold font-geistMono mr-2 `}>{messages && messages.length > 1 && 'x' + messages.length}</p>
                     <p>
-                        {visibleMessage.message}
+                        {visibleMessage.log.payload}
                     </p>
                     <button
                         onClick={handleCloseNotification}
