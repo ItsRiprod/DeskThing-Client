@@ -75,7 +75,6 @@ export class MusicStore {
   }
 
   async requestMusicData(): Promise<void> {
-    console.log('requesting music data')
     if (WebSocketService.is_ready()) {
       const data = { app: 'utility', type: 'get', request: AUDIO_REQUESTS.SONG };
       WebSocketService.post(data);

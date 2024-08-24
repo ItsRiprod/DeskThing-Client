@@ -33,7 +33,8 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
         app: data.app || 'client',
         type: data.type || null,
         request: data.request || null,
-        data: data.payload || null,
+        payload: data.payload || null,
+        source: 'deskthing'
       }
       sendMessageToIframe(message)
     }
@@ -42,7 +43,7 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
       returnMessage({ type: 'apps', payload: app })
     }
     const onMusicUpdate = (song: SongData) => {
-      returnMessage({ type: 'song', payload: song })
+      returnMessage({ type: 'music', payload: song })
     }
     const onMessageUpdate = (message: log) => {
       returnMessage({ type: 'message', payload: message.payload })
@@ -123,7 +124,7 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
               case 'apps':
                 onAppUpdate(appStore.getApps())
                 break
-              case 'song':
+              case 'music':
                 onMusicUpdate(musicStore.getSongData())
                 break
               case 'messages':
@@ -145,6 +146,7 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
             break
           }
       } else if (socket.is_ready()) {
+        console.log('Not client - routing to app')
         socket.post(data);
       }
     }
@@ -160,6 +162,7 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
   }, [currentView, ip, port, socket]);
 
   const sendMessageToIframe = (data: SocketData) => {
+    console.log('Sending message', data)
     if (iframeRef.current && iframeRef.current.contentWindow) {
       iframeRef.current.contentWindow.postMessage(data, '*');
     }
