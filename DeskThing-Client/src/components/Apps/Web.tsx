@@ -135,13 +135,23 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
                 break
             }
             break
-          case 'action':
+          case 'button':
             console.log(data)
             if (data.payload.button && data.payload.flavor) {
               ActionHelper.executeAction(data.payload.button, EventFlavor[data.payload.flavor as keyof typeof EventFlavor])
             } else {
               console.error('Error! Button or flavor not found!')
               logStore.sendMessage(currentView, 'Error! Button or flavor not found!')
+            }
+            break
+          case 'action':
+            console.log(data)
+            if (data.payload.id && data.payload.source) {
+              ActionHelper.runAction(data.payload, data.payload.val || 0)
+              
+            } else {
+              console.error('Error! Action source or ID not found!')
+              logStore.sendMessage(currentView, 'Error! Action source or ID not found!')
             }
             break
           }

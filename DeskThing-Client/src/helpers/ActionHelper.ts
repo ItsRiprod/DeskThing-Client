@@ -36,22 +36,32 @@ export class ActionHandler {
       console.warn(`No action found for button: ${button} ${EventFlavor[flavor]}`);
       return;
     }
-    
-    const { source, id } = action;
-    LogStore.getInstance().sendLog('ACTION', `Running action ${id} for button: ${button} ${EventFlavor[flavor]}`);
 
-    // Extract the first number from the button's name
     const buttonNumber = button.match(/\d+/);
     const extractedNumber = buttonNumber ? parseInt(buttonNumber[0], 10) : null;
-
-    if (source === 'server') {
-      this.handleServerAction(action, extractedNumber);
-    } else {
-      await this.handleClientAction(source, id, extractedNumber);
-    }
+    
+    LogStore.getInstance().sendLog('ACTION', `Running button: ${button} ${EventFlavor[flavor]}`);
+    this.runAction(action, extractedNumber)
   }
 
   /**
+   * Executes an action based on the Action information
+   * @params action The action to be executed
+   */
+  runAction = async (action: Action, val = 0): Promise<void> => {
+
+    const { source, id } = action;
+
+    LogStore.getInstance().sendLog('ACTION', `Running action ${id}`);
+
+    if (source === 'server') {
+      this.handleServerAction(action, val);
+    } else {
+      await this.handleClientAction(source, id, val);
+    }
+  }
+
+    /**
    * Handle server-side actions
    * @param action The action to be handled
    */
