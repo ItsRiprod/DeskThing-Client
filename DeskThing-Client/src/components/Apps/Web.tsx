@@ -209,7 +209,7 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
             <div
               ref={swipeRef}
               className={`touch-auto fixed h-10 rounded-2xl top-2 bg-gray-500 ${
-                swipeVisible ? 'opacity-100 w-11/12 h-4/6 flex items-center justify-center text-6xl' : 'opacity-30 w-1/4'
+                swipeVisible ? 'opacity-100 w-11/12 h-4/6 flex items-center justify-center text-6xl' : 'opacity-0 w-1/4'
               } transition-all duration-300`}
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
