@@ -3,7 +3,7 @@ import { msToTime } from '../utils/TimeUtils';
 import { SongData } from '../types';
 import { MusicStore } from '../stores';
 import ActionHelper from './ActionHelper';
-import AutoSizingText, { ScrollingText } from './AutoSizingText';
+import { ScrollingText } from './AutoSizingText';
 
 interface CountUpTimerProps {
   expand: boolean
