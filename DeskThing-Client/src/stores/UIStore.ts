@@ -10,6 +10,7 @@ import socket from "../helpers/WebSocketService"
  */
 
 import { Property, ViewMode } from "../types";
+import { ManifestStore } from "./manifestStore";
 
 type StateCallback = (state: App[] | string | ViewMode) => void;
 
@@ -17,7 +18,7 @@ type StateCallback = (state: App[] | string | ViewMode) => void;
 
 export class UIStore {
   private static instance: UIStore;
-
+  private manifest: ManifestStore;
   private stateCallbacks: Map<string, StateCallback[]> = new Map();
   private currentView: string = 'landing';
   private views: App[] = [];
@@ -28,9 +29,13 @@ export class UIStore {
   private miniplayerMode: ViewMode = 'peek';
 
   private peekTimeout: NodeJS.Timeout | null = null;
-
   private constructor() {
     this.appListener.push(AppStore.getInstance().onAppUpdates(this.updateAvailableViews.bind(this)));
+    this.manifest = ManifestStore.getInstance()
+    const manifest = this.manifest.getManifest()
+    this.manifest.on((manifest) => {this.setCurrentView(manifest.default_view); this.setMiniplayerMode(manifest.miniplayer as ViewMode)})
+    this.setCurrentView(manifest.default_view)
+    this.setMiniplayerMode(manifest.miniplayer as ViewMode)
   }
 
   static getInstance(): UIStore {

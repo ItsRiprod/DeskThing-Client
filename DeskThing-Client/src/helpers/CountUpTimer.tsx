@@ -3,6 +3,7 @@ import { msToTime } from '../utils/TimeUtils';
 import { SongData } from '../types';
 import { MusicStore } from '../stores';
 import ActionHelper from './ActionHelper';
+import AutoSizingText, { ScrollingText } from './AutoSizingText';
 
 interface CountUpTimerProps {
   expand: boolean
@@ -16,43 +17,47 @@ const CountUpTimer: React.FC<CountUpTimerProps> = ({
   const [ms, setMs] = useState(0);
   const [msEnd, setMsEnd] = useState(6000);
   const [touching, setTouching] = useState(false);
-  const [songId, setSongID] = useState<string>('');
+  const [songId, setSongID] = useState<number>(0);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const touchBuffer = 10000
   useEffect(() => {
-    const myInterval = setInterval(() => {
-      if (songData && songData.is_playing && !touching) {
-        if (ms < msEnd) {
-          setMs((prev) => prev + 1000);
-        } else {
-          console.log('Sending request because song is over')
-            musicStore.requestMusicData()
-            setMs(0);
+    const Interval = setInterval(() => {
+      setMs((prevMs) => {
+        if (songData && songData.is_playing && !touching) {
+          if (prevMs < msEnd) {
+            return prevMs + 1000;
+          } else {
+            console.log('Sending request because song is over');
+            musicStore.requestMusicData();
+            return 0;
+          }
         }
-      }
+        return prevMs;
+      });
     }, 1000);
-    return () => clearInterval(myInterval);
-  }, [songData, touching, ms, songId]);
+    
+    return () => clearInterval(Interval);
+  }, [songData, touching]);
 
   useEffect(() => {
     if (songData) {
-      if (songData.id == songId) return
+      if (songData.timestamp == songId) return
+
       setMs(songData.track_progress);
       setMsEnd(songData.track_duration);
-      setSongID(songData.id)
+      setSongID(songData.timestamp)
     }
-  }, [songData]);
+  }, [songData, songId]);
 
   useEffect(() => {
     const handleSongData = (songData: SongData) => {
       setSongData(songData);
-      setSongID('')
     };
 
     const Listener = musicStore.subscribeToSongDataUpdate(handleSongData);
 
     return () => Listener();
-  }, [musicStore])
+  }, [musicStore, songId])
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     e.stopPropagation();
@@ -64,6 +69,7 @@ const CountUpTimer: React.FC<CountUpTimerProps> = ({
       let newMs = 0;
       setTouching(true);
       const handleTouchMove = (e: TouchEvent) => {
+        e.stopPropagation()
         const currentX = e.touches[0].clientX - rect.left;
         const curMs = Math.round((currentX / rect.width) * msEnd);
         setMs(curMs);
@@ -130,10 +136,12 @@ const CountUpTimer: React.FC<CountUpTimerProps> = ({
   };
 
   return (
-    <div className="pt-11" onTouchStart={handleTouchStart} onMouseDown={handleMouseStart}>
+    <div className={`${!expand && 'pt-8'}`} onTouchStart={handleTouchStart} onMouseDown={handleMouseStart}>
       <div className={` rounded-sm m-auto transition-all overflow-hidden bg-zinc-800 ${expand || touching ? 'h-11' : 'h-2'}`} ref={progressBarRef}>
-        <div className={`m-0 pointer-events-none fixed w-full h-11 items-center text-2xl px-5 flex justify-between p-0 font-bold ${expand || touching ? 'block' : 'hidden'}`}>
-          <p>{songData.track_name}</p>
+        <div className={`m-0 pointer-events-none fixed w-full h-11 items-center text-2xl pr-5 flex justify-between p-0 font-bold ${expand || touching ? 'block' : 'hidden'}`}>
+          <p className="w-5/6 h-full">
+            <ScrollingText className="content-center text-2xl" text={songData.track_name} fades={false} />
+          </p>
           <p>{msToTime(ms)}/{msToTime(msEnd)}</p>
         </div>
         <div

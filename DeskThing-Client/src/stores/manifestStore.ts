@@ -17,6 +17,8 @@ export interface ServerManifest {
     version: string;
     port: number;
     ip: string;
+    default_view: string;
+    miniplayer: string;
   }
 
 export class ManifestStore {
@@ -24,13 +26,15 @@ export class ManifestStore {
     "name": "Sample Client",
     "id": "deskthing",
     "short_name": "DT",
-    "description": "Seeing this client means manifest.json is not configured correctly",
+    "description": "Seeing this means manifest.json is not configured correctly",
     "builtFor": "Spotify Car Thing",
     "reactive": true,
     "author": "Riprod",
     "version": "v0.8.0",
     "port": 8891,
-    "ip": "loading-ip"
+    "ip": "loading-ip",
+    "default_view": "landing",
+    "miniplayer": "peek"
   }
   private static instance: ManifestStore
   private listeners: Set<(manifest: ServerManifest | null) => void> = new Set()

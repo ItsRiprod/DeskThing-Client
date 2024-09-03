@@ -36,7 +36,7 @@ export class MusicStore {
     if (msg.type === 'song') {
       const data = msg.payload as SongData;
       if (data.thumbnail && data.thumbnail != this.songData.thumbnail) {
-        this.songData = { ...this.songData, ...data };
+        this.songData = { ...this.songData, ...data, timestamp: new Date().getTime() };
         const imageElement = new Image();
         imageElement.src = data.thumbnail;
         imageElement.onload = () => {
@@ -52,7 +52,7 @@ export class MusicStore {
         if (!data.thumbnail && data.id != this.songData.id && this.songData.track_name != undefined) {
           this.requestMusicData();
         }
-        this.songData = { ...this.songData ,...data };
+        this.songData = { ...this.songData ,...data, timestamp: new Date().getTime() };
         this.notifySongDataUpdate();
       }
 

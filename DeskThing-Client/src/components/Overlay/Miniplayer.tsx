@@ -19,9 +19,10 @@ const Miniplayer: React.FC = () => {
 
     const updateIconSize = () => {
         const height = window.innerHeight;
-        if (height < 300) {
+        const width = window.innerWidth;
+        if (height < 300 || width < 500) {
             setIconSize(50); // Small size
-        } else if (height < 500) {
+        } else if (height < 500 || width < 700) {
             setIconSize(75); // Medium size
         } else {
             setIconSize(100); // Large size
@@ -113,8 +114,8 @@ const Miniplayer: React.FC = () => {
                                     backgroundPosition: 'center',
                                 }} />}
                             {state == 'peek' && <div onClick={() => setShowActions(true)} className={`overflow-hidden max-w-full font-geist grow pl-5 pt-5 ${showActions && 'hidden'}`} ref={textContainerRef}>
-                                <h1 className={`font-semibold text-wrap text-sm overflow-x-scroll overflow-y-hidden`}>
-                                    <AutoSizingText textContent={musicData.track_name} textSizesDescending={['text-4xl', 'text-2xl', 'text-xl', 'text-sm', 'text-xs']} />
+                                <h1 className={`font-semibold text-wrap text-sm overflow-x-hidden`}>
+                                    <AutoSizingText textContent={musicData.track_name} textSizesDescending={['text-4xl', 'text-2xl', 'text-xl', 'text-sm']} />
                                 </h1>
                                 <p className={'text-sm'}>
                                     {musicData.artist}
@@ -132,8 +133,8 @@ const Miniplayer: React.FC = () => {
                                 <ActionIcon Button={'DynamicAction2'} iconSize={iconSize} className={`${showActions || state == 'full' ? '' : 'hidden px-2'} `} />
                                 <ActionIcon Button={'DynamicAction3'} iconSize={iconSize} className={`${showActions || state == 'full' ? '' : 'hidden px-2'} `} />
                                 <ActionIcon Button={'DynamicAction4'} iconSize={iconSize} className={`${showActions || state == 'full' ? '' : 'hidden px-2'} `} />
-                                <ActionIcon Button={'Action5'} iconSize={iconSize} className={`${showActions || state == 'full' ? '' : 'hidden px-2'} `} />
-                                <ActionIcon Button={'Action6'} iconSize={iconSize} className={`${showActions || state == 'full' ? '' : 'hidden px-2'} sm:block `} />
+                                <ActionIcon Button={'Action5'} iconSize={iconSize} className={`${showActions || state == 'full' ? '' : 'hidden'} lg:block `} />
+                                <ActionIcon Button={'Action6'} iconSize={iconSize} className={`${showActions || state == 'full' ? '' : 'hidden'} sm:block `} />
                                 <ActionIcon Button={'Action7'} iconSize={iconSize} />
                             </div>
                         </>

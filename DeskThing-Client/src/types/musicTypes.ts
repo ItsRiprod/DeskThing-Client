@@ -19,6 +19,7 @@ export type SongData = {
     device: string | null // Name of device that is playing the audio
     id: string | null // A way to identify the current song (is used for certain actions)
     device_id: string | null // a way to identify the current device if needed
+    timestamp: number
   }
 
   export enum AUDIO_REQUESTS {

@@ -152,6 +152,9 @@ export class ActionHandler {
   Rewind = () => {
     const songData = this.musicStore.getSongData();
     this.handleSendCommand(AUDIO_REQUESTS.PREVIOUS, songData.id);
+    setTimeout(() => {
+      this.musicStore.requestMusicData()
+    }, 1000);
   };
 
   Shuffle = () => {
