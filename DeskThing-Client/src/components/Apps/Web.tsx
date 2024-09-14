@@ -28,6 +28,14 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
   });
 
   useEffect(() => {
+    const listener = (msg: SocketData) => {
+      if (msg.type === 'time') {
+        returnMessage({ type: 'time', payload: msg.payload })
+      }
+    };
+
+    const removeTimeListener = socket.on('client', listener);
+
     const returnMessage = (data: Partial<SocketData>) => {
       const message = {
         app: data.app || 'client',
@@ -168,6 +176,8 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
       unsubscribeRefs.current.app()
       unsubscribeRefs.current.music()
       unsubscribeRefs.current.message()
+      unsubscribeRefs.current.settings()
+      removeTimeListener()
     };
   }, [currentView, ip, port, socket]);
 
@@ -204,28 +214,27 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
   }
 
   return (
-    <div className='max-h-screen h-screen overflow-hidden'>
-        <div className="touch-none w-full h-0 flex justify-center items-center bg-red-200">
-            <div
-              ref={swipeRef}
-              className={`touch-auto fixed h-10 rounded-2xl top-2 bg-gray-500 ${
-                swipeVisible ? 'opacity-100 w-11/12 h-4/6 flex items-center justify-center text-6xl' : 'opacity-0 w-1/4'
-              } transition-all duration-300`}
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-            >
-              {swipeVisible ? 'Swipe' : ''}
-            </div>
+    <div className='max-h-fit h-full overflow-hidden'>
+        <div 
+          className={`touch-auto fixed w-screen bg-black/50 h-10 border-b-green-500 border-b-2 ${
+            swipeVisible ? 'opacity-100 h-28' : 'opacity-0'
+          } transition-all duration-300 flex items-center justify-center text-xl z-10`}
+          ref={swipeRef}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          {swipeVisible ? 'Swipe' : ''}
         </div>
-        <iframe
-          ref={iframeRef}
-          src={`http://${ip}:${port}/${currentView}`}
-          style={{ width: '100%', height: '100%', border: 'none' }}
-          title="Web View"
-          height="100%"
-          width="100%"
-        />
-        
+        <div className={`${swipeVisible ? 'blur' : ''} h-full transition-all duration-75`}>
+          <iframe
+            ref={iframeRef}
+            src={`http://${ip}:${port}/${currentView}`}
+            style={{ width: '100%', height: '100%', border: 'none' }}
+            title="Web View"
+            height="100%"
+            width="100%"
+          />
+        </div>
     </div>
   )
 }

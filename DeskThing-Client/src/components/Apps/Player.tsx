@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { MusicStore, UIStore } from "../../stores";
 import { SongData, ViewMode } from "../../types";
 import ActionIcon from "../../helpers/ActionIcon";
+import { IconAlbum } from "../../assets/Icons";
 
 const Player: React.FC = () => {
     const uiStore = UIStore.getInstance()
@@ -76,14 +77,14 @@ const Player: React.FC = () => {
                 <div
                     ref={buttonRef}
                     onClick={handleSongClick}
-                    className={`m-5 ${verticle && 'h-[100vw]'} rounded-tl-[25%] rounded-br-[25%] rounded-xl overflow-hidden bg-black`}
+                    className={`m-5 ${verticle && 'h-[100vw]'} relative rounded-tl-[25%] rounded-br-[25%] rounded-xl ${!padVisible && 'overflow-hidden'} bg-black`}
                     style={{
-                        backgroundImage: `url(${songData.thumbnail})`,
+                        backgroundImage: songData.thumbnail ? `url(${songData.thumbnail})` : 'none',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                     }}
                 >
-                    {padVisible && 
+                    {padVisible ?
                         <div className="h-full w-full grid grid-cols-3 grid-rows-3 gap-1">
                             <ActionIcon Button={'Pad1'} iconSize={24} className={"w-full h-full p-3 bg-opacity-50 bg-black rounded-3xl border"} />
                             <ActionIcon Button={'Pad2'} iconSize={24} className={"w-full h-full p-3 bg-opacity-50 bg-black rounded-3xl border"} />
@@ -95,6 +96,8 @@ const Player: React.FC = () => {
                             <ActionIcon Button={'Pad8'} iconSize={24} className={"w-full h-full p-3 bg-opacity-50 bg-black rounded-3xl border"} />
                             <ActionIcon Button={'Pad9'} iconSize={24} className={"w-full h-full p-3 bg-opacity-50 bg-black rounded-3xl border"} />
                         </div>
+                        :
+                        !songData.thumbnail && <IconAlbum className="absolute w-full h-full" />
                     }
                 </div>
                 <div className="my-5 max-w-[50%] justify-center flex flex-col w-full" style={{ color: 'var(--text-color)' }}>

@@ -20,9 +20,10 @@ export class WebSocketService {
     'localhost',
     '192.168.7.1'
   ];
-
   private attempts: number = 0
   private currentIpIndex: number = 0;
+  private useProxy: boolean = false; // flag
+  private manifest: ServerManifest | null = null
 
   constructor() {
     ManifestStore.on((manifest) => this.handleManifestChange(manifest));
@@ -41,6 +42,7 @@ export class WebSocketService {
       console.log('Reconnecting due to manifest update')
       LogStore.sendMessage('WS', `Reconnecting Websocket to port ${manifest.ip}`)
       this.reconnect(manifest.ip);
+      this.manifest = manifest
     }
   }
 
@@ -56,7 +58,17 @@ export class WebSocketService {
       }
     } catch (error) {
       console.error('Failed to initialize WebSocket:', error);
-      LogStore.sendError('WS', `Failed to initialize websocket`)
+      LogStore.sendError('WS', `Failed to initialize WebSocket: ${error.message}`)
+    }
+  }
+
+  private async startReverseProxy(): Promise<void> {
+    try {
+      LogStore.sendMessage('Proxy', 'Attempting to start reverse proxy...');
+      await import('./reverse-proxy');
+      LogStore.sendMessage('Proxy', 'Reverse proxy started successfully.');
+    } catch (error) {
+      LogStore.sendError('Proxy', `Failed to start reverse proxy: ${error.message}`);
     }
   }
 
@@ -73,20 +85,35 @@ export class WebSocketService {
     // browser socket, WebSocket IPC transport
     webSocket.onopen = (): void => {
       this.attempts = 0
-      LogStore.sendMessage('WS', `Connected`)
+      LogStore.sendMessage('WS', `Connected to ${this.ipList[this.currentIpIndex]}`)
       this.registerEventHandler();
+      this.post({app: 'server', payload: this.manifest, type: 'manifest'})
     };
 
-    webSocket.onclose = () => {
+    webSocket.onclose = async (event: CloseEvent): Promise<void> => {
       this.webSocket.close();
+      LogStore.sendError('WS', `WebSocket closed, Code: ${event.code}, Reason: ${event.reason || 'Unknown reason'}`)
       this.attempts++;
-      LogStore.sendError('WS', `Unable to connect to ${this.ipList[this.currentIpIndex]}`)
+
+      if (this.attempts > 3 && !this.useProxy) {
+        this.useProxy = true;
+        await this.startReverseProxy();
+      }
+
       setTimeout(this.reconnect.bind(this), this.attempts > 5 ? 30000 : 2000);
       return;
     };
-    webSocket.onerror = () => {
-      LogStore.sendError('WS', `Encountered an error`);
-      //setTimeout(this.reconnect.bind(this), 1000);
+    webSocket.onerror = (event: Event) => {
+      console.error(`WebSocket error: ${event}`);
+      LogStore.sendError('WS', `WebSocket encountered an error: ${event.type}`);
+
+      if (event.type === 'ECONNREFUSED') {
+        LogStore.sendError('WS', `Connection refused: Check if the server is running and accepting connections.`);
+      } else if (event.type === 'EHOSTUNREACH') {
+        LogStore.sendError('WS', `Host unreachable: Verify if the IP address ${this.ipList[this.currentIpIndex]} is correct and reachable.`);
+      } else if (event.type === 'ETIMEOUT') {
+        LogStore.sendError('WS', `Connection timeout: It may be blocked by a firewall or network issue.`);
+      }
       this.webSocket.close();
       return;
     };
@@ -149,6 +176,7 @@ export class WebSocketService {
   private createSocket(): WebSocket {
     const manifest = ManifestStore.getManifest();
     if (manifest) {
+      this.manifest = manifest
       const { ip, port } = manifest;
       if (!this.ipList.includes(ip)) {
         this.ipList.push(ip);

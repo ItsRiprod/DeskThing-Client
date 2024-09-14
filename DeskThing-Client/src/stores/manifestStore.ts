@@ -19,6 +19,8 @@ export interface ServerManifest {
     ip: string;
     default_view: string;
     miniplayer: string;
+    uuid?: string
+    device_type: string
   }
 
 export class ManifestStore {
@@ -34,7 +36,8 @@ export class ManifestStore {
     "port": 8891,
     "ip": "loading-ip",
     "default_view": "landing",
-    "miniplayer": "peek"
+    "miniplayer": "peek",
+    "device_type": "Car Thing"
   }
   private static instance: ManifestStore
   private listeners: Set<(manifest: ServerManifest | null) => void> = new Set()

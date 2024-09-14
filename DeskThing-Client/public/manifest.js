@@ -6,9 +6,10 @@ window.manifest = {
   "builtFor": "Spotify Car Thing",
   "reactive": true,
   "author": "Riprod",
-  "version": "v0.8.4",
+  "version": "v0.8.6",
   "port": 8891,
   "ip": "localhost",
   "default_view": "landing",
-  "miniplayer": "peek"
+  "miniplayer": "peek",
+  "device_type": "Car Thing"
 }

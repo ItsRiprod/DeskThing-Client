@@ -4,7 +4,7 @@ import { SongData, ViewMode } from "../../types";
 import ActionIcon from "../../helpers/ActionIcon";
 import AutoSizingText from "../../helpers/AutoSizingText";
 import CountUpTimer from "../../helpers/CountUpTimer";
-import { IconArrowDown } from "../../assets/Icons";
+import { IconAlbum, IconArrowDown } from "../../assets/Icons";
 
 const Miniplayer: React.FC = () => {
     const uiStore = UIStore.getInstance();
@@ -105,14 +105,27 @@ const Miniplayer: React.FC = () => {
                 <div className={`flex xs:flex-nowrap ${showActions && 'flex-wrap'} transition-all justify-between bg-black ${state == 'hidden' ? 'h-0' : 'h-fit'}`}>
                     {state != 'hidden' &&
                         <>
-                            {state == 'peek' && <button
-                                onClick={handleExpand}
-                                className="w-28 h-28 hidden xs:block shrink-0 bg-red-50"
-                                style={{
-                                    backgroundImage: `url(${musicData.thumbnail})`,
-                                    backgroundSize: 'cover',
-                                    backgroundPosition: 'center',
-                                }} />}
+                            {state == 'peek' &&
+                                (musicData.thumbnail != null 
+                                    ? 
+                                    <button
+                                        onClick={handleExpand}
+                                        className="xs:w-28 xs:h-28 block shrink-0 bg-red-50"
+                                        style={{
+                                            backgroundImage: `url(${musicData.thumbnail})`,
+                                            backgroundSize: 'cover',
+                                            backgroundPosition: 'center',
+                                        }}
+                                    />
+                                    : 
+                                    <button
+                                        onClick={handleExpand}
+                                        className="xs:w-28 xs:h-28 w-10 h-10 block shrink-0"
+                                    >
+                                        <IconAlbum className="w-full h-full" />
+                                    </button>
+                                )
+                                }
                             {state == 'peek' && <div onClick={() => setShowActions(true)} className={`overflow-hidden max-w-full font-geist grow pl-5 pt-5 ${showActions && 'hidden'}`} ref={textContainerRef}>
                                 <h1 className={`font-semibold text-wrap text-sm overflow-x-hidden`}>
                                     <AutoSizingText textContent={musicData.track_name} textSizesDescending={['text-4xl', 'text-2xl', 'text-xl', 'text-sm']} />
