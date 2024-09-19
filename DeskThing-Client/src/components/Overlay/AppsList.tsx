@@ -41,16 +41,18 @@ const AppSelector: React.FC = () => {
   }
 
   return (
-    <div className={`absolute z-50 w-screen pb-5 justify-around flex flex-wrap overflow-hidden top-0 left-0 ${state == 'full' ? ' h-screen overflow-y-auto bg-black pt-2' : state == 'peek' ? 'bg-black border-b-2 border-b-green-500' : '-translate-y-28 overflow-hidden max-h-28'} transition-all`}>
+    <div className={`absolute z-50 w-screen pb-5 justify-around content-start flex flex-wrap overflow-hidden top-0 left-0 ${state == 'full' ? ' h-screen overflow-y-auto bg-black pt-2' : state == 'peek' ? 'bg-black border-b-2 border-b-green-500' : '-translate-y-28 overflow-hidden max-h-28'} transition-all`}>
       {apps.map((app, index) => 
         app.manifest?.isLocalApp || app.manifest?.isWebApp ?
         (
           <button
             key={app.manifest.id}
-            className={`bg-black m-1 h-24 p-5 border rounded-lg cursor-pointer w-1/5 ${app.prefIndex < 4 || state == 'full' ? 'preferred' : 'hidden'} ${currentView === app.manifest.id ? 'border-green-600' : 'border-white'}`}
+            className={`bg-black m-1 h-24 p-5 border rounded-lg cursor-pointer w-1/5 ${index < 4 || state == 'full' ? 'preferred' : 'hidden'} ${currentView === app.manifest.id ? 'border-green-600' : 'border-white'}`}
             onClick={() => onAppSelect(app.manifest.id)}
           >
-            {app.manifest? app.manifest.label : app.name}
+            <p className="text-white flex items-center justify-center text-center text-sm">
+              {app.manifest? app.manifest.label : app.name}
+            </p>
           </button>
         )
         :

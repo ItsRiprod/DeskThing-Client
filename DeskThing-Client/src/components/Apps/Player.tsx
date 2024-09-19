@@ -53,31 +53,38 @@ const Player: React.FC = () => {
     useEffect(() => {
         const resizeButton = () => {
             const button = buttonRef.current;
-            if (button) {
-                button.style.width = `${button.offsetHeight}px`;
-                button.style.minWidth = `${button.offsetHeight}px`;
-                button.style.maxWidth = `${button.offsetHeight}px`;
-            }
-
             if (window.innerHeight - window.innerWidth * 1.25 > 0) {
                 setIsVerticle(true)
             } else {
                 setIsVerticle(false)
             }
+
+            if (button) {
+                const width = Math.min(button.offsetWidth, window.innerHeight * 0.7)
+                button.style.height = `${width}px`;
+                button.style.minHeight = `${width}px`;
+                button.style.maxHeight = `${width}px`;
+            }
         };
 
         resizeButton(); // Initial resize
+
+        window.addEventListener('resize', resizeButton);
+
+        return () => {
+            window.removeEventListener('resize', resizeButton);
+        };
     }, [miniplayerState, songData]);
 
     return (
         <div className={`w-full h-full flex-col bg-black`}
             style={{backgroundImage: "linear-gradient(to right, var(--album-color)75%, rgba(128, 128, 128, 0.5))"}}
         >
-            <div className={`h-full max-w-screen flex ${verticle && 'flex-col items-center'} justify-center`}>
+            <div className={`h-full max-w-screen flex ${verticle && 'flex-col items-center'} items-center justify-center`}>
                 <div
                     ref={buttonRef}
                     onClick={handleSongClick}
-                    className={`m-5 ${verticle && 'h-[100vw]'} relative rounded-tl-[25%] rounded-br-[25%] rounded-xl ${!padVisible && 'overflow-hidden'} bg-black`}
+                    className={`m-5 ${verticle && 'h-[100vw] w-full max-w-screen'} w-full h-full relative rounded-tl-[25%] rounded-br-[25%] rounded-xl ${!padVisible && 'overflow-hidden'} bg-black`}
                     style={{
                         backgroundImage: songData.thumbnail ? `url(${songData.thumbnail})` : 'none',
                         backgroundSize: 'cover',

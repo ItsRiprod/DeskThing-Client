@@ -205,7 +205,7 @@ export class ActionHandler {
   };
   Swap = async (index: number = 5) => {
     const currentView = this.uiStore.getCurrentView();
-    this.uiStore.setPrefIndex(currentView, index);
+    this.uiStore.setPrefIndex(currentView, index -1);
   }
   VolUp = () => {
     const volume = this.musicStore.getSongData().volume

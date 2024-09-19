@@ -110,7 +110,7 @@ const Miniplayer: React.FC = () => {
                                     ? 
                                     <button
                                         onClick={handleExpand}
-                                        className="xs:w-28 xs:h-28 block shrink-0 bg-red-50"
+                                        className="w-20 h-20 xs:w-28 xs:h-28 block shrink-0 bg-red-50"
                                         style={{
                                             backgroundImage: `url(${musicData.thumbnail})`,
                                             backgroundSize: 'cover',
@@ -120,7 +120,7 @@ const Miniplayer: React.FC = () => {
                                     : 
                                     <button
                                         onClick={handleExpand}
-                                        className="xs:w-28 xs:h-28 w-10 h-10 block shrink-0"
+                                        className="xs:w-28 xs:h-28 w-20 h-10 block shrink-0"
                                     >
                                         <IconAlbum className="w-full h-full" />
                                     </button>

@@ -86,7 +86,6 @@ export class AppStore {
   private handleClientData = (msg: SocketData) => {
     if (msg.type === 'config') {
       const data = msg.payload as App[]
-      data.sort((a, b) => a.prefIndex - b.prefIndex);
       this.apps = data;
       this.notifyAppUpdates()
     } else if (msg.type === 'settings') {

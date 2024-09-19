@@ -69,17 +69,8 @@ export class UIStore {
    */
 
   private async updateAvailableViews(apps: App[]): Promise<void> {
-    const filteredApps = apps.filter(app => app.manifest?.isWebApp || app.manifest?.isLocalApp);
-
-
-    const availableViews = filteredApps
-      .sort((a, b) => a.prefIndex - b.prefIndex)
-      .map((app, index) => {
-        app.prefIndex = index; // Reassign prefIndex sequentially
-        return app;
-      });
-
-    this.setAvailableViews(availableViews);
+    
+    this.setAvailableViews(apps);
 
   }
 
@@ -144,34 +135,17 @@ export class UIStore {
   }
 
   async setPrefIndex(appName: string, newPrefIndex: number): Promise<void> {
-    const appToMove = this.views.find(app => app.name === appName)
-    if (!appToMove) return
-
-    const existingApp = this.views.find(app => app.prefIndex === newPrefIndex)
-    if (existingApp) {
-      existingApp.prefIndex = appToMove.prefIndex
-    }
-
-    appToMove.prefIndex = newPrefIndex
-
-    // Sort the views by the updated prefIndexes
-    this.views.sort((a, b) => a.prefIndex - b.prefIndex)
-
-    // Reassign indexes to ensure continuity
-    this.views.forEach((app, index) => app.prefIndex = index);
-
-    this.notifyStateUpdates('availableViews', this.views)
 
     this.notifyServerOfPrefIndex(appName, newPrefIndex)
   }
 
-  private notifyServerOfPrefIndex(appName: string, newPrefIndex: number) {
+  private notifyServerOfPrefIndex(appName: string, index: number) {
     if (socket.is_ready()) {
       const data = {
         app: 'server',
         type: 'set',
         request: 'update_pref_index',
-        payload: { app: appName, index: newPrefIndex },
+        payload: { app: appName, index },
       };
       socket.post(data);
     }
