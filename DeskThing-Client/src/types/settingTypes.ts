@@ -37,6 +37,6 @@ export interface Settings {
   }
 
 
-export type Property = 'currentView' | 'appsListMode' | 'miniplayerMode' | 'availableViews'
+export type Property = 'currentView' | 'appsListMode' | 'miniplayerMode' | 'availableViews' | 'screensaver'
 
 export type ViewMode = 'hidden' | 'peek' | 'full';

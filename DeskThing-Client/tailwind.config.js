@@ -18,6 +18,17 @@ export default {
         geistMono: ['GeistMono', 'monospace'],
         THEBOLDFONT: ['THEBOLDFONT', 'sans-serif'],
       },
+      keyframes: {
+              float: {
+                '0%': { transform: 'translate(0%, 10%)' },
+                '50%': { transform: 'translate(10%, 0%)' },
+                '100%': { transform: 'translate(0%, 10%)' },
+              },
+            },
+      animation: {
+        float: 'float 15s ease infinite;',
+      }
+      
     },
   },
   plugins: [],

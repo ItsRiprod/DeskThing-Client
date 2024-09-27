@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { AppStore, log, LOG_TYPES, LogStore } from "../../stores";
+import { AppStore, log, LOG_TYPES, LogStore, UIStore } from "../../stores";
 import { App, Settings } from "../../types";
 import Landing from "./Landing";
 import WebSocketService from "../../helpers/WebSocketService";
@@ -15,8 +15,8 @@ const Utility: React.FC = () => {
     const appStore = AppStore.getInstance()
     const socket = WebSocketService
     const logStore = LogStore.getInstance()
-    const [logs, setLogs] = useState<log[]>(logStore.getAllLogs())
-    const [apps, setApps] = useState<App[]>(appStore.getApps())
+    const [logs, setLogs] = useState<log[]>(logStore.getAllLogs() || [])
+    const [apps, setApps] = useState<App[]>(appStore.getApps() || [])
     const [settings, setSettings] = useState<Settings>(appStore.getSettings())
     const [selectedApp, setSelectedApp] = useState<string>('')
     const [currentSetting, setCurrentSetting] = useState<string>('')
@@ -83,6 +83,10 @@ const Utility: React.FC = () => {
         setLogFilter(type);
     }
 
+    const openDevView = () => {
+      UIStore.getInstance().setCurrentView('dev')
+    }
+
     return (
       <div
         className={`flex w-full max-h-full h-full flex-col-reverse sm:flex-row bg-black`}
@@ -103,9 +107,14 @@ const Utility: React.FC = () => {
               <p className="h-full items-center flex ">{app.name}</p>
             </button>
           ))}
+          <button
+            className={`p-5 rounded-xl border sm:border-l-2 ${selectedApp == "logs" ? "border-green-500 bg-slate-800" : ""}`}
+            onClick={() => selectApp("dev")}>
+            <p className="h-full items-center flex ">config</p>
+          </button>
         </div>
         <div className="border border-slate-500 h-full w-full m-2 rounded-lg p-5 overflow-y-scroll">
-          {selectedApp && settings[selectedApp] ? (
+          {selectedApp && selectedApp !== 'logs' && settings[selectedApp] ? (
             Object.keys(settings[selectedApp]).map((setting, index) => (
               <div
                 key={index}
@@ -143,7 +152,7 @@ const Utility: React.FC = () => {
                 </div>
               </div>
             ))
-          ) : selectedApp == "logs" && logs.length > 0 ? (
+          ) : selectedApp == "logs" && logs && logs.length > 0 ? (
             <div className="w-full">
               <div className="w-full flex justify-between mb-3">
                 <button
@@ -177,7 +186,7 @@ const Utility: React.FC = () => {
                   <p>All</p>
                 </button>
               </div>
-              {logs.map((log, index) => (
+              {logs && logs.map((log, index) => (
                 <div
                   key={index}
                   className={`${logFilter != "all" && log.type != logFilter && "hidden"} ${log.type == "error" && "bg-red-500"} ${log.type == "log" && "bg-slate-900"} ${log.type == "message" && "bg-slate-500"} w-full border-x-2 mb-1 rounded-2xl h-fit overflow-hidden hover:overflow-fit`}
@@ -187,6 +196,17 @@ const Utility: React.FC = () => {
                   </p>
                 </div>
               ))}
+            </div>
+          ) : selectedApp == "dev" ? (
+            <div className="w-full">
+              <div className="w-full flex justify-between mb-3">
+                <button
+                  className={`border-2 border-slate-500 rounded-xl p-5`}
+                  onClick={openDevView}
+                >
+                  <p>Dev Mode</p>
+                </button>
+              </div>
             </div>
           ) : (
             <Landing />

@@ -134,6 +134,7 @@ export class ControlStore {
   private handleConfigUpdate(data: ButtonMapping): void {
     for (const [button, eventFlavors] of Object.entries(data)) {
       this.buttonMapping[button] = eventFlavors;
+      this.notifyListeners();
     }
   }
 

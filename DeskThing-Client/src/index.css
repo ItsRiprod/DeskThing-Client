@@ -76,3 +76,7 @@ button {
 #root {
   position: fixed
 }
+
+.bg-gradient-radial {
+  background: radial-gradient(circle, var(--tw-gradient-from) 0%, var(--tw-gradient-to) 100%);
+}

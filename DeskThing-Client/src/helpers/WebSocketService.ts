@@ -15,15 +15,19 @@ type SocketEventListener = (msg: SocketData) => void;
 export class WebSocketService {
   private static instance: WebSocketService
   listeners: { [app: string]: SocketEventListener[] } = {};
-  webSocket: WebSocket;
+  webSocket: WebSocket | null = null;
   private ipList: string[] = [
     'localhost',
     '192.168.7.1'
   ];
   private attempts: number = 0
   private currentIpIndex: number = 0;
-  private useProxy: boolean = false; // flag
+  private reconnecting: boolean = false;
   private manifest: ServerManifest | null = null
+  private heartbeatInterval: NodeJS.Timeout | null = null;
+  private heartbeatTimeout: NodeJS.Timeout | null = null;
+  private live = false;
+  private missedHeartBeats: number = 0;
 
   constructor() {
     ManifestStore.on((manifest) => this.handleManifestChange(manifest));
@@ -49,6 +53,7 @@ export class WebSocketService {
   private initializeSocket(): void {
     if (this.webSocket) {
       this.webSocket.close();
+      this.webSocket = null;
     }
 
     try {
@@ -62,22 +67,37 @@ export class WebSocketService {
     }
   }
 
-  private async startReverseProxy(): Promise<void> {
-    try {
-      LogStore.sendMessage('Proxy', 'Attempting to start reverse proxy...');
-      await import('./reverse-proxy');
-      LogStore.sendMessage('Proxy', 'Reverse proxy started successfully.');
-    } catch (error) {
-      LogStore.sendError('Proxy', `Failed to start reverse proxy: ${error.message}`);
-    }
-  }
-
   reconnect(manifestIp: string | null = null): void {
+    if (this.reconnecting) {
+      return;
+    }
+
+    this.reconnecting = true;
+
+    if (this.webSocket) {
+      this.webSocket.close(1000, "Reconnecting...");
+      this.webSocket = null;
+    }
+
     if (manifestIp && !this.ipList.includes(manifestIp)) {
       this.ipList.push(manifestIp);
     }
     this.currentIpIndex = (this.currentIpIndex + 1) % this.ipList.length;
-    this.connect(this.createSocket());
+    setTimeout(() => {
+      try {
+        this.webSocket = this.createSocket();
+        if (this.webSocket) {
+          this.connect(this.webSocket);
+        }
+      } catch (error) {
+        console.error('Failed to reconnect WebSocket:', error);
+        LogStore.sendError('WS', `Failed to reconnect WebSocket: ${error.message}`);
+        this.attempts++;
+        setTimeout(() => this.reconnect(manifestIp), this.attempts > 5 ? 30000 : 5000);
+      } finally {
+        this.reconnecting = false;
+      }
+    }, 1000);
   }
 
   connect(webSocket: WebSocket): void {
@@ -87,65 +107,74 @@ export class WebSocketService {
       this.attempts = 0
       LogStore.sendMessage('WS', `Connected to ${this.ipList[this.currentIpIndex]}`)
       this.registerEventHandler();
+      this.startHeartbeat();
       this.post({app: 'server', payload: this.manifest, type: 'manifest'})
     };
 
     webSocket.onclose = async (event: CloseEvent): Promise<void> => {
-      this.webSocket.close();
       LogStore.sendError('WS', `WebSocket closed, Code: ${event.code}, Reason: ${event.reason || 'Unknown reason'}`)
+      if (event.code == 1000) return
       this.attempts++;
-
-      if (this.attempts > 3 && !this.useProxy) {
-        this.useProxy = true;
-        await this.startReverseProxy();
-      }
-
-      setTimeout(this.reconnect.bind(this), this.attempts > 5 ? 30000 : 2000);
-      return;
+      setTimeout(() => {
+        LogStore.sendLog('WS', `Attempting to reconnect to ${this.ipList[this.currentIpIndex]}`);
+        this.reconnect(this.ipList[this.currentIpIndex]);
+      }, this.attempts > 5 ? 30000 : 5000);
     };
+
     webSocket.onerror = (event: Event) => {
       console.error(`WebSocket error: ${event}`);
       LogStore.sendError('WS', `WebSocket encountered an error: ${event.type}`);
 
-      if (event.type === 'ECONNREFUSED') {
-        LogStore.sendError('WS', `Connection refused: Check if the server is running and accepting connections.`);
-      } else if (event.type === 'EHOSTUNREACH') {
-        LogStore.sendError('WS', `Host unreachable: Verify if the IP address ${this.ipList[this.currentIpIndex]} is correct and reachable.`);
-      } else if (event.type === 'ETIMEOUT') {
-        LogStore.sendError('WS', `Connection timeout: It may be blocked by a firewall or network issue.`);
+      if (event instanceof ErrorEvent) {
+        if (event.message.includes('ECONNREFUSED')) {
+          LogStore.sendError('WS', `Connection refused: Check if the server is running and accepting connections.`);
+        } else if (event.message.includes('EHOSTUNREACH')) {
+          LogStore.sendError('WS', `Host unreachable: Verify if the IP address ${this.ipList[this.currentIpIndex]} is correct and reachable.`);
+        } else if (event.message.includes('ETIMEOUT')) {
+          LogStore.sendError('WS', `Connection timeout: It may be blocked by a firewall or network issue.`);
+        }
       }
-      this.webSocket.close();
-      return;
+      
+      if (this.webSocket) {
+        this.webSocket.close();
+      }
     };
   }
 
   is_ready(): boolean {
-    return this.webSocket.readyState > 0;
+    return this.webSocket !== null && this.webSocket.readyState === WebSocket.OPEN;
   }
 
   post(body: SocketData): void {
-    if (this.is_ready()) {
-      this.webSocket.send(JSON.stringify(body));
+    if (this.is_ready() && this.live) {
+      this.webSocket!.send(JSON.stringify(body));
     } else {
       console.error('WebSocket is not ready.');
     }
   }
 
   registerEventHandler = (): void => {
-    this.webSocket.onmessage = (event) => {
-      try {
-        const msg = JSON.parse(event.data.toString());
-        const { app } = msg
-        
-        if (!this.listeners[app]) {
-          this.listeners[app] = [];
+    if (this.webSocket) {
+      this.webSocket.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data.toString()) as SocketData;
+          const { app } = msg
+          
+          if (app === 'client' && msg.type === 'heartbeat') {
+            this.resetHeartbeatTimeout();
+            return;
+          }
+
+          if (!this.listeners[app]) {
+            this.listeners[app] = [];
+          }
+          // console.log('WEBSOCKET', msg)
+          this.listeners[app].forEach((listener: SocketEventListener) => listener(msg as SocketData));
+        } catch (e) {
+          console.error(e);
         }
-        // console.log('WEBSOCKET', msg)
-        this.listeners[app].forEach((listener: SocketEventListener) => listener(msg as SocketData));
-      } catch (e) {
-        console.error(e);
-      }
-    };
+      };
+    }
   };
 
   // This is what should be used. Returns a function that can be used to remove the socket
@@ -173,6 +202,7 @@ export class WebSocketService {
       this.listeners[app].splice(index, 1);
     }
   }
+
   private createSocket(): WebSocket {
     const manifest = ManifestStore.getManifest();
     if (manifest) {
@@ -195,6 +225,64 @@ export class WebSocketService {
     } else {
       LogStore.sendError('WS', `Manifest not available!`);
       throw new Error('Manifest is not available.');
+    }
+  }
+
+  private startHeartbeat(): void {
+    this.missedHeartBeats = 0
+    this.live = true
+    this.notifyLiveState()
+
+    this.heartbeatInterval = setInterval(() => {
+      if (this.is_ready()) {
+        this.post({ app: 'server', type: 'heartbeat', payload: null });
+      }
+    }, 30000); // Send heartbeat every 30 seconds
+
+    this.resetHeartbeatTimeout();
+  }
+
+  private resetHeartbeatTimeout(): void {
+    if (this.heartbeatTimeout) {
+      clearTimeout(this.heartbeatTimeout);
+    }
+
+    this.heartbeatTimeout = setTimeout(() => {
+      this.handleMissedHeartbeat();
+    }, 45000); // Wait 45 seconds for a heartbeat response
+  }
+
+  private handleMissedHeartbeat(): void {
+    LogStore.sendError('WS', 'Missed heartbeat from server ' + (this.missedHeartBeats + 1) + ' / 4');
+    if (this.missedHeartBeats >= 3) {
+      if (this.webSocket) {
+        this.webSocket.close(1000, "Did not receive heartbeat");
+        this.notifyLiveState()
+      }
+      this.stopHeartbeat();
+    } else {
+      this.missedHeartBeats++;
+      if (this.webSocket == null) {
+        this.reconnect()
+      }
+      this.resetHeartbeatTimeout();
+      this.notifyLiveState()
+    }
+  }
+
+  private async notifyLiveState() {
+    const { UIStore } = await import('../stores')
+
+    UIStore.getInstance().setScreensaver(!this.live)
+  }
+
+  private stopHeartbeat(): void {
+    this.live = false
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+    }
+    if (this.heartbeatTimeout) {
+      clearTimeout(this.heartbeatTimeout);
     }
   }
 }

@@ -12,7 +12,7 @@ import socket from "../helpers/WebSocketService"
 import { Property, ViewMode } from "../types";
 import { ManifestStore } from "./manifestStore";
 
-type StateCallback = (state: App[] | string | ViewMode) => void;
+type StateCallback = (state: App[] | string | ViewMode | boolean) => void;
 
 
 
@@ -27,6 +27,8 @@ export class UIStore {
 
   private appsListMode: ViewMode = 'hidden';
   private miniplayerMode: ViewMode = 'peek';
+
+  private screensaver: boolean = false;
 
   private peekTimeout: NodeJS.Timeout | null = null;
   private constructor() {
@@ -114,6 +116,14 @@ export class UIStore {
   async setCurrentView(view: string): Promise<void> {
     this.currentView = view
     this.notifyStateUpdates('currentView', view)
+  }
+
+  getScreensaver(): boolean {
+    return this.screensaver
+  }
+  async setScreensaver(value: boolean): Promise<void> {
+    this.screensaver = value
+    this.notifyStateUpdates('screensaver', value)
   }
 
   /**

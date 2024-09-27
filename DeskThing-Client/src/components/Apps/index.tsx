@@ -5,11 +5,8 @@ import Web from './Web';
 import Landing from './Landing';
 import Player from './Player';
 
-/* Legacy Apps - will remove */
-import Spotify from './Legacy/Spotify'
-import Local from './Legacy/Local';
-
 import { UIStore } from '../../stores';
+import Dev from './Dev';
 
 const Apps = () => {
   const uiStore = UIStore.getInstance();
@@ -42,11 +39,8 @@ const Apps = () => {
         return <Utility />
       case 'player':
         return <Player />
-        /* legacy apps - will remove */
-      case 'spotify':
-        return <Spotify />
-      case 'local':
-        return <Local />
+      case 'dev':
+        return <Dev />
       default:
         console.log('Unknown view:', currentView);
         return <Web currentView={currentView} />

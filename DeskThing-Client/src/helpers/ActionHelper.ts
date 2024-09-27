@@ -32,15 +32,12 @@ export class ActionHandler {
   executeAction = async (button: Button, flavor: EventFlavor): Promise<void> => {
     const action = ControlStore.getInstance().getButtonMapping(button, flavor);
     if (!action) {
-      LogStore.getInstance().sendLog('ACTION', `No action found for button: ${button} ${EventFlavor[flavor]}`);
-      console.warn(`No action found for button: ${button} ${EventFlavor[flavor]}`);
       return;
     }
 
     const buttonNumber = button.match(/\d+/);
     const extractedNumber = buttonNumber ? parseInt(buttonNumber[0], 10) : null;
     
-    LogStore.getInstance().sendLog('ACTION', `Running button: ${button} ${EventFlavor[flavor]}`);
     this.runAction(action, extractedNumber)
   }
 
@@ -51,8 +48,6 @@ export class ActionHandler {
   runAction = async (action: Action, val = 0): Promise<void> => {
 
     const { source, id } = action;
-
-    LogStore.getInstance().sendLog('ACTION', `Running action ${id}`);
 
     if (source === 'server') {
       this.handleServerAction(action, val);
@@ -83,8 +78,8 @@ export class ActionHandler {
     try {
       const socketData = {
         app: source,
-        type: 'button',
-        payload: { id: id, val: val }
+        type: 'action',
+        payload: { id: id, value: val }
       }
       await socket.post(socketData);
     } catch (error) {

@@ -93,6 +93,7 @@ const ActionIcon: React.FC<IconHelperProps> = ({ Button, flavor = EventFlavor.Do
                     if (!response.ok) throw new Error('Network response was not ok');
                     const svgData = await response.text();
                     setSvgContent(svgData);
+                    console.log(svgData)
                 } catch (error) {
                     console.error('Failed to fetch SVG content:', error);
                 }
@@ -129,12 +130,12 @@ const ActionIcon: React.FC<IconHelperProps> = ({ Button, flavor = EventFlavor.Do
 
         
         <button onClick={handleClick} className={`${className}`}>
-        {IconComponent ? (
+        {IconComponent && svgContent === null ? (
                 <IconComponent {...props} />
             ) : (
-                <Icon>
+                <Icon {...props}>
                     {svgContent ? (
-                        <div dangerouslySetInnerHTML={{ __html: svgContent }} />
+                        <svg dangerouslySetInnerHTML={{ __html: svgContent }} />
                     ) : (
                         <text>loading...</text>
                     )}
