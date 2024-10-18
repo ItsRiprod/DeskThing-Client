@@ -155,7 +155,7 @@ export class WebSocketService {
 
   pong(): void {
     if (this.is_ready() && this.live) {
-      this.webSocket!.send(JSON.stringify({ app: 'server', type: 'pong' }));
+      this.webSocket!.send(JSON.stringify({ app: 'server', type: 'pong', payload: this.manifest.uuid || '' }));
     } else {
       console.error('WebSocket is not ready.');
     }
@@ -169,14 +169,20 @@ export class WebSocketService {
           const { app } = msg
           
           if (app === 'client' && msg.type === 'heartbeat') {
-            this.resetHeartbeatTimeout();
-            return;
+            if (msg.type == 'heartbeat') {
+              this.resetHeartbeatTimeout();
+              return;
+            } else if (msg.type == 'pong') {
+                this.pong();
+                LogStore.sendLog('WS', `Received pong from ${this.ipList[this.currentIpIndex]}`)
+                LogStore.sendMessage('WS', 'Pong!')
+                return;
+            } else if (msg.type == 'get' && msg.request == 'manifest') {
+              this.post({app: 'server', payload: this.manifest, type: 'manifest'})
+              LogStore.sendLog('WS', `Sent manifest to ${this.ipList[this.currentIpIndex]}`)
+              return;
+            }
           }
-          if (app === 'client' && msg.type === 'ping') {
-            this.resetHeartbeatTimeout();
-            return;
-          }
-
           if (!this.listeners[app]) {
             this.listeners[app] = [];
           }
