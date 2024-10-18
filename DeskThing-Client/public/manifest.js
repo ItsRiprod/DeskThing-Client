@@ -7,9 +7,10 @@ window.manifest = {
   "reactive": true,
   "author": "Riprod",
   "version": "v0.9.0",
+  "version_code": 900,
   "port": 8891,
   "ip": "localhost",
   "default_view": "landing",
   "miniplayer": "peek",
-  "device_type": "Car Thing"
+  "device_type": {"id": 4, "name": "CarThing"}
 }

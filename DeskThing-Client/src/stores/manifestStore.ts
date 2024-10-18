@@ -19,8 +19,9 @@ export interface ServerManifest {
     ip: string;
     default_view: string;
     miniplayer: string;
-    uuid?: string
-    device_type: string
+    uuid?: string;
+    version_code: number;
+    device_type: { id: number, name: string }
   }
 
 export class ManifestStore {
@@ -33,11 +34,12 @@ export class ManifestStore {
     "reactive": true,
     "author": "Riprod",
     "version": "v0.8.0",
+    "version_code": 900,
     "port": 8891,
     "ip": "loading-ip",
     "default_view": "landing",
     "miniplayer": "peek",
-    "device_type": "Car Thing"
+    "device_type": {"id": 4, "name": "Unknown"}
   }
   private static instance: ManifestStore
   private listeners: Set<(manifest: ServerManifest | null) => void> = new Set()

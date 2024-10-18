@@ -153,6 +153,14 @@ export class WebSocketService {
     }
   }
 
+  pong(): void {
+    if (this.is_ready() && this.live) {
+      this.webSocket!.send(JSON.stringify({ app: 'server', type: 'pong' }));
+    } else {
+      console.error('WebSocket is not ready.');
+    }
+  }
+
   registerEventHandler = (): void => {
     if (this.webSocket) {
       this.webSocket.onmessage = (event) => {
@@ -161,6 +169,10 @@ export class WebSocketService {
           const { app } = msg
           
           if (app === 'client' && msg.type === 'heartbeat') {
+            this.resetHeartbeatTimeout();
+            return;
+          }
+          if (app === 'client' && msg.type === 'ping') {
             this.resetHeartbeatTimeout();
             return;
           }
