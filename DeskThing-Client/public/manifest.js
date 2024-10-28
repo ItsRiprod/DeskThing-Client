@@ -8,6 +8,7 @@ window.manifest = {
   "author": "Riprod",
   "version": "v0.9.0",
   "version_code": 900,
+  "compatible_server": [9],
   "port": 8891,
   "ip": "localhost",
   "default_view": "landing",

@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from "react";
 import { AppStore, log, LOG_TYPES, LogStore, UIStore } from "../../stores";
-import { App, Settings } from "../../types";
+import { App, AppSettings } from "../../types";
 import Landing from "./Landing";
 import WebSocketService from "../../helpers/WebSocketService";
 
@@ -17,7 +17,7 @@ const Utility: React.FC = () => {
     const logStore = LogStore.getInstance()
     const [logs, setLogs] = useState<log[]>(logStore.getAllLogs() || [])
     const [apps, setApps] = useState<App[]>(appStore.getApps() || [])
-    const [settings, setSettings] = useState<Settings>(appStore.getSettings())
+    const [settings, setSettings] = useState<AppSettings>(appStore.getSettings())
     const [selectedApp, setSelectedApp] = useState<string>('')
     const [currentSetting, setCurrentSetting] = useState<string>('')
     const [logFilter, setLogFilter] = useState<LOG_TYPES | 'all'>('all');
@@ -46,7 +46,7 @@ const Utility: React.FC = () => {
             setApps(apps)
         }
         
-        const updateSettings = (settings: Settings) => {
+        const updateSettings = (settings: AppSettings) => {
             console.log('Setting the settings')
             setSettings(settings)
         }

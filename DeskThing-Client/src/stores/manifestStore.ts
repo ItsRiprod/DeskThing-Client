@@ -19,6 +19,7 @@ export interface ServerManifest {
     ip: string;
     default_view: string;
     miniplayer: string;
+    compatible_server: number[],
     uuid?: string;
     version_code: number;
     device_type: { id: number, name: string }
@@ -33,8 +34,9 @@ export class ManifestStore {
     "builtFor": "Spotify Car Thing",
     "reactive": true,
     "author": "Riprod",
-    "version": "v0.8.0",
-    "version_code": 900,
+    "version": "v0.9.0",
+    "version_code": 9.0,
+    "compatible_server": [9], // Compatible with all versions of 9.X
     "port": 8891,
     "ip": "loading-ip",
     "default_view": "landing",
