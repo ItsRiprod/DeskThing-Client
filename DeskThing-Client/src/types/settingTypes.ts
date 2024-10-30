@@ -56,12 +56,13 @@ export interface SettingsSelect {
 }
 
 export interface SettingsMultiSelect {
-  value: boolean[]
+  value: string[]
   type: 'multiselect'
   label: string
   description?: string
   options: {
-    label: string
+    label: string,
+    value: string
   }[]
 }
 

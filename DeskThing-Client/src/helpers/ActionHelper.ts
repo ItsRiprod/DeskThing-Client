@@ -217,7 +217,7 @@ export class ActionHandler {
     }
   }
 
-  private handleSendCommand = (request: string, payload = null, app = 'utility', type = 'set') => {
+  private handleSendCommand = (request: string, payload = null, app = 'music', type = 'set') => {
     if (socket.is_ready()) {
       const data = {
         type: type,

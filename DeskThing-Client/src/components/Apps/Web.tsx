@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import WebSocketService from '../../helpers/WebSocketService'
 import { ManifestStore, AppStore, LogStore, MusicStore, log } from '../../stores'
-import { App, EventFlavor, Settings, SocketData, SongData } from '../../types'
+import { App, EventFlavor, AppSettings, SocketData, SongData } from '../../types'
 import ActionHelper from '../../helpers/ActionHelper'
 
 interface WebViewProps {
@@ -56,7 +56,7 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
     const onMessageUpdate = (message: log) => {
       returnMessage({ type: 'message', payload: message.payload })
     }
-    const onSettingsUpdate = (settings: Settings) => {
+    const onSettingsUpdate = (settings: AppSettings) => {
       returnMessage({ type: 'settings', payload: settings })
     }
 
