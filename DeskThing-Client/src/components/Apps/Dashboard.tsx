@@ -7,10 +7,13 @@
 import React, { useState, useEffect } from 'react';
 import socket from '../../helpers/WebSocketService';
 import { SocketData } from '../../types/websocketTypes';
+import { SongData } from '../../types';
+import musicStore from '../../stores/musicStore';
 const Default: React.FC = (): JSX.Element => {
   const [time, setTime] = useState<string>('00:00 AM');
   const [serverTime, setServerTime] = useState<Date | null>(null);
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
+  const [albumArt, setAlbumArt] = useState<string>(musicStore.getSongData().thumbnail);
 
   const formatTime = (date: Date): string => {
     const hours = date.getUTCHours();
@@ -49,12 +52,18 @@ const Default: React.FC = (): JSX.Element => {
       }
     };
 
+    const albumArtListener = (data: SongData) => {
+        setAlbumArt(data.thumbnail as string);
+    }
+
     requestPreferences();
 
+    const removeSongListener = musicStore.subscribeToSongDataUpdate(albumArtListener);
     const removeListener = socket.on('client', listener);
 
     return () => {
       removeListener();
+      removeSongListener()
     };
   }, []);
 
@@ -74,8 +83,11 @@ const Default: React.FC = (): JSX.Element => {
     return () => clearInterval(interval);
   }, [serverTime]);
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center text-9xl font-semibold font-geistMono">
-      {time}
+    <div className="w-full h-full flex flex-col items-center justify-center text-9xl font-semibold font-geistMono relative">
+      <img src={albumArt} className="w-full blur-lg opacity-50 absolute inset"></img>
+      <p className="absolute">
+        {time}
+      </p>
     </div>
   );
 };

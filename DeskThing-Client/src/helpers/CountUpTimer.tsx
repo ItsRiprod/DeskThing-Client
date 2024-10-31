@@ -139,9 +139,9 @@ const CountUpTimer: React.FC<CountUpTimerProps> = ({
     <div className={`${!expand && 'pt-8'}`} onTouchStart={handleTouchStart} onMouseDown={handleMouseStart}>
       <div className={` rounded-sm m-auto transition-all overflow-hidden bg-zinc-800 ${expand || touching ? 'h-11' : 'h-2'}`} ref={progressBarRef}>
         <div className={`m-0 pointer-events-none fixed w-full h-11 items-center text-2xl pr-5 flex justify-between p-0 font-bold ${expand || touching ? 'block' : 'hidden'}`}>
-          <p className="w-5/6 h-full">
+          <div className="w-5/6 h-full">
             <ScrollingText className="content-center text-2xl" text={songData.track_name} fades={false} />
-          </p>
+          </div>
           <p>{msToTime(ms)}/{msToTime(msEnd)}</p>
         </div>
         <div

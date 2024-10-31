@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import WebSocketService from "../../helpers/WebSocketService";
 import { AppStore, LogStore, MusicStore, log } from "../../stores";
-import { App, EventFlavor, AppSettings, SocketData, SongData } from "../../types";
+import { App, EventFlavor, SocketData, SongData, AppListSettings } from "../../types";
 import ActionHelper from "../../helpers/ActionHelper";
 
 interface DevViewProps {}
@@ -56,7 +56,7 @@ const Dev: React.FC<DevViewProps> = () => {
     const onMessageUpdate = (message: log) => {
       returnMessage({ type: "message", payload: message.payload });
     };
-    const onSettingsUpdate = (settings: AppSettings) => {
+    const onSettingsUpdate = (settings: AppListSettings) => {
       returnMessage({ type: "settings", payload: settings });
     };
 

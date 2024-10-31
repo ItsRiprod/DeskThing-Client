@@ -120,16 +120,16 @@ const Miniplayer: React.FC = () => {
                                     : 
                                     <button
                                         onClick={handleExpand}
-                                        className="xs:w-28 xs:h-28 w-20 h-10 block shrink-0"
+                                        className="xs:w-28 xs:h-28 w-20 h-10 p-1 block shrink-0"
                                     >
                                         <IconAlbum className="w-full h-full" />
                                     </button>
                                 )
                                 }
                             {state == 'peek' && <div onClick={() => setShowActions(true)} className={`overflow-hidden max-w-full font-geist grow pl-5 pt-5 ${showActions && 'hidden'}`} ref={textContainerRef}>
-                                <h1 className={`font-semibold text-wrap text-sm overflow-x-hidden`}>
+                                <div className={`font-semibold text-wrap text-sm overflow-x-hidden`}>
                                     <AutoSizingText textContent={musicData.track_name} textSizesDescending={['text-4xl', 'text-2xl', 'text-xl', 'text-sm']} />
-                                </h1>
+                                </div>
                                 <p className={'text-sm'}>
                                     {musicData.artist}
                                 </p>

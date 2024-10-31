@@ -77,6 +77,9 @@ export interface AppSettings {
   [key: string]: SettingsType
 }
 
+export interface AppListSettings {
+  [app: string]: AppSettings
+}
 
 export type Property = 'currentView' | 'appsListMode' | 'miniplayerMode' | 'availableViews' | 'screensaver'
 

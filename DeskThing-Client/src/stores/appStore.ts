@@ -6,9 +6,9 @@
  * 
  */
 import WebSocketService from '../helpers/WebSocketService';
-import { App, AppSettings, SocketData } from '../types';
+import { App, AppListSettings, SocketData } from '../types';
 type AppUpdateCallbacks = (data: App[]) => void
-type settingsUpdateCallbacks = (data: AppSettings) => void
+type settingsUpdateCallbacks = (data: AppListSettings) => void
 
 export class AppStore {
   private static instance: AppStore;
@@ -18,7 +18,7 @@ export class AppStore {
   private appUpdateCallbacks: AppUpdateCallbacks[] = [];
   private settingsUpdateCallbacks: settingsUpdateCallbacks[] = [];
   private apps: App[] = []
-  private settings: AppSettings = undefined
+  private settings: AppListSettings = undefined
 
 
   private constructor() {
@@ -66,7 +66,7 @@ export class AppStore {
     return this.apps;
   }
 
-  getSettings(): AppSettings {
+  getSettings(): AppListSettings {
     return this.settings;
   }
 
@@ -89,7 +89,7 @@ export class AppStore {
       this.apps = data;
       this.notifyAppUpdates()
     } else if (msg.type === 'settings') {
-      const data = msg.payload as AppSettings
+      const data = msg.payload as AppListSettings
       this.settings = data;
       this.notifySettingsUpdates()
     }

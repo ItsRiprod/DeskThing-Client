@@ -1,5 +1,5 @@
 import { useState, useEffect  } from 'react';
-import Utility from './Utility';
+import Utility from './Utility/Utility';
 import Dashboard from './Dashboard';
 import Web from './Web';
 import Landing from './Landing';

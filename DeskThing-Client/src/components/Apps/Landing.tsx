@@ -41,7 +41,6 @@ const Landing: React.FC = (): JSX.Element => {
     <div className="w-full flex flex-col justify-center h-full text-center items-center">
       <div className="flex relative items-center font-THEBOLDFONT">
         <div className="flex absolute inset-0 items-center blur-2xl">
-
           <IconLogoGear iconSize={140} /><div className="flex flex-col justify-start">
             <IconLogo width={255} height={119} className="-my-7" />
             <p className="w-fit text-xs font-geistMono">
