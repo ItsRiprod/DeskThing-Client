@@ -1,11 +1,10 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { ClientSettings, log } from '@src/types/settings'
-
 interface SettingsState {
   logs: log[]
   settings: ClientSettings
-  addLog: (log: Omit<log, 'app'>) => void
+  addLog: (log: log) => void
   clearLogs: () => void
   updateSettings: (settings: Partial<ClientSettings>) => void
   resetSettings: () => void
@@ -25,7 +24,14 @@ const defaultSettings: ClientSettings = {
   port: 8000,
   ip: 'localhost',
   device_type: { id: 0, name: '' },
-  miniplayer: 'default'
+  miniplayer: {
+    state: 'peek',
+    visible: true,
+    position: 'bottom'
+  },
+  currentView: {name: 'landing'},
+  ShowNotifications: true,
+  Screensaver: {name: 'default'},
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -35,14 +41,14 @@ export const useSettingsStore = create<SettingsState>()(
       settings: defaultSettings,
       addLog: (log) =>
         set((state) => ({
-          logs: [...state.logs, { ...log, app: 'system' }]
+          logs: [...state.logs, { ...log }]
         })),
       clearLogs: () => set({ logs: [] }),
       updateSettings: (newSettings) =>
         set((state) => ({
           settings: { ...state.settings, ...newSettings }
         })),
-      resetSettings: () => set({ settings: defaultSettings })
+      resetSettings: () => set({ settings: defaultSettings }),
     }),
     {
       name: 'settings-storage'

@@ -16,8 +16,5 @@ export interface AppManifest {
 
   export interface App {
     name: string
-    enabled: boolean
-    running: boolean
-    prefIndex: number
     manifest?: AppManifest
   }

@@ -1,3 +1,5 @@
+import { App } from "."
+
 export interface SettingsNumber {
     value: number
     type: 'number'
@@ -71,7 +73,25 @@ export interface SettingsNumber {
     }
 
     export interface ClientSettings extends ClientManifest {
-      miniplayer: string
+      miniplayer?: MiniplayerSettings
+      theme?: Theme
+      currentView?: App
+      ShowNotifications: boolean
+      Screensaver: App
+    }
+
+    export interface MiniplayerSettings {
+      state: ViewMode,
+      visible: boolean
+      position: 'bottom' | 'left' | 'right'
+    }
+
+    export interface Theme {
+      primary: string
+      secondary: string
+      background: string
+      scale: 'small' | 'medium' | 'large'
+
     }
 
   export type LOG_TYPES = 'error' | 'message' | 'log' | 'all'
