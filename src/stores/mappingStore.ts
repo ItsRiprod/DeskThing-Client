@@ -1,8 +1,9 @@
 
 import { create } from 'zustand'
 import { Action, ButtonMapping, EventMode } from '@src/types/buttons'
-import { WebSocketState } from './websocketStore'
 import { SocketData, SocketMappings, SocketSetIcon } from '@src/types'
+import { useSettingsStore } from './settingsStore';
+import { useAppStore } from './appStore';
 
 const initialTrayConfig: ButtonMapping = {
     version: '0.9.1',
@@ -12,6 +13,18 @@ const initialTrayConfig: ButtonMapping = {
     trigger_app: '',
     mapping: {
 
+        Wheel1: {
+            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Pref', id: 'pref', description: 'Changed Pref', source: 'server', value: '0' }
+        },
+        Wheel2: {
+            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Pref', id: 'pref', description: 'Changed Pref', source: 'server', value: '1' }
+        },
+        Wheel3: {
+            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Pref', id: 'pref', description: 'Changed Pref', source: 'server', value: '2' }
+        },
+        Wheel4: {
+            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Pref', id: 'pref', description: 'Changed Pref', source: 'server', value: '3' }
+        },
         Pad1: {
             [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'VolUp', id: 'volup', description: 'VolUp', source: 'server', value: '5' }
         },
@@ -106,24 +119,16 @@ const initialTrayConfig: ButtonMapping = {
     interface MappingState {
         profile: ButtonMapping | null
         setProfile: (profile: ButtonMapping) => void
-        executeAction: (key: string, eventMode: EventMode) => void;
-        initialize: (websocketManager: WebSocketState) => void
+        executeAction: (action: Action) => void;
+        executeKey: (key: string, eventMode: EventMode) => void
         updateIcon: (id: string, icon: string) => void
+        getActionUrl: (action: Action) => string
         getButtonAction: (key: string, mode: EventMode) => Action | undefined
     }
 
 export const useMappingStore = create<MappingState>((set, get) => ({
     profile: initialTrayConfig,
   setProfile: (profile) => set({ profile }),
-  initialize: (websocketManager) => {
-    websocketManager.addListener((socketData) => {
-      if (isSocketMapping(socketData)) {
-        set({ profile: socketData.payload })
-      } else if (isIconUpdate(socketData)) {
-        get().updateIcon(socketData.payload.id, socketData.payload.icon)
-      }
-    })
-  },
 
   getButtonAction: (key: string, mode: EventMode) => {
     const profile = get().profile;
@@ -133,7 +138,12 @@ export const useMappingStore = create<MappingState>((set, get) => ({
     return undefined;
   },
 
-  executeAction: (key: string, eventMode: EventMode) => {
+  executeAction: (action: Action) => {
+    // execute action
+    console.log(`Executing action: ${action.name}`);
+  },
+
+  executeKey: (key: string, eventMode: EventMode) => {
     const profile = get().profile;
     if (profile?.mapping[key] && profile.mapping[key][eventMode]) {
       const action = profile.mapping[key][eventMode];
@@ -141,6 +151,28 @@ export const useMappingStore = create<MappingState>((set, get) => ({
         // Execute the action - could be sending a WebSocket message, invoking a function, etc.
         console.log(`Executing action: ${action.name}`);
       }
+    }
+  },
+
+  getActionUrl: (action: Action) => {
+    const settings = useSettingsStore.getState().settings;
+    const { ip, port } = settings;
+    if (action.source === 'server') {
+
+      if (action.id === 'pref') {
+        const apps = useAppStore.getState().apps
+        const app = apps[action.value || 0]
+        if (app) {
+          const url = `http://${ip}:${port}/icon/${app.name}/${app.name}.svg`;
+          return url
+        } else {
+          return new URL(`../../public/icons/${action.icon || action.id}.svg`, import.meta.url).href;
+        }
+      }
+
+      return new URL(`../../public/icons/${action.icon || action.id}.svg`, import.meta.url).href;
+    } else {
+      return `http://${ip}:${port}/icon/${action.id}/${action.icon || action.id}.svg`;
     }
   },
 
@@ -166,10 +198,10 @@ export const useMappingStore = create<MappingState>((set, get) => ({
   }
 }))
 
-function isSocketMapping(data: SocketData): data is SocketMappings {
+export function isSocketMapping(data: SocketData): data is SocketMappings {
     return data.app === 'client' && data.type === 'button_mappings';
   }
 
-function isIconUpdate(data: SocketData): data is SocketSetIcon {
+export function isIconUpdate(data: SocketData): data is SocketSetIcon {
     return data.app === 'client' && data.type === 'set' && data.request === 'icon';
   }

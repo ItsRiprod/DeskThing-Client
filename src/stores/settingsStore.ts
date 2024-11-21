@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { ClientSettings, log } from '@src/types/settings'
+import { ClientSettings, log, ViewMode, VolMode } from '@src/types/settings'
 interface SettingsState {
   logs: log[]
   settings: ClientSettings
@@ -21,14 +21,15 @@ const defaultSettings: ClientSettings = {
   version: '0.0.1',
   version_code: 1,
   compatible_server: [],
-  port: 8000,
+  port: 8891,
   ip: 'localhost',
   device_type: { id: 0, name: '' },
   miniplayer: {
-    state: 'peek',
+    state: ViewMode.PEEK,
     visible: true,
     position: 'bottom'
   },
+  volume: VolMode.WHEEL,
   currentView: {name: 'landing'},
   ShowNotifications: true,
   Screensaver: {name: 'default'},
@@ -38,7 +39,7 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       logs: [],
-      settings: defaultSettings,
+      settings: { ...defaultSettings, ...(window.manifest || {}) },
       addLog: (log) =>
         set((state) => ({
           logs: [...state.logs, { ...log }]

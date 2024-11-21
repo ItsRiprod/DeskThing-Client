@@ -1,39 +1,79 @@
 import { OutgoingSocketData, SocketData } from "@src/types";
 
 type SocketEventListener = (msg: SocketData) => void;
+type ConnectionStatus = 'connected' | 'disconnected' | 'reconnecting';
+type StatusListener = (status: ConnectionStatus) => void;
 
 class WebSocketManager {
+  private static instance: WebSocketManager
   private socket: WebSocket | null = null;
   private listeners: SocketEventListener[] = [];
-  private url: string;
+  private statusListeners: StatusListener[] = [];
   private reconnecting = false;
+  private url: string;
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private pongTimeout: NodeJS.Timeout | null = null;
   private missedPongs = 0;
   private readonly MAX_MISSED_PONGS = 3;
 
-  constructor(url: string) {
-    this.url = url;
-    this.connect();
+  constructor() {
+
   }
 
-  connect() {
-    if (this.socket) {
-      this.socket.close();
-      this.socket = null;
+  public static getInstance(): WebSocketManager {
+    if (!WebSocketManager.instance) {
+      WebSocketManager.instance = new WebSocketManager()
     }
 
+    return WebSocketManager.instance
+  }
+
+  closeExisting() {
+    if (this.socket) {
+      // Clean up event listeners
+      this.socket.onopen = null;
+      this.socket.onclose = null;
+      this.socket.onerror = null;
+      this.socket.onmessage = null;
+      
+      // Close connection if open
+      if (this.socket.readyState === WebSocket.OPEN) {
+        this.socket.close();
+      }
+      
+      // Clear heartbeat timers
+      this.stopHeartbeat();
+      
+      // Reset state
+      this.socket = null;
+      this.missedPongs = 0;
+    } 
+  }
+  
+
+  async connect(url?: string) {
+    this.url = url || this.url;
+    
+    if (this.url == undefined || !this.url) {
+      console.error("No WebSocket URL provided");
+      return;
+    }
+
+    this.closeExisting();
+    
     this.socket = new WebSocket(this.url);
 
     this.socket.onopen = () => {
       console.log(`Connected to ${this.url}`);
       this.reconnecting = false;
       this.startHeartbeat()
+      this.notifyStatusChange('connected');
     };
 
-    this.socket.onclose = () => {
-      console.log("Disconnected, attempting to reconnect...");
+    this.socket.onclose = (reason) => {
+      console.log("Disconnected, attempting to reconnect...", reason);
       this.stopHeartbeat()
+      this.notifyStatusChange('disconnected');
       this.reconnect();
     };
 
@@ -54,17 +94,16 @@ class WebSocketManager {
   }
 
   disconnect() {
-    this.stopHeartbeat()
-    if (this.socket) {
-      this.socket.close();
-      this.socket = null;
-    }
+    this.closeExisting()
   }
 
   private reconnect() {
     if (this.reconnecting) return;
     this.reconnecting = true;
-    setTimeout(() => this.connect(), 5000); // Reconnect after 5 seconds
+    this.notifyStatusChange('reconnecting');
+    setTimeout(() => {
+      this.connect()
+    }, 5000); // Reconnect after 5 seconds
   }
 
   sendMessage(message: OutgoingSocketData) {
@@ -81,6 +120,18 @@ class WebSocketManager {
 
   removeListener(listener: SocketEventListener) {
     this.listeners = this.listeners.filter((l) => l !== listener);
+  }
+
+  addStatusListener(listener: StatusListener) {
+    this.statusListeners.push(listener);
+  }
+
+  removeStatusListener(listener: StatusListener) {
+    this.statusListeners = this.statusListeners.filter(l => l !== listener);
+  }
+
+  private notifyStatusChange(status: ConnectionStatus) {
+    this.statusListeners.forEach(listener => listener(status));
   }
 
   private notifyListeners(data: SocketData) {
@@ -118,10 +169,17 @@ class WebSocketManager {
       this.missedPongs += 1;
       console.warn(`Missed pong ${this.missedPongs}/${this.MAX_MISSED_PONGS}`);
       if (this.missedPongs >= this.MAX_MISSED_PONGS) {
-        this.socket?.close();
+        this.closeExisting()
         this.reconnect();
       }
     }, 10000);
+  }
+
+  public static resetInstance() {
+    if (WebSocketManager.instance) {
+      WebSocketManager.instance.disconnect();
+      WebSocketManager.instance = null;
+    }
   }
 
   private resetPongTimeout() {
@@ -130,4 +188,5 @@ class WebSocketManager {
   }
 }
 
-export default WebSocketManager;
+export default WebSocketManager
+

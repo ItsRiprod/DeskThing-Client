@@ -179,7 +179,7 @@ const Web: React.FC<WebViewProps> = ({ currentView }) => {
       unsubscribeRefs.current.settings()
       removeTimeListener()
     };
-  }, [currentView, ip, port, socket]);
+  }, [appStore, currentView, ip, logStore, musicStore, port, socket]);
 
   const sendMessageToIframe = (data: SocketData) => {
     console.log('Sending message', data)

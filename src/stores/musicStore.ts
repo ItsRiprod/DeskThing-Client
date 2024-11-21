@@ -7,7 +7,6 @@ import { SocketData, SocketMusic } from '@src/types'
     song: SongData | null
     websocketManager: WebSocketState | null
     setSong: (song: SongData) => void
-    initialize: (websocketManager: WebSocketState) => void
     requestMusicData: () => void
     next: () => void
     previous: () => void
@@ -26,14 +25,6 @@ import { SocketData, SocketMusic } from '@src/types'
     song: null,
     websocketManager: null,
     setSong: (song) => set({ song }),
-    initialize: (websocketManager) => {
-      set({ websocketManager })
-      websocketManager.addListener((socketData) => {
-        if (isSocketMusic(socketData)) {
-          set({ song: socketData.payload })
-        }
-      })
-    },
 
     requestMusicData: () => {
       const websocketManager = get().websocketManager;
@@ -120,6 +111,6 @@ import { SocketData, SocketMusic } from '@src/types'
     }
   }))
 
-  function isSocketMusic(data: SocketData): data is SocketMusic {
+export  function isSocketMusic(data: SocketData): data is SocketMusic {
     return data.app === 'client' && data.type === 'song';
   }
