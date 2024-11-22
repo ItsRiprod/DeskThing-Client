@@ -3,30 +3,35 @@ import {
   useSettingsStore,
   useAppStore,
   useMappingStore,
+  useWebSocketStore,
 } from "../stores";
 import {
   Action,
   AUDIO_REQUESTS,
   EventMode,
   OutgoingSocketAction,
+  OutgoingSocketData,
   OutgoingSocketMusic,
   OutgoingSocketServer,
 } from "@src/types";
-import WebSocketManager from "./websocketManager";
+import { useActionStore } from "@src/stores/actionStore";
 
 export class ActionHandler {
-  private socketManager: WebSocketManager;
   private static instance: ActionHandler;
 
-  private constructor(socketManager: WebSocketManager) {
-    this.socketManager = socketManager;
+  private constructor() {
   }
 
-  static getInstance(socketManager?: WebSocketManager): ActionHandler {
-    if (!ActionHandler.instance && socketManager) {
-      ActionHandler.instance = new ActionHandler(socketManager);
+  static getInstance(): ActionHandler {
+    if (!ActionHandler.instance) {
+      ActionHandler.instance = new ActionHandler();
     }
     return ActionHandler.instance;
+  }
+
+  private sendMessage = async (data: OutgoingSocketData) => {
+    const send = useWebSocketStore.getState().send;
+    await send(data);
   }
 
   executeAction = async (button: string, mode: EventMode): Promise<void> => {
@@ -38,8 +43,9 @@ export class ActionHandler {
     this.runAction(action);
   };
 
-  runAction = async (action: Action): Promise<void> => {
+  public runAction = async (action: Action): Promise<void> => {
     const { source } = action;
+    console.log("Running action:", action.id);
 
     if (source === "server") {
       this.handleServerAction(action);
@@ -64,7 +70,7 @@ export class ActionHandler {
         app: action.source,
         payload: action,
       };
-      await this.socketManager.sendMessage(socketData);
+      await this.sendMessage(socketData);
     } catch (error) {
       console.error(`Failed to forward action to server: ${error}`);
     }
@@ -108,7 +114,7 @@ export class ActionHandler {
 
   PlayPause = () => {
     const songData = useMusicStore.getState().song;
-    if (songData.is_playing) {
+    if (songData?.is_playing || false) {
       this.handleSendCommand(AUDIO_REQUESTS.PAUSE);
       useMappingStore.getState().updateIcon("play", "");
     } else {
@@ -175,9 +181,13 @@ export class ActionHandler {
     this.handleSendCommand(AUDIO_REQUESTS.REPEAT, newRepeatState);
   };
 
-  Pref = (num: number) => {
-    useSettingsStore.getState().updateSettings({
-      currentView: { name: this.getAppByButtonIndex(num - 1) },
+  Pref = (action: Action) => {
+    const updateSettings = useSettingsStore.getState().updateSettings
+    
+    const app = this.getAppByButtonIndex(Number(action.value))
+
+    updateSettings({
+      currentView: { name: app },
     });
   };
 
@@ -189,7 +199,7 @@ export class ActionHandler {
     return "dashboard";
   };
 
-  Swap = async (index: number = 5) => {
+  Swap = async (action: Action) => {
     const currentView = useSettingsStore.getState().settings.currentView.name;
     const socketData: OutgoingSocketServer = {
         app: 'server',
@@ -197,10 +207,11 @@ export class ActionHandler {
         request: 'update_pref_index',
         payload: {
             app: currentView,
-            index: index
+            index: Number(action.value)
         }
     }
-    this.socketManager.sendMessage(socketData)
+
+    this.sendMessage(socketData)
   };
 
   VolUp = () => {
@@ -233,7 +244,7 @@ export class ActionHandler {
         request: request,
         payload: payload,
     };
-    this.socketManager.sendMessage(data);
+    this.sendMessage(data);
   };
 
   toggleFullscreen = () => {
@@ -274,6 +285,11 @@ export class ActionHandler {
     });
   }
 
+  Wheel() {
+    const setWheel = useActionStore.getState().setWheelState;
+    setWheel(true);
+  }
+
   swipeR() {
     const currentView = useSettingsStore.getState().settings.currentView.name;
     const apps = useAppStore.getState().apps;
@@ -298,8 +314,9 @@ export class ActionHandler {
     play: this.PlayPause,
     skip: this.Skip,
     repeat: this.Repeat,
-    pref: (val: number) => this.Pref(val),
-    swap: (val: number) => this.Swap(val),
+    wheel: this.Wheel,
+    pref: this.Pref,
+    swap: this.Swap,
     volDown: this.VolDown,
     volUp: this.VolUp,
     hide: this.handleHideAction,

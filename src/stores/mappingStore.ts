@@ -1,121 +1,21 @@
 
 import { create } from 'zustand'
 import { Action, ButtonMapping, EventMode } from '@src/types/buttons'
-import { SocketData, SocketMappings, SocketSetIcon } from '@src/types'
+import { SocketAction, SocketData, SocketMappings, SocketSetIcon } from '@src/types'
 import { useSettingsStore } from './settingsStore';
 import { useAppStore } from './appStore';
+import { defaults } from '../assets/defaultMapping'
+import { ActionHandler } from '@src/utils/serverActionHandler';
 
-const initialTrayConfig: ButtonMapping = {
-    version: '0.9.1',
-    id: 'default',
-    name: 'Default Mapping',
-    description: 'The Default System Mapping',
-    trigger_app: '',
-    mapping: {
-
-        Wheel1: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Pref', id: 'pref', description: 'Changed Pref', source: 'server', value: '0' }
-        },
-        Wheel2: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Pref', id: 'pref', description: 'Changed Pref', source: 'server', value: '1' }
-        },
-        Wheel3: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Pref', id: 'pref', description: 'Changed Pref', source: 'server', value: '2' }
-        },
-        Wheel4: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Pref', id: 'pref', description: 'Changed Pref', source: 'server', value: '3' }
-        },
-        Pad1: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'VolUp', id: 'volup', description: 'VolUp', source: 'server', value: '5' }
-        },
-        Pad2: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Swipe Left', id: 'swipel', description: 'Goes to left app', source: 'server' }
-        },
-        Pad3: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Swipe Right', id: 'swiper', description: 'Goes to right app', source: 'server' }
-        },
-        Pad4: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'VolDown', id: 'voldown', description: 'VolDown', source: 'server', value: '5' }
-        },
-        Pad5: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Hide AppsList', id: 'hidelist', description: 'Hides the apps list', source: 'server' }
-        },
-        Pad6: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Show AppsList', id: 'showlist', description: 'Shows the apps list', source: 'server' }
-        },
-        Pad7: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Repeat', id: 'repeat', description: 'Repeat', source: 'server' }
-        },
-        Pad8: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'PlayPause', id: 'play', description: 'Plays or Pauses Audio', source: 'server' }
-        },
-        Pad9: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Fullscreen', id: 'fullscreen', description: 'Fullscreens the application', source: 'server' }
-        },
-        DynamicAction1: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Repeat', id: 'repeat', description: 'Repeat', source: 'server' }  
-        },
-        DynamicAction2: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Shuffle', id: 'shuffle', description: 'Shuffle', source: 'server' }  
-        },
-        DynamicAction3: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Rewind', id: 'rewind', description: 'Rewind', source: 'server', value: '15' }
-        },
-        DynamicAction4: {
-            [EventMode.KeyDown]: { name: 'Hidden Button', id: 'hidden', description: 'Hides the button. Has no action', source: 'server', version: '0.9.1', enabled: true, icon: '' }
-        },
-        Action5: {
-            [EventMode.KeyDown]: { name: 'Hidden Button', id: 'hidden', description: 'Hides the button. Has no action', source: 'server', version: '0.9.1', enabled: true, icon: '' }
-        },
-        Action6: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'PlayPause', id: 'play', description: 'Plays or Pauses Audio', source: 'server' }
-        },
-        Action7: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Skip', id: 'skip', description: 'Skip', source: 'server' }
-        },
-        Digit1: {
-            [EventMode.PressShort]: { version: '0.9.1', enabled: true, icon: '', name: 'Pref', id: 'pref', description: 'Changed Pref', source: 'server', value: '1' },
-            [EventMode.PressLong]: { version: '0.9.1', enabled: true, icon: '', name: 'Swap', id: 'swap', description: 'Swap', source: 'server', value: '1' }
-        },
-        Digit2: {
-            [EventMode.PressShort]: { version: '0.9.1', enabled: true, icon: '', name: 'Pref', id: 'pref', description: 'Changed Pref', source: 'server', value: '2' },
-            [EventMode.PressLong]: { version: '0.9.1', enabled: true, icon: '', name: 'Swap', id: 'swap', description: 'Swap', source: 'server', value: '2' }
-        },
-        Digit3: {
-            [EventMode.PressShort]: { version: '0.9.1', enabled: true, icon: '', name: 'Pref', id: 'pref', description: 'Changed Pref', source: 'server', value: '3' },
-            [EventMode.PressLong]: { version: '0.9.1', enabled: true, icon: '', name: 'Swap', id: 'swap', description: 'Swap', source: 'server', value: '3' }
-        },
-        Digit4: {
-            [EventMode.PressShort]: { version: '0.9.1', enabled: true, icon: '', name: 'Pref', id: 'pref', description: 'Changed Pref', source: 'server', value: '4' },
-            [EventMode.PressLong]: { version: '0.9.1', enabled: true, icon: '', name: 'Swap', id: 'swap', description: 'Swap', source: 'server', value: '4' }
-        },
-        KeyM: {
-            [EventMode.PressShort]: { version: '0.9.1', enabled: true, icon: '', name: 'Open', id: 'open', description: 'Open View', source: 'server', value: 'dashboard' },
-            [EventMode.PressLong]: { version: '0.9.1', enabled: true, icon: '', name: 'Open', id: 'open', description: 'Open View', source: 'server', value: 'utility' }
-        },
-        Scroll: {
-            [EventMode.ScrollRight]: { version: '0.9.1', enabled: true, icon: '', name: 'VolUp', id: 'volup', value: '5', description: 'VolUp', source: 'server' },
-            [EventMode.ScrollUp]: { version: '0.9.1', enabled: true, icon: '', name: 'VolUp', id: 'volup', value: '5', description: 'VolUp', source: 'server' },
-            [EventMode.ScrollLeft]: { version: '0.9.1', enabled: true, icon: '', name: 'VolDown', id: 'voldown', value: '5', description: 'VolDown', source: 'server' },
-            [EventMode.ScrollDown]: { version: '0.9.1', enabled: true, icon: '', name: 'VolDown', id: 'voldown', value: '5', description: 'VolDown', source: 'server' }
-        },
-        Enter: {
-            [EventMode.KeyDown]: { version: '0.9.1', enabled: true, icon: '', name: 'playPause', id: 'play', description: 'PlayPause', source: 'server' },
-            [EventMode.PressLong]: { version: '0.9.1', enabled: true, icon: '', name: 'Skip', id: 'skip', description: 'Skip', source: 'server' }
-        },
-        Escape: {
-            [EventMode.PressShort]: { version: '0.9.1', enabled: true, icon: '', name: 'Show AppsList', id: 'show', description: 'Shows the apps list', source: 'server' },
-            [EventMode.PressLong]: { version: '0.9.1', enabled: true, icon: '', name: 'Hide AppsList', id: 'hide', description: 'Hides the apps list', source: 'server' }
-        },
-        Swipe: {
-            [EventMode.SwipeUp]: { version: '0.9.1', enabled: true, icon: '', name: 'Hide AppsList', id: 'hidelist', description: 'Hides the apps list', source: 'server' },
-            [EventMode.SwipeDown]: { version: '0.9.1', enabled: true, icon: '', name: 'Show AppsList', id: 'showlist', description: 'Shows the apps list', source: 'server' },
-            [EventMode.SwipeLeft]: { version: '0.9.1', enabled: true, icon: '', name: 'Swipe Left', id: 'swipel', description: 'Goes to left app', source: 'server' },
-            [EventMode.SwipeRight]: { version: '0.9.1', enabled: true, icon: '', name: 'Swipe Right', id: 'swiper', description: 'Goes to right app', source: 'server' },
-        }
-    }
-    };
-    
+/**
+ * Hey YOU when you go to fix updateIcon remember what needs to be changed:
+ * 
+ * Button mappings need to be modified so that the key-value doesnt directly connect to the entire action. Rather, it should just have the ID
+ * 
+ * Then, there needs to be a seperate list of actions that show their "true form" and that way you dont have to update an action in multiple spots
+ * 
+ * You're basically making a relational database over here 
+ */
     interface MappingState {
         profile: ButtonMapping | null
         setProfile: (profile: ButtonMapping) => void
@@ -127,7 +27,7 @@ const initialTrayConfig: ButtonMapping = {
     }
 
 export const useMappingStore = create<MappingState>((set, get) => ({
-    profile: initialTrayConfig,
+    profile: defaults,
   setProfile: (profile) => set({ profile }),
 
   getButtonAction: (key: string, mode: EventMode) => {
@@ -140,7 +40,12 @@ export const useMappingStore = create<MappingState>((set, get) => ({
 
   executeAction: (action: Action) => {
     // execute action
-    console.log(`Executing action: ${action.name}`);
+    if (action.source == 'server') {
+      const actionHandler = ActionHandler.getInstance()
+      actionHandler.runAction(action)
+    } else {
+      console.log(`Executing Non-Server Action:`, action);
+    }
   },
 
   executeKey: (key: string, eventMode: EventMode) => {
@@ -177,25 +82,26 @@ export const useMappingStore = create<MappingState>((set, get) => ({
   },
 
   updateIcon: (id: string, icon: string) => {
+    console.log(`Updating icon for ${id} to ${icon}`);  
     set((state) => {
-      if (state.profile) {
-        return {
-          ...state,
-          mapping: {
-            ...state.profile,
-            mapping: {
-              ...state.profile.mapping,
-              [id]: {
-                ...state.profile.mapping[id],
-                icon,
-              },
-            },
-          },
+        if (state.profile) {
+            const newProfile = {
+                ...state.profile,
+                mapping: {
+                    ...state.profile.mapping
+                }
+            }
+            // Update the icon for all event modes
+            Object.values(EventMode).forEach(mode => {
+                if (newProfile.mapping[id]?.[mode]) {
+                    newProfile.mapping[id][mode].icon = icon
+                }
+            })
+            return { profile: newProfile }
         }
-      }
-      return state
+        return state
     })
-  }
+}
 }))
 
 export function isSocketMapping(data: SocketData): data is SocketMappings {
@@ -204,4 +110,8 @@ export function isSocketMapping(data: SocketData): data is SocketMappings {
 
 export function isIconUpdate(data: SocketData): data is SocketSetIcon {
     return data.app === 'client' && data.type === 'set' && data.request === 'icon';
+  }
+
+  export function isSocketAction(data: SocketData): data is SocketAction {
+    return data.app === 'client' && data.type === 'action';
   }

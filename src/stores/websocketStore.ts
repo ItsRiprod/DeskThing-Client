@@ -9,7 +9,7 @@ export interface WebSocketState {
   isReconnecting: boolean;
   connect: (url: string) => void;
   disconnect: () => void;
-  sendMessage: (message: OutgoingSocketData) => void;
+  send: (message: OutgoingSocketData) => Promise<void>;
   addListener: (listener: (msg: SocketData) => void) => void;
   removeListener: (listener: (msg: SocketData) => void) => void;
 }
@@ -63,10 +63,10 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
       }
     },
 
-    sendMessage: (message: OutgoingSocketData) => {
+    send: async (message: OutgoingSocketData): Promise<void> => {
       const manager = get().socketManager;
       if (manager) {
-        manager.sendMessage(message);
+        await manager.sendMessage(message);
       } else {
         console.error("WebSocket is not connected");
       }

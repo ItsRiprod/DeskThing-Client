@@ -1,12 +1,12 @@
-import { Action, App, AppSettings, AUDIO_REQUESTS, ButtonMapping, LOG_TYPES, MiniplayerSettings, SongData, Theme } from "."
+import { Action, App, AppSettings, AUDIO_REQUESTS, ButtonMapping, ClientSettings, LOG_TYPES, MiniplayerSettings, SongData, Theme } from "."
   
-export type SocketData = SocketSetIcon | SocketGet | SocketSet | SocketSettings | SocketMappings | SocketConfig | SocketLog | SocketMiniplayer | SocketTheme | SocketMusic
+export type SocketData = SocketAction | SocketPingPong | SocketSetIcon | SocketGet | SocketSet | SocketSettings | SocketMappings | SocketConfig | SocketLog | SocketMiniplayer | SocketTheme | SocketMusic
 
 export type OutgoingSocketData = OutgoingSocketAction | OutgoingSocketServer | OutgoingSocketMusic
 
 interface BaseSocket {
   app: 'client' | 'server' | 'music';
-  type: string;
+  type: string
   request?: string;
 }
 
@@ -19,7 +19,7 @@ export interface OutgoingSocketServer {
     app: 'server'
     type: string
     request?: string
-    payload?: string | number | { app: string, index: number }
+    payload?: string | number | { app: string, index: number } | ClientSettings
 }  
 
 export interface OutgoingSocketMusic {
@@ -31,6 +31,10 @@ export interface OutgoingSocketMusic {
 
 interface ClientSocket extends BaseSocket {
   app: 'client';
+}
+
+export interface SocketPingPong extends ClientSocket {
+  type: 'ping' | 'pong'
 }
 
 export interface SocketSettings extends ClientSocket {
@@ -67,6 +71,11 @@ export interface SocketMiniplayer extends ClientSocket {
 export interface SocketMappings extends ClientSocket {
   type: 'button_mappings'
   payload: ButtonMapping
+}
+
+export interface SocketAction extends ClientSocket {
+  type: 'action'
+  payload: Action
 }
 
 export interface SocketConfig extends ClientSocket {

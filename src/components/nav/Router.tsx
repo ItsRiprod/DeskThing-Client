@@ -1,3 +1,4 @@
+import { useSettingsStore } from "@src/stores"
 import AppPage from "../../pages/app"
 import LandingPage from "../../pages/landing"
 import React, { useEffect } from "react"
@@ -5,13 +6,16 @@ import { Route, Routes, useNavigate } from "react-router-dom"
 
 const NavRouter: React.FC = () => {
     const navigate = useNavigate()
+    const settings = useSettingsStore((store) => store.settings)
   
     useEffect(() => {
-      const startupPage = window.localStorage.getItem('startupPage')
-      if (startupPage) {
-        navigate(startupPage)
+      const currentView = settings.currentView.name
+      if (currentView == 'settings' || currentView == 'developer') {
+        navigate('/' + currentView)
+      } else {
+        navigate('/app/' + currentView)
       }
-    }, [navigate])
+    }, [navigate, settings])
   
     return (
       <>

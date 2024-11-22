@@ -1,4 +1,5 @@
 import { OutgoingSocketData, SocketData } from "@src/types";
+import { handleServerSocket } from "./serverWebsocketHandler";
 
 type SocketEventListener = (msg: SocketData) => void;
 type ConnectionStatus = 'connected' | 'disconnected' | 'reconnecting';
@@ -83,13 +84,19 @@ class WebSocketManager {
 
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      if (data.type == "pong") {
-        this.resetPongTimeout();
-      } else if (data.type == "ping") {
-        this.sendMessage({ app: "server", type: "pong" });
-      } else {
-        this.notifyListeners(data);
+      console.log('Received message:', data);
+      if (data.app == 'client') {
+        if (data.type == "pong") {
+          this.resetPongTimeout();
+        } else if (data.type == "ping") {
+          this.sendMessage({ app: "server", type: "pong" });
+        } else {
+          handleServerSocket(data)
+        }
       }
+      
+
+      this.notifyListeners(data);
     };
   }
 
@@ -98,11 +105,14 @@ class WebSocketManager {
   }
 
   private reconnect() {
+    console.log('Reconnecting in 5s...')
     if (this.reconnecting) return;
     this.reconnecting = true;
     this.notifyStatusChange('reconnecting');
     setTimeout(() => {
+      console.log("Conecting...");
       this.connect()
+      this.reconnecting = false;
     }, 5000); // Reconnect after 5 seconds
   }
 

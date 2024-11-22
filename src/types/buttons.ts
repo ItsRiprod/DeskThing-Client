@@ -1,6 +1,7 @@
 export type ButtonMapping = {
     // The ID of the key
     version: string
+    version_code: number
     id: string
     name: string
     description?: string
@@ -37,5 +38,6 @@ export type ButtonMapping = {
     icon?: string // The name of the icon the action uses - if left blank, the action will use the icon's id
     source: string // The origin of the action
     version: string // The version of the action
+    version_code: number // The version code of the action
     enabled: boolean // Whether or not the app associated with the action is enabled
   }

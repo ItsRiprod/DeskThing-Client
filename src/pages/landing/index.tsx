@@ -1,9 +1,11 @@
 import React from 'react'
 import { IconLogo } from '../../assets/Icons'
 import { useLocation, Link } from 'react-router-dom'
+import { useSettingsStore } from '@src/stores'
 
 const LandingPage: React.FC = () => {
     const location = useLocation()
+    const settings = useSettingsStore((store) => store.settings)
 
     return (
         <div className="w-screen h-screen bg-black flex-col flex items-center justify-center">
@@ -17,7 +19,7 @@ const LandingPage: React.FC = () => {
                         <Link to="/app" className="mt-4 text-blue-500 hover:text-blue-700 underline">
                             Go to App
                         </Link>
-            
+            <p>{JSON.stringify(settings)}</p>
         </div>
     )
 }

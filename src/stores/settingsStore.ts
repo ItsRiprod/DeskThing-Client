@@ -29,6 +29,12 @@ const defaultSettings: ClientSettings = {
     visible: true,
     position: 'bottom'
   },
+  theme: {
+    scale: 'medium',
+    primary: '#22c55e',
+    secondary: '#ffffff',
+    background: '#000000',
+  },
   volume: VolMode.WHEEL,
   currentView: {name: 'landing'},
   ShowNotifications: true,
@@ -39,7 +45,7 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       logs: [],
-      settings: { ...defaultSettings, ...(window.manifest || {}) },
+      settings: defaultSettings,
       addLog: (log) =>
         set((state) => ({
           logs: [...state.logs, { ...log }]
@@ -52,7 +58,14 @@ export const useSettingsStore = create<SettingsState>()(
       resetSettings: () => set({ settings: defaultSettings }),
     }),
     {
-      name: 'settings-storage'
+      name: 'settings-storage',
+      onRehydrateStorage: () => (state) => {
+        setTimeout(() => {
+          if (window.manifest) {
+            state?.updateSettings({...defaultSettings, ...window.manifest})
+          }
+        }, 100)
+      }
     }
   )
 )

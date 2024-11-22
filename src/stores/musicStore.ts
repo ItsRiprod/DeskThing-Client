@@ -1,11 +1,11 @@
   import { create } from 'zustand'
   import { AUDIO_REQUESTS, SongData } from '@src/types/musicTypes'
-  import { WebSocketState } from './websocketStore'
+  import useWebSocketStore from './websocketStore'
 import { SocketData, SocketMusic } from '@src/types'
+import { useMappingStore } from './mappingStore'
 
   interface MusicState {
     song: SongData | null
-    websocketManager: WebSocketState | null
     setSong: (song: SongData) => void
     requestMusicData: () => void
     next: () => void
@@ -17,99 +17,137 @@ import { SocketData, SocketMusic } from '@src/types'
     seek: (position: number) => void
     like: () => void
     setVolume: (volume: number) => void
-    setRepeat: () => void
+    setRepeat: (state: 'off' | 'all' | 'track') => void
     setShuffle: () => void
   }
 
   export const useMusicStore = create<MusicState>((set, get) => ({
     song: null,
-    websocketManager: null,
-    setSong: (song) => set({ song }),
+    setSong: (newData) => {
+      console.log('setting song')
+      set({ song: { ...get().song, ...newData } })
+
+      const updateIcons = async () => {
+        const updateIcon = useMappingStore.getState().updateIcon;
+        updateIcon('play', newData.is_playing ? 'pause' : '');
+      }
+
+      updateIcons();
+
+    },
 
     requestMusicData: () => {
-      const websocketManager = get().websocketManager;
-      if (websocketManager) {
-        websocketManager.sendMessage({ app: 'music', type: 'get', request: AUDIO_REQUESTS.SONG });
-      }
+      createWSAction(AUDIO_REQUESTS.SONG, 'get');
     },
 
     next: () => {
-      const websocketManager = get().websocketManager;
-      if (websocketManager) {
-        websocketManager.sendMessage({ app: 'music', type: 'set', request: AUDIO_REQUESTS.NEXT });
-      }
+      const previousState = get().song;
+      set({ song: { ...previousState, track_progress: 0 } });
+      createWSAction(AUDIO_REQUESTS.NEXT).catch(() => {
+        set({ song: previousState });
+      });
     },
 
     previous: () => {
-      const websocketManager = get().websocketManager;
-      if (websocketManager) {
-        websocketManager.sendMessage({ app: 'music', type: 'set', request: AUDIO_REQUESTS.PREVIOUS });
-      }
+      const previousState = get().song;
+      set({ song: { ...previousState, track_progress: 0 } });
+      createWSAction(AUDIO_REQUESTS.PREVIOUS).catch(() => {
+        set({ song: previousState });
+      });
     },
 
     rewind: () => {
-      const websocketManager = get().websocketManager;
-      if (websocketManager) {
-        websocketManager.sendMessage({ app: 'music', type: 'set', request: AUDIO_REQUESTS.REWIND });
-      }
+      const previousState = get().song;
+      set({ song: { ...previousState, track_progress: Math.min(previousState.track_progress - 15000, 0) } });
+      createWSAction(AUDIO_REQUESTS.REWIND).catch(() => {
+        set({ song: previousState });
+      });
     },
 
     fastForward: () => {
-      const websocketManager = get().websocketManager;
-      if (websocketManager) {
-        websocketManager.sendMessage({ app: 'music', type: 'set', request: AUDIO_REQUESTS.FAST_FORWARD });
-      }
+      const previousState = get().song;
+      set({ song: { ...previousState, track_progress: previousState.track_progress + 15000 } });
+      createWSAction(AUDIO_REQUESTS.FAST_FORWARD).catch(() => {
+        set({ song: previousState });
+      });
     },
-
+    
     play: () => {
-      const websocketManager = get().websocketManager;
-      if (websocketManager) {
-        websocketManager.sendMessage({ app: 'music', type: 'set', request: AUDIO_REQUESTS.PLAY });
-      }
+      const previousState = get().song;
+      set({ song: { ...previousState, is_playing: !previousState.is_playing } });
+      createWSAction(AUDIO_REQUESTS.PLAY).catch(() => {
+        set({ song: previousState });
+      });
     },
 
     pause: () => {
-      const websocketManager = get().websocketManager;
-      if (websocketManager) {
-        websocketManager.sendMessage({ app: 'music', type: 'set', request: AUDIO_REQUESTS.PAUSE });
-      }
+      const previousState = get().song;
+      set({ song: { ...previousState, is_playing: false } });
+      createWSAction(AUDIO_REQUESTS.PAUSE).catch(() => {
+        set({ song: previousState });
+      });
     },
 
     seek: (position: number) => {
-      const websocketManager = get().websocketManager;
-      if (websocketManager) {
-        websocketManager.sendMessage({ app: 'music', type: 'set', request: AUDIO_REQUESTS.SEEK, payload: position });
-      }
+      const previousState = get().song;
+      set({ song: { ...get().song, track_progress: position } });
+      createWSAction(AUDIO_REQUESTS.SEEK, 'set', position).catch(() => {
+        set({ song: previousState });
+      });
     },
 
     like: () => {
-      const websocketManager = get().websocketManager;
-      if (websocketManager) {
-        websocketManager.sendMessage({ app: 'music', type: 'set', request: AUDIO_REQUESTS.LIKE });
-      }
+      const previousState = get().song;
+      set({ song: { ...previousState, liked: !previousState.liked } });
+      createWSAction(AUDIO_REQUESTS.LIKE).catch(() => {
+        set({ song: previousState });
+      });
     },
 
     setVolume: (volume: number) => {
-      const websocketManager = get().websocketManager;
-      if (websocketManager) {
-        websocketManager.sendMessage({ app: 'music', type: 'set', request: AUDIO_REQUESTS.VOLUME, payload: volume });
-      }
+      const previousState = get().song;
+      set({ song: { ...get().song, volume: volume } });
+      createWSAction(AUDIO_REQUESTS.VOLUME, 'set', volume).catch(() => {
+        set({ song: previousState });
+      });
     },
 
-    setRepeat: () => {
-      const websocketManager = get().websocketManager;
-      if (websocketManager) {
-        websocketManager.sendMessage({ app: 'music', type: 'set', request: AUDIO_REQUESTS.REPEAT });
-      }
+    setRepeat: (state: 'off' | 'all' | 'track') => {
+      const previousState = get().song;
+      set({ song: { ...previousState, repeat_state: state } });
+      createWSAction(AUDIO_REQUESTS.REPEAT).catch(() => {
+        set({ song: previousState });
+      });
     },
 
     setShuffle: () => {
-      const websocketManager = get().websocketManager;
-      if (websocketManager) {
-        websocketManager.sendMessage({ app: 'music', type: 'set', request: AUDIO_REQUESTS.SHUFFLE });
-      }
+      const previousState = get().song;
+      set({ song: { ...previousState, shuffle_state: !previousState.shuffle_state } });
+      createWSAction(AUDIO_REQUESTS.SHUFFLE).catch(() => {
+        set({ song: previousState });
+      });
     }
   }))
+    let debounceTimers: { [key in AUDIO_REQUESTS]?: NodeJS.Timeout } = {};
+
+    const createWSAction = async (request: AUDIO_REQUESTS, type: 'get' | 'set' = 'set', payload?: number): Promise<void> => {
+      try {
+        const send = useWebSocketStore.getState().send;
+      
+        // Clear any existing timeout for this request type
+        if (debounceTimers[request]) {
+          clearTimeout(debounceTimers[request]);
+        }
+
+        // Set a new timeout
+        debounceTimers[request] = setTimeout(() => {
+          send({ app: 'music', type, request, payload });
+          delete debounceTimers[request];
+        }, 500); // 100ms debounce delay
+      } catch (error) {
+        throw error;
+      }
+    }
 
 export  function isSocketMusic(data: SocketData): data is SocketMusic {
     return data.app === 'client' && data.type === 'song';
