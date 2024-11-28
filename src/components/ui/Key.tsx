@@ -5,9 +5,10 @@ import { useEffect, useState } from "react"
 
 interface KeyProps {
     keyId: string
+    className?: string
   }
 
-const Key: React.FC<KeyProps> = ({ keyId }) => {
+const Key: React.FC<KeyProps> = ({ keyId, className }) => {
     const getButtonAction = useMappingStore((store) => store.getButtonAction)
     const profile = useMappingStore((store) => store.profile)
     const [action, setAction] = useState(getButtonAction(keyId, EventMode.KeyDown))
@@ -21,7 +22,7 @@ const Key: React.FC<KeyProps> = ({ keyId }) => {
     if (action.id == 'hidden') return null
 
     return (
-        <ActionComponent action={action} />
+        <ActionComponent action={action} className={className} />
     )
 }
 

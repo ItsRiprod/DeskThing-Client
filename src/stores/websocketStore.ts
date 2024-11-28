@@ -9,6 +9,7 @@ export interface WebSocketState {
   isReconnecting: boolean;
   connect: (url: string) => void;
   disconnect: () => void;
+  reconnect: () => void
   send: (message: OutgoingSocketData) => Promise<void>;
   addListener: (listener: (msg: SocketData) => void) => void;
   removeListener: (listener: (msg: SocketData) => void) => void;
@@ -23,8 +24,8 @@ if (import.meta.hot) {
 export const useWebSocketStore = create<WebSocketState>((set, get) => {
   const manager = WebSocketManager.getInstance()
 
-  const settings = useSettingsStore.getState().settings
-  const wsUrl = `ws://${settings.ip}:${settings.port}`
+  const manifest = useSettingsStore.getState().manifest
+  const wsUrl = `ws://${manifest.ip}:${manifest.port}`
 
   manager.addStatusListener((status) => {
     set({
@@ -36,7 +37,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
   manager.connect(wsUrl)
 
   useSettingsStore.subscribe((state) => {
-    const newWsUrl = `ws://${state.settings.ip}:${state.settings.port}`
+    const newWsUrl = `ws://${state.manifest.ip}:${state.manifest.port}`
     if (newWsUrl !== wsUrl) {
       manager.connect(newWsUrl)
     }
@@ -54,13 +55,24 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
     disconnect: () => {
       const manager = get().socketManager;
       if (manager) {
-        console.log("Disconnecting WebSocket");
         manager.disconnect();
         set({ 
           isConnected: false,
           isReconnecting: false 
         });
       }
+    },
+
+    reconnect: () => {
+      const manager = get().socketManager
+      if (manager) {
+        manager.reconnect()
+        set({ 
+          isConnected: false,
+          isReconnecting: true 
+        });
+      }
+
     },
 
     send: async (message: OutgoingSocketData): Promise<void> => {

@@ -21,6 +21,18 @@ export type SongData = {
     device_id: string | null // a way to identify the current device if needed
     timestamp: number
     liked?: boolean
+    color?: color
+  }
+
+  interface color {
+    value: number[]
+    rgb: string
+    rgba: string
+    hex: string
+    hexa: string
+    isDark: boolean
+    isLight: boolean
+    error?: string
   }
 
   export enum AUDIO_REQUESTS {

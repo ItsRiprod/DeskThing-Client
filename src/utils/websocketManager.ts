@@ -16,6 +16,7 @@ class WebSocketManager {
   private pongTimeout: NodeJS.Timeout | null = null;
   private missedPongs = 0;
   private readonly MAX_MISSED_PONGS = 3;
+  private code = Math.random() * 1000000;
 
   constructor() {
 
@@ -29,7 +30,7 @@ class WebSocketManager {
     return WebSocketManager.instance
   }
 
-  closeExisting() {
+  async closeExisting() {
     if (this.socket) {
       // Clean up event listeners
       this.socket.onopen = null;
@@ -39,7 +40,7 @@ class WebSocketManager {
       
       // Close connection if open
       if (this.socket.readyState === WebSocket.OPEN) {
-        this.socket.close();
+        await this.socket.close(4000, 'Closing existing connection');
       }
       
       // Clear heartbeat timers
@@ -60,9 +61,11 @@ class WebSocketManager {
       return;
     }
 
-    this.closeExisting();
     
-    this.socket = new WebSocket(this.url);
+    if (this.url != this.socket?.url) {
+      await this.closeExisting();
+      this.socket = new WebSocket(this.url);
+    }
 
     this.socket.onopen = () => {
       console.log(`Connected to ${this.url}`);
@@ -72,7 +75,7 @@ class WebSocketManager {
     };
 
     this.socket.onclose = (reason) => {
-      console.log("Disconnected, attempting to reconnect...", reason);
+      console.log("Disconnected, attempting to reconnect...", this.code, reason);
       this.stopHeartbeat()
       this.notifyStatusChange('disconnected');
       this.reconnect();
@@ -84,7 +87,6 @@ class WebSocketManager {
 
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log('Received message:', data);
       if (data.app == 'client') {
         if (data.type == "pong") {
           this.resetPongTimeout();
@@ -104,11 +106,14 @@ class WebSocketManager {
     this.closeExisting()
   }
 
-  private reconnect() {
+  reconnect() {
     console.log('Reconnecting in 5s...')
     if (this.reconnecting) return;
     this.reconnecting = true;
     this.notifyStatusChange('reconnecting');
+
+    this.disconnect()
+
     setTimeout(() => {
       console.log("Conecting...");
       this.connect()

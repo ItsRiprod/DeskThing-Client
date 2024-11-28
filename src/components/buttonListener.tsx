@@ -7,34 +7,48 @@ export const ButtonListener = () => {
     const getActions = useMappingStore((store) => store.getButtonAction)
 
     useEffect(() => {
-      const pressStartTimes = new Map<string, number>();
-      const LONG_PRESS_DURATION = 200; // 500ms for long press
+      const longPressTimeouts = new Map<string, number>();
+      const buttonStates: { [key: string]: EventMode } = {};
 
       const keyDownHandler = (e: KeyboardEvent) => {
         if (e.defaultPrevented) return;
-        pressStartTimes.set(e.key, Date.now());
-        const action = getActions(e.key, EventMode.KeyDown);
-        action && executeAction(action);
+
+        // Only set down if it is not already down or already a long press
+        if (buttonStates[e.key] !== EventMode.PressLong && buttonStates[e.key] !== EventMode.KeyDown) {
+          const action = getActions(e.code, EventMode.KeyDown);
+          action && executeAction(action)
+          buttonStates[e.key] = EventMode.KeyDown;
+        }
+
+        // Ensure that you dont double-call a long press
+        if (!longPressTimeouts.has(e.key)) {
+          const timeout = window.setTimeout(() => {
+            buttonStates[e.key] = EventMode.PressLong;
+            const longPressAction = getActions(e.code, EventMode.PressLong);
+            longPressAction && executeAction(longPressAction)
+          }, 400);
+
+          longPressTimeouts.set(e.key, timeout);
+        }
       };
 
       const keyUpHandler = (e: KeyboardEvent) => {
         if (e.defaultPrevented) return;
-        const action = getActions(e.key, EventMode.KeyUp);
-        action && executeAction(action);
 
-        // Check for short/long press
-        const pressStartTime = pressStartTimes.get(e.key);
-        if (pressStartTime) {
-          const pressDuration = Date.now() - pressStartTime;
-          if (pressDuration < LONG_PRESS_DURATION) {
-            const shortPressAction = getActions(e.key, EventMode.PressShort);
-            shortPressAction && executeAction(shortPressAction);
-          } else {
-            const longPressAction = getActions(e.key, EventMode.PressLong);
-            
-            longPressAction && executeAction(longPressAction);
-          }
-          pressStartTimes.delete(e.key);
+        // Dont notify if the most recent action was a longpress
+        if (buttonStates[e.key] !== EventMode.PressLong) {
+          const shortPressAction = getActions(e.code, EventMode.PressShort);
+          shortPressAction && executeAction(shortPressAction)
+        }
+        
+        const action = getActions(e.code, EventMode.KeyUp);
+        action && executeAction(action)
+        buttonStates[e.key] = EventMode.KeyUp;
+
+        // Clear the event timeout to cancel a long press and cleanup
+        if (longPressTimeouts.has(e.key)) {
+          clearTimeout(longPressTimeouts.get(e.key)!);
+          longPressTimeouts.delete(e.key);
         }
       };
 
@@ -44,9 +58,9 @@ export const ButtonListener = () => {
       return () => {
         window.removeEventListener('keydown', keyDownHandler);
         window.removeEventListener('keyup', keyUpHandler);
+        longPressTimeouts.forEach(timeout => clearTimeout(timeout));
       }
     }, []);
   
     return null;
 };
-

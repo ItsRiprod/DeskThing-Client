@@ -3,16 +3,19 @@ import NavRouter from "./components/nav/Router"
 import Overlays from "./overlay"
 import { WebSocketListener } from "@src/components/websocketListener"
 import { ButtonListener } from "./components/buttonListener"
+import ErrorBoundary from "@src/pages/error/ErrorBoundary"
 
 function App() {
 
   return (
     <HashRouter>
-      <WebSocketListener />
-      <ButtonListener />
-      <Overlays>
-        <NavRouter />
-      </Overlays>
+      <ErrorBoundary>
+        <WebSocketListener />
+        <ButtonListener />
+        <Overlays>
+          <NavRouter />
+        </Overlays>
+      </ErrorBoundary>
     </HashRouter>
   )
 }

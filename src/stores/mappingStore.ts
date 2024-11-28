@@ -1,6 +1,6 @@
 
 import { create } from 'zustand'
-import { Action, ButtonMapping, EventMode } from '@src/types/buttons'
+import { Action, ActionReference, ButtonMapping, EventMode } from '@src/types/buttons'
 import { SocketAction, SocketData, SocketMappings, SocketSetIcon } from '@src/types'
 import { useSettingsStore } from './settingsStore';
 import { useAppStore } from './appStore';
@@ -19,10 +19,10 @@ import { ActionHandler } from '@src/utils/serverActionHandler';
     interface MappingState {
         profile: ButtonMapping | null
         setProfile: (profile: ButtonMapping) => void
-        executeAction: (action: Action) => void;
+        executeAction: (action: Action | ActionReference) => void;
         executeKey: (key: string, eventMode: EventMode) => void
         updateIcon: (id: string, icon: string) => void
-        getActionUrl: (action: Action) => string
+        getActionUrl: (action: Action | ActionReference) => string
         getButtonAction: (key: string, mode: EventMode) => Action | undefined
     }
 
@@ -33,18 +33,25 @@ export const useMappingStore = create<MappingState>((set, get) => ({
   getButtonAction: (key: string, mode: EventMode) => {
     const profile = get().profile;
     if (profile?.mapping[key] && profile.mapping[key][mode]) {
-      return profile.mapping[key][mode];
+      const action = profile.mapping[key][mode]
+        const mergedAction = {
+          ...profile.actions && profile.actions.find(a => a.id === action.id),
+          ...action
+        }
+        return mergedAction
+
     }
     return undefined;
   },
 
-  executeAction: (action: Action) => {
+  executeAction: (action: Action | ActionReference) => {
     // execute action
-    if (action.source == 'server') {
+    if (action?.source == 'server') {
       const actionHandler = ActionHandler.getInstance()
       actionHandler.runAction(action)
     } else {
       console.log(`Executing Non-Server Action:`, action);
+      useSettingsStore.getState().addLog({app: 'MAPPING', payload: `NON-SERVER Actions are NOT SUPPORTED`, type: 'error'});
     }
   },
 
@@ -54,49 +61,54 @@ export const useMappingStore = create<MappingState>((set, get) => ({
       const action = profile.mapping[key][eventMode];
       if (action && action.enabled) {
         // Execute the action - could be sending a WebSocket message, invoking a function, etc.
-        console.log(`Executing action: ${action.name}`);
+        console.log(`Executing action: ${action}`);
       }
     }
   },
 
-  getActionUrl: (action: Action) => {
-    const settings = useSettingsStore.getState().settings;
-    const { ip, port } = settings;
+  getActionUrl: (action: Action | ActionReference) => {
+    const manifest = useSettingsStore.getState().manifest;
+    const profile = get().profile;
+    const { ip, port } = manifest;
     if (action.source === 'server') {
 
       if (action.id === 'pref') {
         const apps = useAppStore.getState().apps
         const app = apps[action.value || 0]
         if (app) {
-          const url = `http://${ip}:${port}/icon/${app.name}/${app.name}.svg`;
+          const url = `http://${ip}:${port}/icon/${app.name}/${app.name}.svg?url`;
           return url
         } else {
-          return new URL(`../../public/icons/${action.icon || action.id}.svg`, import.meta.url).href;
+          const actionIcon = profile?.actions.find(a => a.id === action.id).icon  || action.id
+          return new URL(`../../public/icons/${actionIcon}.svg?url`, import.meta.url).href;
         }
       }
 
-      return new URL(`../../public/icons/${action.icon || action.id}.svg`, import.meta.url).href;
+      const actionIcon = profile?.actions.find(a => a.id === action.id).icon || action.id
+      return new URL(`../../public/icons/${actionIcon}.svg?url`, import.meta.url).href;
     } else {
-      return `http://${ip}:${port}/icon/${action.id}/${action.icon || action.id}.svg`;
+      // Fetch from server
+      const actionIcon = profile?.actions.find(a => a.id === action.id).icon || action.id
+      return `http://${ip}:${port}/icon/${action.id}/${actionIcon}.svg?url`;
     }
   },
 
   updateIcon: (id: string, icon: string) => {
     console.log(`Updating icon for ${id} to ${icon}`);  
+
+    if (get().profile.actions.find(a => a.id === id)?.icon === icon) {
+      console.log(`Icon is already ${icon}, no update needed`);
+      return;
+    }
+
     set((state) => {
         if (state.profile) {
             const newProfile = {
                 ...state.profile,
-                mapping: {
-                    ...state.profile.mapping
-                }
+                actions: state.profile.actions.map(action => 
+                    action.id === id ? { ...action, icon } : action
+                )
             }
-            // Update the icon for all event modes
-            Object.values(EventMode).forEach(mode => {
-                if (newProfile.mapping[id]?.[mode]) {
-                    newProfile.mapping[id][mode].icon = icon
-                }
-            })
             return { profile: newProfile }
         }
         return state

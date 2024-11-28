@@ -8,9 +8,17 @@ export type ButtonMapping = {
     trigger_app?: string
     mapping: {
       [key: string]: {
-        [Mode in EventMode]?: Action
+        [Mode in EventMode]?: ActionReference
       }
     }
+    actions: Action[]
+  }
+
+  export type ActionReference = {
+    id: string
+    value?: string
+    enabled: boolean
+    source: string
   }
 
   export enum EventMode {

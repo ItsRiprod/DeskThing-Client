@@ -25,7 +25,7 @@ export default {
                 '100%': { transform: 'translate(0%, 10%)' },
               },
               drop: {
-                '0%': { transform: 'translateY(-100%)', opacity: '0' },
+                '0%': { transform: 'translateY(-25%)', opacity: '0' },
                 '100%': { transform: 'translateY(0%)', opacity: '1' },
               },
               dropdelay: {

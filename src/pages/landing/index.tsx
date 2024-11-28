@@ -1,25 +1,74 @@
-import React from 'react'
-import { IconLogo } from '../../assets/Icons'
-import { useLocation, Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import WelcomePage from './Welcome'
+import ConnectingPage from './Connecting'
+import { IconArrowLeft, IconArrowRight } from '@src/assets/Icons'
 import { useSettingsStore } from '@src/stores'
 
+export interface StepProps {
+    onNextStep: (reverse?: boolean) => void
+    setNextSteps: (visible: boolean) => void
+  }
+
+interface Step {
+    id: number
+    component: React.ComponentType<StepProps>
+  }
+
+const steps: Step[] = [
+    {
+        id: 1,
+        component: WelcomePage,
+    },
+    {
+        id: 2,
+        component: ConnectingPage,
+    },
+]
+
 const LandingPage: React.FC = () => {
-    const location = useLocation()
-    const settings = useSettingsStore((store) => store.settings)
+    const [currentStep, setCurrentStep] = useState(0)
+    const [transitioning, setIsTransitioning] = useState(false)
+    const [showNextSteps, setShowNextSteps] = useState(false)
+    const onboarding = useSettingsStore((store) => store.preferences.onboarding)
+
+    const handleNextStep = (reverse = false) => {
+        setShowNextSteps(false)
+        setIsTransitioning(true)
+        setTimeout(() => {
+            setIsTransitioning(false)
+            if (reverse) {
+                setCurrentStep((prevStep) => (prevStep - 1 + steps.length) % steps.length)
+                return
+            }
+            setCurrentStep((prevStep) => (prevStep + 1) % steps.length)
+        }, 500)
+    }
+
+    useEffect(() => {
+        if (onboarding) {
+            setCurrentStep(1)
+        }
+    }, [onboarding])
+
+    const renderCurrentStep = () => {
+        const { component: CurrentStepComponent } = steps[currentStep]
+        return <CurrentStepComponent onNextStep={handleNextStep} setNextSteps={setShowNextSteps} />
+    }
 
     return (
-        <div className="w-screen h-screen bg-black flex-col flex items-center justify-center">
-            <h1 className="text-4xl font-semibold">Welcome to</h1>
-            <IconLogo className="w-1/2 h-fit" />
-            <div className="flex space-x-2 items-center">
-                <p>Waiting For Connection...</p>
+        <div className="absolute w-screen h-screen bg-black flex-col flex items-center justify-center z-10">
+            <div className={`${transitioning && 'opacity-0'} duration-500 transition-opacity w-full h-full`}>
+                {renderCurrentStep()}
             </div>
-            <p className="mt-4">Current page: {location.pathname}</p>
-            
-                        <Link to="/app" className="mt-4 text-blue-500 hover:text-blue-700 underline">
-                            Go to App
-                        </Link>
-            <p>{JSON.stringify(settings)}</p>
+
+            <div className={`${showNextSteps ? 'w-screen' : 'w-[98vw] opacity-0'} p-5 transition-all duration-500 ease-in-out absolute bottom-0 flex justify-between`}>
+                <button onClick={() => handleNextStep(true)} className={`${currentStep > 0 ? '' : 'opacity-0'} transition-opacity`}>
+                    <IconArrowLeft iconSize={64} />
+                </button>
+                <button onClick={() => handleNextStep()} className={`${currentStep < steps.length - 1 ? '' : 'opacity-0'} transition-opacity`}>
+                    <IconArrowRight iconSize={64} />
+                </button>
+            </div>
         </div>
     )
 }

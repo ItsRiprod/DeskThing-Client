@@ -7,12 +7,14 @@ import {
 } from "../stores";
 import {
   Action,
+  ActionReference,
   AUDIO_REQUESTS,
   EventMode,
   OutgoingSocketAction,
   OutgoingSocketData,
   OutgoingSocketMusic,
   OutgoingSocketServer,
+  ViewMode,
 } from "@src/types";
 import { useActionStore } from "@src/stores/actionStore";
 
@@ -43,7 +45,7 @@ export class ActionHandler {
     this.runAction(action);
   };
 
-  public runAction = async (action: Action): Promise<void> => {
+  public runAction = async (action: Action | ActionReference): Promise<void> => {
     const { source } = action;
     console.log("Running action:", action.id);
 
@@ -54,7 +56,7 @@ export class ActionHandler {
     }
   };
 
-  private async handleServerAction(action: Action): Promise<void> {
+  private async handleServerAction(action: Action | ActionReference): Promise<void> {
     const handler = this.actionMap[action.id];
     if (handler) {
       handler(action);
@@ -63,7 +65,7 @@ export class ActionHandler {
     }
   }
 
-  private async handleClientAction(action: Action): Promise<void> {
+  private async handleClientAction(action: Action | ActionReference): Promise<void> {
     try {
       const socketData: OutgoingSocketAction = {
         type: "action",
@@ -77,17 +79,17 @@ export class ActionHandler {
   }
 
   private handleShowAction(): void {
-    const mode = useSettingsStore.getState().settings.currentView.name;
+    const mode = useSettingsStore.getState().preferences.appTrayState;
     switch (mode) {
       case "hidden":
         useSettingsStore
           .getState()
-          .updateSettings({ currentView: { name: "peek" } });
+          .updatePreferences({ appTrayState: ViewMode.PEEK });
         break;
       case "peek":
         useSettingsStore
           .getState()
-          .updateSettings({ currentView: { name: "full" } });
+          .updatePreferences({ appTrayState: ViewMode.FULL });
         break;
       case "full":
         break;
@@ -95,17 +97,17 @@ export class ActionHandler {
   }
 
   private handleHideAction(): void {
-    const mode = useSettingsStore.getState().settings.currentView.name;
+    const mode = useSettingsStore.getState().preferences.appTrayState;
     switch (mode) {
       case "full":
         useSettingsStore
           .getState()
-          .updateSettings({ currentView: { name: "peek" } });
+          .updatePreferences({ appTrayState: ViewMode.PEEK });
         break;
       case "peek":
         useSettingsStore
           .getState()
-          .updateSettings({ currentView: { name: "hidden" } });
+          .updatePreferences({ appTrayState: ViewMode.HIDDEN });
         break;
       case "hidden":
         break;
@@ -118,12 +120,12 @@ export class ActionHandler {
       this.handleSendCommand(AUDIO_REQUESTS.PAUSE);
       useMappingStore.getState().updateIcon("play", "");
     } else {
-      this.handleSendCommand(AUDIO_REQUESTS.PLAY, songData.id);
+      this.handleSendCommand(AUDIO_REQUESTS.PLAY, songData?.id || '');
       useMappingStore.getState().updateIcon("play", "pause");
     }
     useMusicStore
       .getState()
-      .setSong({ ...songData, is_playing: !songData.is_playing });
+      .setSong({ ...songData, is_playing: !songData?.is_playing || false });
   };
 
   Skip = () => {
@@ -145,15 +147,15 @@ export class ActionHandler {
 
   Shuffle = () => {
     const songData = useMusicStore.getState().song;
-    if (songData.shuffle_state) {
+    if (songData?.shuffle_state) {
       useMappingStore.getState().updateIcon("shuffle", "shuffleDisabled");
     } else {
       useMappingStore.getState().updateIcon("shuffle", "");
     }
-    this.handleSendCommand(AUDIO_REQUESTS.SHUFFLE, !songData.shuffle_state);
+    this.handleSendCommand(AUDIO_REQUESTS.SHUFFLE, !songData?.shuffle_state || false);
     useMusicStore
       .getState()
-      .setSong({ ...songData, shuffle_state: !songData.shuffle_state });
+      .setSong({ ...songData, shuffle_state: !songData?.shuffle_state || false });
   };
 
   Repeat = () => {
@@ -182,7 +184,7 @@ export class ActionHandler {
   };
 
   Pref = (action: Action) => {
-    const updateSettings = useSettingsStore.getState().updateSettings
+    const updateSettings = useSettingsStore.getState().updatePreferences
     
     const app = this.getAppByButtonIndex(Number(action.value))
 
@@ -193,14 +195,14 @@ export class ActionHandler {
 
   private getAppByButtonIndex = (index: number): string => {
     const apps = useAppStore.getState().apps;
-    if (index <= apps.length) {
-      return apps[index].name;
+    if (index < apps.length) {
+      return apps[index]?.name || 'Unknown';
     }
     return "dashboard";
   };
 
   Swap = async (action: Action) => {
-    const currentView = useSettingsStore.getState().settings.currentView.name;
+    const currentView = useSettingsStore.getState().preferences.currentView.name;
     const socketData: OutgoingSocketServer = {
         app: 'server',
         type: 'set',
@@ -276,11 +278,11 @@ export class ActionHandler {
   };
   
   swipeL() {
-    const currentView = useSettingsStore.getState().settings.currentView.name;
+    const currentView = useSettingsStore.getState().preferences.currentView.name;
     const apps = useAppStore.getState().apps;
     const currentIndex = apps.findIndex((app) => app.name === currentView);
     const nextIndex = (currentIndex - 1 + apps.length) % apps.length;
-    useSettingsStore.getState().updateSettings({
+    useSettingsStore.getState().updatePreferences({
       currentView: { name: apps[nextIndex].name },
     });
   }
@@ -291,18 +293,18 @@ export class ActionHandler {
   }
 
   swipeR() {
-    const currentView = useSettingsStore.getState().settings.currentView.name;
+    const currentView = useSettingsStore.getState().preferences.currentView.name;
     const apps = useAppStore.getState().apps;
     const currentIndex = apps.findIndex((app) => app.name === currentView);
     const nextIndex = (currentIndex + 1) % apps.length;
-    useSettingsStore.getState().updateSettings({
+    useSettingsStore.getState().updatePreferences({
       currentView: { name: apps[nextIndex].name },
     });
   }
 
   open = (action: Action) => {
     useSettingsStore.getState()
-    .updateSettings({
+    .updatePreferences({
       currentView: { name: action.value },
     });
   };

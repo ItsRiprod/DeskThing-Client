@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react"
 
 const VolumeOverlay: React.FC = () => {
     const setMusicVolume = useMusicStore((store) => store.setVolume)
-    const color = useSettingsStore((store) => store.settings.theme?.primary)
+    const color = useSettingsStore((store) => store.preferences.theme?.primary)
     const musicVolume = useMusicStore((store) => store.song?.volume)
     const [touching, setIsTouching] = useState(false)
     const [visible, setIsVisible] = useState(false)

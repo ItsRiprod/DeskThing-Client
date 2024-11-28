@@ -24,12 +24,11 @@ import { useMappingStore } from './mappingStore'
   export const useMusicStore = create<MusicState>((set, get) => ({
     song: null,
     setSong: (newData) => {
-      console.log('setting song')
       set({ song: { ...get().song, ...newData } })
 
       const updateIcons = async () => {
         const updateIcon = useMappingStore.getState().updateIcon;
-        updateIcon('play', newData.is_playing ? 'pause' : '');
+        newData.is_playing !== undefined && updateIcon('play', newData.is_playing ? 'pause' : '');
       }
 
       updateIcons();
@@ -37,6 +36,7 @@ import { useMappingStore } from './mappingStore'
     },
 
     requestMusicData: () => {
+      console.log('Requesting song data')
       createWSAction(AUDIO_REQUESTS.SONG, 'get');
     },
 

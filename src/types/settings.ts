@@ -1,24 +1,30 @@
 import { App } from "."
 
-export interface SettingsNumber {
-  value: number
+interface SettingsBase {
+  type: 'boolean' | 'list' | 'multiselect' | 'number' | 'range' | 'ranked' | 'select' | 'string'
+  label: string
+  description?: string
+}
+
+export interface SettingsNumber extends SettingsBase {
   type: 'number'
+  value: number
   min: number
   max: number
   label: string
   description?: string
 }
 
-export interface SettingsBoolean {
-  value: boolean
+export interface SettingsBoolean extends SettingsBase {
   type: 'boolean'
+  value: boolean
   label: string
   description?: string
 }
 
-export interface SettingsRange {
-  value: number
+export interface SettingsRange extends SettingsBase {
   type: 'range'
+  value: number
   label: string
   min: number
   max: number
@@ -26,17 +32,17 @@ export interface SettingsRange {
   description?: string
 }
 
-export interface SettingsString {
-  value: string
+export interface SettingsString extends SettingsBase {
   type: 'string'
+  value: string
   label: string
   maxLength?: number
   description?: string
 }
 
-export interface SettingsSelect {
-  value: string
+export interface SettingsSelect extends SettingsBase {
   type: 'select'
+  value: string
   label: string
   description?: string
   placeholder?: string
@@ -48,32 +54,29 @@ export type SettingOption = {
   value: string
 }
 
-export interface SettingsRanked {
-  value: string[]
+export interface SettingsRanked extends SettingsBase {
   type: 'ranked'
+  value: string[]
   label: string
   description?: string
   options: SettingOption[]
 }
 
-/**
- * Not fully implemented yet!
- */
-export interface SettingsList {
+export interface SettingsList extends SettingsBase {
+  type: 'list'
   value: string[]
   placeholder?: string
   maxValues?: number
   orderable?: boolean
   unique?: boolean
-  type: 'list'
   label: string
   description?: string
   options: SettingOption[]
 }
 
-export interface SettingsMultiSelect {
-  value: string[]
+export interface SettingsMultiSelect extends SettingsBase {
   type: 'multiselect'
+  value: string[]
   label: string
   description?: string
   placeholder?: string
@@ -81,15 +84,19 @@ export interface SettingsMultiSelect {
 }
 
 export type SettingsType =
-  | SettingsNumber
-  | SettingsBoolean
-  | SettingsString
-  | SettingsSelect
-  | SettingsMultiSelect
-  | SettingsRange
-  | SettingsRanked
-  | SettingsList
+| SettingsBoolean
+| SettingsList
+| SettingsMultiSelect
+| SettingsNumber
+| SettingsRange
+| SettingsRanked
+| SettingsSelect
+| SettingsString
   
+  export interface AllAppSettings {
+    [key: string]: AppSettings
+  }
+
   export interface AppSettings {
     [key: string]: SettingsType
   }
@@ -110,13 +117,15 @@ export type SettingsType =
       device_type: { id: number; name: string }
     }
 
-    export interface ClientSettings extends ClientManifest {
+    export interface ClientPreferences {
       miniplayer?: MiniplayerSettings
+      appTrayState: ViewMode
       volume: VolMode
       theme?: Theme
       currentView?: App
       ShowNotifications: boolean
       Screensaver: App
+      onboarding: boolean
     }
 
     export interface MiniplayerSettings {

@@ -4,7 +4,7 @@ import { OutgoingSocketData, SocketData } from "@src/types";
 
 const handleGetManifest = () => {
     const send = useWebSocketStore.getState().send;
-    const manifest = useSettingsStore.getState().settings;
+    const manifest = useSettingsStore.getState().manifest;
 
     const returnData: OutgoingSocketData = {
         type: 'manifest',
