@@ -18,8 +18,8 @@ const SettingOption: React.FC<SettingOptionProps> = ({ app, onClick }) => {
     return (
         <button className="mt-2 flex-shrink-0 w-full h-16 p-10 rounded-lg bg-black flex items-center justify-between" onClick={handleClick} >
             <div className="flex items-center">
-                <ActionIcon url={getAppIcon(app)} className="w-10 h-10" />
-                <p className="ml-4 text-3xl">{app.manifest?.label || app.name}</p>
+                <ActionIcon url={getAppIcon(app)} className="h-full" />
+                <p className="ml-4 text-nowrap overflow-ellipsis text-3xl">{app.manifest?.label || app.name}</p>
             </div>
             <div className="flex items-center">
                 <IconArrowRight />

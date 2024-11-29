@@ -1,7 +1,7 @@
 import { App } from "."
 
 interface SettingsBase {
-  type: 'boolean' | 'list' | 'multiselect' | 'number' | 'range' | 'ranked' | 'select' | 'string'
+  type: 'boolean' | 'list' | 'multiselect' | 'number' | 'range' | 'ranked' | 'select' | 'string' | 'color'
   label: string
   description?: string
 }
@@ -83,6 +83,14 @@ export interface SettingsMultiSelect extends SettingsBase {
   options: SettingOption[]
 }
 
+export interface SettingsColor extends SettingsBase {
+  type: 'color'
+  value: string
+  label: string
+  description?: string
+  placeholder?: string
+}
+
 export type SettingsType =
 | SettingsBoolean
 | SettingsList
@@ -92,6 +100,7 @@ export type SettingsType =
 | SettingsRanked
 | SettingsSelect
 | SettingsString
+| SettingsColor
   
   export interface AllAppSettings {
     [key: string]: AppSettings
@@ -136,7 +145,9 @@ export type SettingsType =
 
     export interface Theme {
       primary: string
-      secondary: string
+      textLight: string
+      textDark: string
+      icons: string
       background: string
       scale: 'small' | 'medium' | 'large'
 

@@ -31,7 +31,7 @@ const ConnectingPage: React.FC<StepProps> = ({ setNextSteps }) => {
 
 
     return (
-        <div className="w-screen h-screen bg-black flex-col flex items-center justify-center">
+        <div className="w-full h-full bg-black flex-col flex items-center justify-center">
             <h1>Let's start with connecting to the DeskThing Server</h1>
             {onLoad}
             {connectionStatus ? (

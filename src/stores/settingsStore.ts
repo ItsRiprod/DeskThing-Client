@@ -9,7 +9,7 @@ interface SettingsState {
   clearLogs: () => void
   updateManifest: (settings: Partial<ClientManifest>) => void
   updatePreferences: (preferences: Partial<ClientPreferences>) => void
-  resetManifest: () => void
+  resetPreferences: () => void
 }
 
 const defaultManifest: ClientManifest = {
@@ -37,7 +37,9 @@ const defaultPreferences: ClientPreferences = {
   theme: {
     scale: 'medium',
     primary: '#22c55e',
-    secondary: '#ffffff',
+    textLight: '#ffffff',
+    textDark: '#000000',
+    icons: '#ffffff',
     background: '#000000',
   },
   volume: VolMode.WHEEL,
@@ -65,7 +67,7 @@ export const useSettingsStore = create<SettingsState>()(
       updatePreferences: (newPreferences) => set((state) => ({
         preferences: { ...state.preferences, ...newPreferences }
       })),
-      resetManifest: () => set({ manifest: defaultManifest }),
+      resetPreferences: () => set({ preferences: defaultPreferences }),
     }),
     {
       name: 'settings-storage',

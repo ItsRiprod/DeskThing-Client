@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import WelcomePage from './Welcome'
-import ConnectingPage from './Connecting'
+import WelcomePage from './WelcomeScreen'
+import ConnectingPage from './ConnectingScreen'
 import { IconArrowLeft, IconArrowRight } from '@src/assets/Icons'
 import { useSettingsStore } from '@src/stores'
+import ConfigPage from './ConfigScreen'
 
 export interface StepProps {
     onNextStep: (reverse?: boolean) => void
     setNextSteps: (visible: boolean) => void
+    currentStep: number
   }
 
 interface Step {
@@ -23,6 +25,10 @@ const steps: Step[] = [
         id: 2,
         component: ConnectingPage,
     },
+    {
+        id: 3,
+        component: ConfigPage,
+    },
 ]
 
 const LandingPage: React.FC = () => {
@@ -30,8 +36,18 @@ const LandingPage: React.FC = () => {
     const [transitioning, setIsTransitioning] = useState(false)
     const [showNextSteps, setShowNextSteps] = useState(false)
     const onboarding = useSettingsStore((store) => store.preferences.onboarding)
+    const setPreferences = useSettingsStore((store) => store.updatePreferences)
+
 
     const handleNextStep = (reverse = false) => {
+        if (currentStep === steps.length - 1 && !reverse) {
+            setPreferences({
+                onboarding: true,
+                currentView: { name: 'dashboard' }
+            })
+            return
+        }
+
         setShowNextSteps(false)
         setIsTransitioning(true)
         setTimeout(() => {
@@ -52,23 +68,25 @@ const LandingPage: React.FC = () => {
 
     const renderCurrentStep = () => {
         const { component: CurrentStepComponent } = steps[currentStep]
-        return <CurrentStepComponent onNextStep={handleNextStep} setNextSteps={setShowNextSteps} />
+        return <CurrentStepComponent currentStep={currentStep} onNextStep={handleNextStep} setNextSteps={setShowNextSteps} />
+    }
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        e.stopPropagation()
     }
 
     return (
-        <div className="absolute w-screen h-screen bg-black flex-col flex items-center justify-center z-10">
+        <div className="w-full h-full bg-black flex-col flex relative items-center justify-center" onTouchStart={handleTouchStart}>
             <div className={`${transitioning && 'opacity-0'} duration-500 transition-opacity w-full h-full`}>
                 {renderCurrentStep()}
             </div>
 
-            <div className={`${showNextSteps ? 'w-screen' : 'w-[98vw] opacity-0'} p-5 transition-all duration-500 ease-in-out absolute bottom-0 flex justify-between`}>
-                <button onClick={() => handleNextStep(true)} className={`${currentStep > 0 ? '' : 'opacity-0'} transition-opacity`}>
-                    <IconArrowLeft iconSize={64} />
-                </button>
-                <button onClick={() => handleNextStep()} className={`${currentStep < steps.length - 1 ? '' : 'opacity-0'} transition-opacity`}>
-                    <IconArrowRight iconSize={64} />
-                </button>
-            </div>
+            <button disabled={currentStep === 0  || !showNextSteps} onClick={() => handleNextStep(true)} className={`bottom-4 left-4 fixed disabled:opacity-0 transition-opacity`}>
+                <IconArrowLeft iconSize={64} />
+            </button>
+            {currentStep !== steps.length - 1 && <button disabled={currentStep == steps.length - 1 || !showNextSteps} onClick={() => handleNextStep()} className={`bottom-4 right-4 fixed disabled:opacity-0 transition-opacity`}>
+                <IconArrowRight iconSize={64} />
+            </button>}
         </div>
     )
 }

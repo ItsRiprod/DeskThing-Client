@@ -8,6 +8,7 @@ import { SettingsRangeComponent } from './SettingsRange';
 import { SettingsRankedComponent } from './SettingsRanked';
 import { SettingsSelectComponent } from './SettingsSelect';
 import { SettingsStringComponent } from './SettingsString';
+import { SettingsColorComponent } from './SettingsColor';
 
   interface SettingsProps {
     setting: SettingsType;
@@ -29,7 +30,8 @@ import { SettingsStringComponent } from './SettingsString';
         range: SettingsRangeComponent,
         ranked: SettingsRankedComponent,
         select: SettingsSelectComponent,
-        string: SettingsStringComponent
+        string: SettingsStringComponent,
+        color: SettingsColorComponent
     } as const;
 
   export const Settings: React.FC<SettingsProps> = ({ setting, className, handleSettingChange }) => {

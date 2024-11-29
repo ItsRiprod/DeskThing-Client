@@ -19,6 +19,8 @@ const AppSettingsPage: React.FC<AppSettingsProps> = ({ appName }) => {
     const saveSettings = useAppStore((store) => store.saveSettings)
     const [saving, setIsSaving] = useState(false)
     const [_searchParams, setSearchParmas] = useSearchParams()
+
+    const [isChanges, setIsChanges] = useState(false)
     
     if (!connected) return <div className="w-screen h-screen bg-red flex items-center justify-center text-4xl">Not connected</div>
     
@@ -28,7 +30,7 @@ const AppSettingsPage: React.FC<AppSettingsProps> = ({ appName }) => {
 
 
     const handleSettingChange = (key: string, value: any) => {
-        console.log(key, value)
+        setIsChanges(true)
         const updatedSettings = {
             ...settings,
             [key]: { ...settings[key], value }
@@ -41,23 +43,39 @@ const AppSettingsPage: React.FC<AppSettingsProps> = ({ appName }) => {
         setSearchParmas({ })
     }
 
-    const handleSave = () => {
+    const handleSave = async () => {
         setIsSaving(true)
-        saveSettings(app.name)
+        await saveSettings(app.name)
         setTimeout(() => {
             setIsSaving(false)
+            setIsChanges(false)
         }, 1000)
+    }
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        e.stopPropagation()
     }
 
     return (
         <div className="p-5 flex flex-col h-full">
-            <div className="border-b items-center flex p-5 ">
-                <Button onClick={onClick}>
-                    <IconArrowLeft iconSize="32" className="w-full h-full" />
-                </Button>
+            <div className="border-b shrink-0 items-center flex p-5 ">
+                {isChanges ?
+                (
+                    <Button onClick={handleSave} disabled={saving}>
+                        {saving ? (
+                            <IconLoading iconSize={32} className="animate-spin" />
+                        ) : (
+                            <IconSave iconSize="32" />
+                        )}
+                    </Button>
+                ) : (
+                    <Button onClick={onClick}>
+                        <IconArrowLeft iconSize="32" className="w-full h-full" />
+                    </Button>
+                )}
                 <h1 className="text-4xl font-semibold">{app.manifest?.label || app.name}</h1>
             </div>
-            <div className="flex flex-col overflow-y-scroll py-10">
+            <div className="flex flex-col overflow-y-scroll py-10" onTouchStart={handleTouchStart}>
                 {settings && Object.entries(settings).map(([key, setting]) => (
                     <Settings 
                     key={key}
@@ -66,15 +84,6 @@ const AppSettingsPage: React.FC<AppSettingsProps> = ({ appName }) => {
                     handleSettingChange={(value) => handleSettingChange(key, value)} 
                     />
                 ))}
-            </div>
-            <div>
-                <Button onClick={handleSave} disabled={saving}>
-                    {saving ? (
-                        <IconLoading className="animate-spin" />
-                    ) : (
-                        <IconSave />
-                    )}
-                </Button>
             </div>
         </div>
     )

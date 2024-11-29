@@ -5,13 +5,15 @@ import React, { useEffect } from "react"
 import { Route, Routes, useNavigate } from "react-router-dom"
 import NowPlaying from "@src/pages/nowplaying"
 import UtilityPage from "@src/pages/settings"
+import DashboardPage from "@src/pages/dashboard"
 
 const SystemApps = [
     'nowplaying',
     'developer',
     'preferences',
     'settings',
-    'utility'
+    'utility',
+    'dashboard'
 ]
 
 const NavRouter: React.FC = () => {
@@ -38,6 +40,7 @@ const NavRouter: React.FC = () => {
           <Route path={'/preferences'} element={<LandingPage />} />
           <Route path={'/developer'} element={<LandingPage />} />
           <Route path={'/nowplaying'} element={<NowPlaying />} />
+          <Route path={'/dashboard'} element={<DashboardPage />} />
           <Route path={'/settings'} element={<UtilityPage />} />
           <Route path={'/utility'} element={<UtilityPage />} />
           <Route path={'/utility/:app'} element={<UtilityPage />} />

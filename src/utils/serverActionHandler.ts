@@ -78,42 +78,26 @@ export class ActionHandler {
     }
   }
 
-  private handleShowAction(): void {
-    const mode = useSettingsStore.getState().preferences.appTrayState;
-    switch (mode) {
-      case "hidden":
-        useSettingsStore
-          .getState()
-          .updatePreferences({ appTrayState: ViewMode.PEEK });
-        break;
-      case "peek":
-        useSettingsStore
-          .getState()
-          .updatePreferences({ appTrayState: ViewMode.FULL });
-        break;
-      case "full":
-        break;
-    }
-  }
+  private handleHideAction(action: Action): void {
+    const currentState = useSettingsStore.getState().preferences.appTrayState;
+    const stateTransitions = {
+      hide: {
+        full: ViewMode.PEEK,
+        peek: ViewMode.HIDDEN,
+        hidden: ViewMode.HIDDEN
+      },
+      show: {
+        hidden: ViewMode.PEEK,
+        peek: ViewMode.FULL,
+        full: ViewMode.FULL
+      }
+    };
 
-  private handleHideAction(): void {
-    const mode = useSettingsStore.getState().preferences.appTrayState;
-    switch (mode) {
-      case "full":
-        useSettingsStore
-          .getState()
-          .updatePreferences({ appTrayState: ViewMode.PEEK });
-        break;
-      case "peek":
-        useSettingsStore
-          .getState()
-          .updatePreferences({ appTrayState: ViewMode.HIDDEN });
-        break;
-      case "hidden":
-        break;
-    }
-  }
+    console.log(action.value, currentState)
 
+    const newState = stateTransitions[action.value][currentState];
+    useSettingsStore.getState().updatePreferences({ appTrayState: newState });
+  }
   PlayPause = () => {
     const songData = useMusicStore.getState().song;
     if (songData?.is_playing || false) {
@@ -321,8 +305,7 @@ export class ActionHandler {
     swap: this.Swap,
     volDown: this.VolDown,
     volUp: this.VolUp,
-    hide: this.handleHideAction,
-    show: this.handleShowAction,
+    appsList: this.handleHideAction,
     swipeL: this.swipeL,
     swipeR: this.swipeR,
     open: this.open

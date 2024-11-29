@@ -23,7 +23,8 @@ const Miniplayer: React.FC = () => {
     const theme = useSettingsStore((store) => store.preferences.theme)
     const song = useMusicStore((store) => store.song)
     const getSong = useMusicStore((store) => store.requestMusicData)
-    
+    const currentView = useSettingsStore((store) => store.preferences.currentView)
+
     const [height, setHeight] = useState('h-16')
     const [width, setWidth] = useState('w-16')
     const [expanded, setExpanded] = useState(false)
@@ -31,19 +32,23 @@ const Miniplayer: React.FC = () => {
     
     const [refreshing, setIsRefreshing] = useState(false)
 
+    const [isAudioSource, setIsAudioSource] = useState(false)
+
+    useEffect(() => {
+        if (currentView.name == 'nowplaying' || currentView?.manifest?.isAudioSource) {
+            setIsAudioSource(true)
+            setExpanded(true)
+        } else {
+            setIsAudioSource(false)
+            setExpanded(false)
+        }
+    }, [currentView])
+
+
     useEffect(() => {
         setHeight(theme.scale == 'small' ? 'h-16' : theme.scale == 'medium' ? 'h-32' : 'h-48')
         setWidth(theme.scale == 'small' ? 'w-16' : theme.scale == 'medium' ? 'w-32' : 'w-48')
         getSong()
-
-        const timeout = setTimeout(() => {
-            setExpanded(false)
-        }, 12000)
-        setTimeoutId(timeout)
-
-        return () => {
-            if (timeoutId) clearTimeout(timeoutId)
-        }
     }, [theme])
 
     const refreshSong = (e: MouseEvent<HTMLButtonElement>) => {
@@ -85,7 +90,7 @@ const Miniplayer: React.FC = () => {
         <div style={{background: theme.background}} className={`absolute left-0 flex flex-col h-fit w-screen bottom-0`}>
             <ProgressBar />
             <div className={`${miniplayer.state == 'peek' ? height : 'h-0'} transition-[height] overflow-hidden flex w-full items-center justify-center`}>
-                <button onClick={refreshSong} className={`${height} ${width} flex-shrink-0 flex items-center justify-center`}>
+                {!isAudioSource && <button onClick={refreshSong} className={`${height} ${width} flex-shrink-0 flex items-center justify-center`}>
                     {song?.thumbnail ? (
                         <img 
                         src={song.thumbnail} 
@@ -98,13 +103,18 @@ const Miniplayer: React.FC = () => {
                         <IconLoading className={`${refreshing ? 'animate-spin opacity-100' : 'opacity-0'} w-1/2 h-1/2 rounded-full`} />
                     </div>
                 </button>
+                }
                 <div className={`flex justify-evenly w-full ${height}`}>
                     {!expanded && 
-                        <button onClick={onClick} className={`animate-drop ml-4 w-full flex flex-col items-start justify-center`}>
-                            <ScrollingText className="text-3xl text-justify max-w-xs sm:max-w-sm md:max-w-2xl lg:max-w-5xl xl:max-w-[75%] font-semibold" fadeWidth={48} text={song?.track_name || 'Loading Song Name'} />
+                        <button onClick={onClick} className={`animate-drop max-w-80 sm:max-w-96 md:max-w-[75%] lg:max-w-[1024px] xl:max-w-[75%] ml-4 w-full flex flex-col items-start justify-center`}>
+                            <ScrollingText className="text-3xl text-justify max-w-80 sm:max-w-96 md:max-w-[400px] lg:max-w-[1024px] xl:max-w-[75%] font-semibold" fadeWidth={48} text={song?.track_name || 'Loading Song Name'} />
                             <p className="text-gray-500">{song?.artist || 'Loading Artist'}</p>
                         </button>}
-                    {expanded && <DynamicAction><LowerMiniplayer /></DynamicAction>}
+                    {expanded && <DynamicAction>
+                        <div className="flex items-center justify-center cursor-pointer w-full h-full">
+                        <LowerMiniplayer className="w-1/2 h-full" />
+                        </div>
+                        </DynamicAction>}
                     {expanded && <DynamicAction keyId='DynamicAction1' />}
                     {expanded && <DynamicAction keyId='DynamicAction2' />}
                     {expanded && <DynamicAction keyId='DynamicAction3' />}
@@ -112,7 +122,7 @@ const Miniplayer: React.FC = () => {
                     {<DynamicAction keyId='Action5' />}
                     {<DynamicAction keyId='Action6' />}
                     {<DynamicAction keyId='Action7' />}
-                    {expanded && <DynamicAction><ActionComponent className="w-1/2 h-full" action={fullscreenAction} /></DynamicAction>}
+                    {!isAudioSource && expanded && <DynamicAction><ActionComponent className="w-1/2 h-full" action={fullscreenAction} /></DynamicAction>}
                 </div>
             </div>
         </div>
@@ -151,6 +161,7 @@ interface LowerMiniplayerProps {
 
 const LowerMiniplayer: React.FC<LowerMiniplayerProps> = ({ className }) => {
     const miniplayerState = useSettingsStore((store) => store.preferences.miniplayer)
+    const iconColor = useSettingsStore((store) => store.preferences.theme.icons)
     const setMiniplayerState = useSettingsStore((store) => store.updatePreferences)
 
     const onClick = () => {
@@ -167,7 +178,7 @@ const LowerMiniplayer: React.FC<LowerMiniplayerProps> = ({ className }) => {
 
     return (
         <button className='flex items-center justify-center flex-grow h-full cursor-pointer' onClick={onClick}>
-            <IconArrowDown className={className + ' w-1/2 h-full'} />
+            <IconArrowDown color={iconColor} className={className + ' w-1/2 h-full'} />
         </button>
     )
 }

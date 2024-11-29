@@ -9,7 +9,7 @@ interface SettingComponentProps {
 const SettingComponent = ({ setting, children, className }: SettingComponentProps): JSX.Element => {
     return (
       <div
-        className={`py-3 flex items-center hover:bg-zinc-950 justify-between w-full border-t relative border-gray-900 ${className}`}
+        className={`py-3 shrink-0 flex items-center hover:bg-zinc-950 justify-between w-full border-t relative border-gray-900 ${className}`}
       >
         <div className="w-full flex-1">
           <div className="text-gray-500 font-geistMono absolute -top-2 inset flex justify-between w-full">
@@ -21,7 +21,7 @@ const SettingComponent = ({ setting, children, className }: SettingComponentProp
             )}
           </div>
           <div className="group relative flex flex-wrap w-full">
-            <p className="py-3 cursor-help text-3xl break-words max-w-xs">{setting.label}</p>
+            <p className="py-5 cursor-help text-3xl break-words max-w-xs">{setting.label}</p>
             {setting.description && (
               <div className="absolute left-0 -bottom-1 translate-y-full invisible group-hover:visible bg-zinc-800 text-sm text-gray-300 px-2 py-1 rounded-md whitespace-normal max-w-xs z-10">
                 {setting.description}

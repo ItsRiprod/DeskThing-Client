@@ -94,10 +94,8 @@ export const useMappingStore = create<MappingState>((set, get) => ({
   },
 
   updateIcon: (id: string, icon: string) => {
-    console.log(`Updating icon for ${id} to ${icon}`);  
 
     if (get().profile.actions.find(a => a.id === id)?.icon === icon) {
-      console.log(`Icon is already ${icon}, no update needed`);
       return;
     }
 

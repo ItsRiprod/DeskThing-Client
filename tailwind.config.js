@@ -28,6 +28,10 @@ export default {
                 '0%': { transform: 'translateY(-25%)', opacity: '0' },
                 '100%': { transform: 'translateY(0%)', opacity: '1' },
               },
+              fade: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
               dropdelay: {
                 '0%': { transform: 'translateY(-100%)', opacity: '0' },
                 '50%': { transform: 'translateY(-100%)', opacity: '0' },
@@ -37,7 +41,9 @@ export default {
       animation: {
         float: 'float 15s ease infinite;',
         drop: 'drop 0.5s ease forwards;',
-        dropdelay: 'dropdelay 1s ease forwards;',
+        dropReverse: 'drop 0.5s ease reverse;',
+        fade: 'fade 0.5s ease forwards;',
+        dropDelay: 'dropdelay 1s ease forwards;',
       }
       
     },

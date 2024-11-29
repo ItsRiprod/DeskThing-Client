@@ -24,15 +24,15 @@ const Overlays: React.FC<OverlayProps> = ({ children }) => {
 
     return (
         <div className="flex bg-black flex-col w-screen max-h-screen h-screen items-center justify-end">
-            <AppTray />
+            {!preferences.onboarding || <AppTray />}
             <ServerStatus />
             <NotificationOverlay />
             <VolumeOverlay />
             {wheelState && <SelectionWheel />}
-            <div className={`h-full w-full transition-[padding] ${preferences.miniplayer.visible && margin && height}`}>
+            <div className={`h-full w-full transition-[padding] ${preferences.onboarding && preferences.miniplayer.visible && margin && height}`}>
                 {children}
             </div>
-            {preferences.miniplayer.visible && <Miniplayer />}
+            {(preferences.miniplayer.visible && preferences.onboarding) && <Miniplayer />}
         </div>
     )
 }

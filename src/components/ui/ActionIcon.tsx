@@ -1,5 +1,5 @@
 import { Icon } from "@src/assets/Icons/Icons"
-import { useMappingStore } from "@src/stores"
+import { useMappingStore, useSettingsStore } from "@src/stores"
 import { IconLogoGearLoading } from "@src/assets/Icons"
 import { useEffect, useState } from "react"
 
@@ -11,6 +11,7 @@ interface ActionProps {
 const ActionIcon: React.FC<ActionProps> = ({ url, className }) => {
     const getActionUrl = useMappingStore((store) => store.getActionUrl)
     const [svgContent, setSvgContent] = useState<string | null>(null)
+    const iconColor = useSettingsStore((store) => store.preferences.theme.icons)
 
     useEffect(() => {
         const fetchIcon = async () => {
@@ -26,7 +27,7 @@ const ActionIcon: React.FC<ActionProps> = ({ url, className }) => {
     }, [getActionUrl, url])
 
     return (
-        <Icon className={className || 'w-full h-full'}>
+        <Icon color={iconColor} className={className || 'w-full h-full'}>
             {svgContent ? (
                 <svg dangerouslySetInnerHTML={{ __html: svgContent }} />
             ) : (

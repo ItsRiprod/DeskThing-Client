@@ -19,7 +19,7 @@ export const SettingsStringComponent: React.FC<SettingsStringProps> = ({ classNa
           value={setting.value as string}
           maxLength={(setting as SettingsString).maxLength}
           onChange={(e) => handleSettingChange(e.target.value)}
-          className={commonClasses + ' w-96 max-w-s'}
+          className={commonClasses + ' text-black w-96 max-w-s'}
         />
       </div>
     </SettingComponent>

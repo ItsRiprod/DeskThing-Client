@@ -29,7 +29,7 @@ const WelcomePage: React.FC<StepProps> = ({ setNextSteps }) => {
     }, [])
 
     return (
-    <div className="w-screen h-screen bg-black flex-col flex items-center justify-center">
+    <div className="w-full h-full bg-black flex-col flex items-center justify-center">
         <div className={`${onLoad ? 'w-5/6' : 'w-0'} ease-in-out flex flex-col items-center duration-1000 transition-all overflow-hidden`}>
             <h1 className="text-4xl w-screen text-center mb-2">Welcome to</h1>
             <IconLogo className="w-[50vw] h-fit" />

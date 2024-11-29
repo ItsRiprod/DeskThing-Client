@@ -10,12 +10,16 @@ const UtilityApp = () => {
         setSearchParams({ app: app})
     }
 
+    const handleTouchStart = (e: React.TouchEvent) => {
+        e.stopPropagation()
+    }
+
     return (
         <div className="p-4 bg-zinc-900 w-full flex flex-col h-full">
             <div className="border-b p-5">
                 <h1 className="text-4xl font-semibold">App Settings</h1>
             </div>
-            <div className="overflow-y-scroll flex flex-col py-10">
+            <div className="overflow-y-scroll flex flex-col py-10" onTouchStart={handleTouchStart}>
                 {apps.map((app) => {
                     return (
                         <SettingOption key={app.name} app={app} onClick={onClick} />

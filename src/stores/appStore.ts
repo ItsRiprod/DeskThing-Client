@@ -31,11 +31,11 @@ import useWebSocketStore from './websocketStore'
         return { appSettings: updatedAppSettings }
       })
     },
-    saveSettings: (appName: string) => {
+    saveSettings: async (appName: string) => {
       const send = useWebSocketStore.getState().send
       const settings = get().appSettings[appName]
 
-      Object.entries(settings).map(([key, value]) => {
+      for (const [key, value] of Object.entries(settings)) {
         console.log(`Updating setting ${key} to ${value.value}`)
         const data: OutgoingSocketData = {
           app: appName,
@@ -47,7 +47,8 @@ import useWebSocketStore from './websocketStore'
           }
         }
         send(data)
-      })
+        await new Promise((resolve) => setTimeout(resolve, 300))
+      }
     },
     getAppIcon: (app) => {
       const ip = useSettingsStore.getState().manifest.ip
