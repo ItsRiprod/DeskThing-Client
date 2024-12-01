@@ -52,7 +52,7 @@ export class ActionHandler {
     if (source === "server") {
       this.handleServerAction(action);
     } else {
-      await this.handleClientAction(action);
+      await this.handleAppAction(action);
     }
   };
 
@@ -65,11 +65,11 @@ export class ActionHandler {
     }
   }
 
-  private async handleClientAction(action: Action | ActionReference): Promise<void> {
+  private async handleAppAction(action: Action | ActionReference): Promise<void> {
     try {
       const socketData: OutgoingSocketAction = {
         type: "action",
-        app: action.source,
+        app: 'server',
         payload: action,
       };
       await this.sendMessage(socketData);

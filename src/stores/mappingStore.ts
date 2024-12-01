@@ -75,6 +75,7 @@ export const useMappingStore = create<MappingState>((set, get) => ({
       if (action.id === 'pref') {
         const apps = useAppStore.getState().apps
         const app = apps[action.value || 0]
+        console.log('App', action.value)
         if (app) {
           const url = `http://${ip}:${port}/icon/${app.name}/${app.name}.svg?url`;
           return url

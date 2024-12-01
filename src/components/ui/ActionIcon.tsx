@@ -1,6 +1,6 @@
 import { Icon } from "@src/assets/Icons/Icons"
 import { useMappingStore, useSettingsStore } from "@src/stores"
-import { IconLogoGearLoading } from "@src/assets/Icons"
+import { IconLogoGear } from "@src/assets/Icons"
 import { useEffect, useState } from "react"
 
 interface ActionProps {
@@ -14,16 +14,23 @@ const ActionIcon: React.FC<ActionProps> = ({ url, className }) => {
     const iconColor = useSettingsStore((store) => store.preferences.theme.icons)
 
     useEffect(() => {
+        const abortController = new AbortController()
+        
         const fetchIcon = async () => {
-            const rawSvg = await fetch(url)
-            if (rawSvg.ok) {
-                setSvgContent(await rawSvg.text())
-            } else {
-                console.error('Failed to fetch icon', rawSvg.statusText)
+            try {
+                const rawSvg = await fetch(url, { signal: abortController.signal })
+                if (rawSvg.ok) {
+                    setSvgContent(await rawSvg.text())
+                }
+            } catch  (error) {
+                if (error instanceof Error && error.name !== 'AbortError') {
+                    // Silently fail for 404s and other errors
+                }
             }
         }
 
         fetchIcon()
+        return () => abortController.abort()
     }, [getActionUrl, url])
 
     return (
@@ -31,7 +38,7 @@ const ActionIcon: React.FC<ActionProps> = ({ url, className }) => {
             {svgContent ? (
                 <svg dangerouslySetInnerHTML={{ __html: svgContent }} />
             ) : (
-                <IconLogoGearLoading />
+                <IconLogoGear />
             )}
         </Icon>
     )

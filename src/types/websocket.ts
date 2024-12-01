@@ -1,8 +1,26 @@
-import { Action, ActionReference, AllAppSettings, App, AUDIO_REQUESTS, ButtonMapping, ClientManifest, LOG_TYPES, MiniplayerSettings, SongData, Theme } from "."
+import { Action, ActionReference, AllAppSettings, App, AppSettings, AUDIO_REQUESTS, ButtonMapping, ClientManifest, LOG_TYPES, MiniplayerSettings, SongData, Theme } from "."
   
 export type SocketData = SocketAction | SocketPingPong | SocketSetIcon | SocketGet | SocketSet | SocketSettings | SocketMappings | SocketConfig | SocketLog | SocketMiniplayer | SocketTheme | SocketMusic
 
 export type OutgoingSocketData = OutgoingSocketAction | OutgoingSocketServer | OutgoingSocketMusic | OutgoingSocketSettings
+
+export type IframeData = IframeAction | IframeMusic | IframeSettings
+
+export interface IframeAction {
+  type: 'action'
+  app: 'client'
+  payload: Action
+}
+export interface IframeMusic {
+  type: 'music'
+  app: 'client'
+  payload: SongData
+}
+export interface IframeSettings {
+  type: 'settings'
+  app: 'client'
+  payload: AppSettings
+}
 
 interface BaseSocket {
   app: 'client' | 'server' | 'music';

@@ -208,71 +208,52 @@ export const defaults: ButtonMapping = {
         value: '3'
       }
     },
-    Pad1: {
+    Tray1: {
       [EventMode.KeyDown]: {
-        id: 'volUp',
-        value: '15',
+        enabled: true,
+        id: 'pref',
         source: 'server',
-        enabled: true
+        value: '0'
       }
     },
-    Pad2: {
+    Tray2: {
       [EventMode.KeyDown]: {
-        id: 'swipeL',
+        enabled: true,
+        id: 'pref',
         source: 'server',
-        enabled: true
+        value: '1'
       }
     },
-    Pad3: {
+    Tray3: {
       [EventMode.KeyDown]: {
-        id: 'swipeR',
+        enabled: true,
+        id: 'pref',
         source: 'server',
-        enabled: true
+        value: '2'
       }
     },
-    Pad4: {
+    Tray4: {
       [EventMode.KeyDown]: {
-        id: 'volDown',
+        enabled: true,
+        id: 'pref',
         source: 'server',
-        value: '15',
-        enabled: true
+        value: '3'
       }
     },
-    Pad5: {
+    Tray5: {
       [EventMode.KeyDown]: {
-        id: 'appsList',
+        enabled: true,
+        id: 'pref',
         source: 'server',
-        value: 'hide',
-        enabled: true
+        value: '4'
       }
     },
-    Pad6: {
+    Tray6: {
       [EventMode.KeyDown]: {
-        id: 'appsList',
-        value: 'show',
+        enabled: true,
+        id: 'pref',
         source: 'server',
-        enabled: true
-      }
-    },
-    Pad7: {
-      [EventMode.KeyDown]: {
-        id: 'repeat',
-        source: 'server',
-        enabled: true
-      }
-    },
-    Pad8: {
-      [EventMode.KeyDown]: {
-        id: 'play',
-        source: 'server',
-        enabled: true
-      }
-    },
-    Pad9: {
-      [EventMode.KeyDown]: {
-        id: 'fullscreen',
-        source: 'server',
-        enabled: true
+        value: '5'
       }
     },
     DynamicAction1: {

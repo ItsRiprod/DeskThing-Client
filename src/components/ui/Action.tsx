@@ -12,24 +12,19 @@ const ActionComponent: React.FC<ActionProps> = ({ action, className }) => {
     const executeAction = useMappingStore((store) => store.executeAction)
     const getActionUrl = useMappingStore((store) => store.getActionUrl)
     const profile = useMappingStore((store) => store.profile)
-    const [url, setUrl] = useState(getActionUrl(action))
+    const [url, setUrl] = useState(null)
 
     const onClick = () => {
         executeAction(action)
     }
 
     useEffect(() => {
-        const fetchIcon = async () => {
-            const url =  getActionUrl(action)
-            setUrl(url)
-        }
-
-        fetchIcon()
-    }, [getActionUrl, action, profile])
+        setUrl(getActionUrl(action))
+    }, [action.id, action.value, profile.actions, getActionUrl])
 
     return (
         <button className={`flex items-center justify-center cursor-pointer w-full h-full`} onClick={onClick}> 
-                <ActionIcon url={url} className={className} />
+                {url && <ActionIcon url={url} className={className} />}
         </button>
     )
 }

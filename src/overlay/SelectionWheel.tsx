@@ -90,7 +90,7 @@ const Wheel: React.FC = () => {
 
   return (
     <div
-      className={`rounded-full lg:rotate-90 overflow-hidden flex items-center bg-gradient-radial from-black via-black/10 to-transparent w-[350px] h-[350px] transition-[transform,opacity] origin-center translate-x-[65vw] lg:translate-x-0 lg:translate-y-0 -translate-y-[30vh] fixed ${opened ? "scale-[2] lg:scale-100 opacity-100" : "scale-0 opacity-0"}`}
+      className={`rounded-full z-10 lg:rotate-90 overflow-hidden flex items-center bg-gradient-radial from-black via-black/10 to-transparent w-[350px] h-[350px] transition-[transform,opacity] origin-center translate-x-[65vw] lg:translate-x-0 lg:translate-y-0 -translate-y-[30vh] fixed ${opened ? "scale-[2] lg:scale-100 opacity-100" : "scale-0 opacity-0"}`}
     >
       <div 
         style={{transform: `rotate(${totalRotation * 90 + 45}deg)`}} className="transition-all grid grid-cols-2 w-full h-full">

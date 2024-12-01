@@ -1,12 +1,12 @@
 import { useParams } from "react-router-dom"
+import WebPage from "./Web"
 
 export default function AppPage() {
   const { app } = useParams()
 
   return (
-    <div className="w-screen h-full bg-black flex-col flex items-center justify-center">
-      <h1>App Page</h1>
-      <p>Current path: {app}</p>
+    <div className="w-screen h-full bg-black">
+      <WebPage currentView={app || ''} />
     </div>
   )
 }

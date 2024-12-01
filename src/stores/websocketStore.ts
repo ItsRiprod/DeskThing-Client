@@ -11,7 +11,7 @@ export interface WebSocketState {
   disconnect: () => void;
   reconnect: () => void
   send: (message: OutgoingSocketData) => Promise<void>;
-  addListener: (listener: (msg: SocketData) => void) => void;
+  addListener: (listener: (msg: SocketData) => void) => (() => void);
   removeListener: (listener: (msg: SocketData) => void) => void;
 }
 
