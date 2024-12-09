@@ -89,7 +89,7 @@ const ActionIcon: React.FC<IconHelperProps> = ({ Button, flavor = EventFlavor.Do
                 setSvgContent(null); // Clear any existing SVG content
             } else {
                 try {
-                    const response = await fetch(`http://${ip}:${port}/${action.source}/icon/${action.id}${action.flair}.svg`);
+                    const response = await fetch(`http://${ip}:${port}/icon/${action.source}/icons/${action.id}${action.flair}.svg`);
                     if (!response.ok) throw new Error('Network response was not ok');
                     const svgData = await response.text();
                     setSvgContent(svgData);
