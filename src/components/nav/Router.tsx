@@ -22,6 +22,8 @@ const NavRouter: React.FC = () => {
     const preferences = useSettingsStore((store) => store.preferences)
   
     useEffect(() => {
+      if (!preferences.saveLocation) return
+
       const currentView = preferences.currentView.name
       if (preferences.onboarding) {
         if (SystemApps.includes(currentView)) {

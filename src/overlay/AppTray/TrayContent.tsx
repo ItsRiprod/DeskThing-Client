@@ -21,8 +21,8 @@ const TrayContent = () => {
 
     
     return (
-        <div className={`${appTrayState == ViewMode.PEEK ? 'overflow-hidden' : 'pb-28 overflow-y-auto'} grid justify-items-center grid-cols-1 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 p-2 w-full overflow-hidden max-h-full h-fit`}>
-                {appTrayState == ViewMode.PEEK ? 
+        <div className={`${appTrayState != ViewMode.FULL ? 'overflow-hidden' :  'pb-28 overflow-y-auto'} grid justify-items-center grid-cols-1 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 p-2 w-full overflow-hidden max-h-full h-fit`}>
+                {appTrayState == ViewMode.PEEK ?  
                     actionKeys.map((aKey) =>
                         <div key={aKey} className=" h-28 w-28">
                             <Key keyId={aKey} />
