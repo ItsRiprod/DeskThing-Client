@@ -47,6 +47,13 @@ const defaultPreferences: ClientPreferences = {
   ShowNotifications: true,
   Screensaver: {name: 'default'},
   onboarding: false,
+  showPullTabs: false,
+  saveLocation: true,
+  ScreensaverType: {
+    version: 1,
+    type: 'logo'
+  },
+  use24hour: false
 }
 
 export const useSettingsStore = create<SettingsState>()(

@@ -30,14 +30,14 @@ const WelcomePage: React.FC<StepProps> = ({ setNextSteps }) => {
 
     return (
     <div className="w-full h-full bg-black flex-col flex items-center justify-center">
-        <div className={`${onLoad ? 'w-5/6' : 'w-0'} ease-in-out flex flex-col items-center duration-1000 transition-all overflow-hidden`}>
+        <div className={`${onLoad ? 'md:w-5/6 w-full' : 'w-0'} ease-in-out flex flex-col items-center duration-1000 transition-all overflow-hidden`}>
             <h1 className="text-4xl w-screen text-center mb-2">Welcome to</h1>
             <IconLogo className="w-[50vw] h-fit" />
-            <div className={`${onLoad ? 'h-10' : 'h-0'} transition-[height] overflow-hidden duration-500 delay-1000 flex items-center`}>
+            <div className={`${onLoad ? 'h-16 md:h-10' : 'h-0'} transition-[height] overflow-hidden duration-500 delay-1000 flex items-center`}>
                 <p className="text-2xl mx-2">Lets get some things setup for you on your {deviceType}</p>
                 <IconLogoGearLoading />
             </div>
-            <div className={`${onLoad ? 'h-28' : 'h-0'} space-x-5 w-full justify-center transition-[height] overflow-hidden duration-500 delay-[2000ms] flex items-center`}>
+            <div className={`${onLoad ? 'max-h-full' : 'max-h-0'} flex-col md:flex-row space-x-5 w-full justify-center transition-[max-height] overflow-hidden duration-500 delay-[2000ms] flex items-center`}>
                 {deviceType === 'Mobile' ? (
                     <FullscreenButton expanded={true} />
                 ) : (

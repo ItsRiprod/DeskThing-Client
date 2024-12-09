@@ -88,7 +88,7 @@ const actions: Action[] = [
   },
   {
     name: 'Volume Down',
-    id: 'volDown',
+    id: 'voldown',
     value: '15',
     value_instructions: 'The amount of volume to change by',
     description: 'Turns the volume down',
@@ -99,7 +99,7 @@ const actions: Action[] = [
   },
   {
     name: 'Volume Up',
-    id: 'volUp',
+    id: 'volup',
     value: '15',
     value_instructions: 'The amount of volume to change by',
     description: 'Turns the volume up',
@@ -120,8 +120,8 @@ const actions: Action[] = [
     enabled: true
   },
   {
-    name: 'Toggle AppsList',
-    id: 'appsList',
+    name: 'Toggle appslist',
+    id: 'appslist',
     value: 'toggle',
     value_options: ['hide', 'toggle', 'show'],
     value_instructions: 'How the button behaves',
@@ -133,7 +133,7 @@ const actions: Action[] = [
   },
   {
     name: 'Open Previous',
-    id: 'swipeL',
+    id: 'swipel',
     description: 'Opens the app at the previous index',
     source: 'server',
     version: '0.9.0',
@@ -142,7 +142,7 @@ const actions: Action[] = [
   },
   {
     name: 'Open Next',
-    id: 'swipeR',
+    id: 'swiper',
     description: 'Opens the app at the next index',
     source: 'server',
     version: '0.9.0',
@@ -417,13 +417,13 @@ export const defaults: ButtonMapping = {
     },
     Escape: {
       [EventMode.PressShort]: {
-        id: 'appsList',
+        id: 'appslist',
         value: 'show',
         source: 'server',
         enabled: true
       },
       [EventMode.PressLong]: {
-        id: 'appsList',
+        id: 'appslist',
         value: 'hide',
         source: 'server',
         enabled: true
@@ -431,24 +431,24 @@ export const defaults: ButtonMapping = {
     },
     Swipe: {
       [EventMode.SwipeUp]: {
-        id: 'appsList',
+        id: 'appslist',
         value: 'hide',
         source: 'server',
         enabled: true
       },
       [EventMode.SwipeDown]: {
-        id: 'appsList',
+        id: 'appslist',
         value: 'show',
         source: 'server',
         enabled: true
       },
       [EventMode.SwipeLeft]: {
-        id: 'swipeL',
+        id: 'swipel',
         source: 'server',
         enabled: true
       },
       [EventMode.SwipeRight]: {
-        id: 'swipeR',
+        id: 'swiper',
         source: 'server',
         enabled: true
       }

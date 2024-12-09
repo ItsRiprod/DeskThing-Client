@@ -62,6 +62,12 @@ export class ActionHandler {
       handler(action);
     } else {
       console.warn(`No handler found for action: ${action.id}`);
+      const socketData: OutgoingSocketAction = {
+        type: "action",
+        app: 'server',
+        payload: action,
+      };
+      this.sendMessage(socketData);
     }
   }
 
@@ -303,11 +309,11 @@ export class ActionHandler {
     wheel: this.Wheel,
     pref: this.Pref,
     swap: this.Swap,
-    volDown: this.VolDown,
-    volUp: this.VolUp,
-    appsList: this.handleHideAction,
-    swipeL: this.swipeL,
-    swipeR: this.swipeR,
+    voldown: this.VolDown,
+    volup: this.VolUp,
+    appslist: this.handleHideAction,
+    swipel: this.swipeL,
+    swiper: this.swipeR,
     open: this.open
   };
 }

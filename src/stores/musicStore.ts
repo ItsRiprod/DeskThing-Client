@@ -22,9 +22,20 @@ import { useMappingStore } from './mappingStore'
   }
 
   export const useMusicStore = create<MusicState>((set, get) => ({
-    song: null,
-    setSong: (newData) => {
-      set({ song: { ...get().song, ...newData } })
+      song: null,
+      setSong: (newData) => {
+        const currentSong = get().song
+      
+        if (!currentSong) {
+          set({ song: newData })
+          return
+        }
+
+        const hasChanges = Object.keys(newData).some(key => newData[key] !== currentSong[key])
+
+        if (hasChanges) {
+          set({ song: { ...currentSong, ...newData } })
+        }
 
       const updateIcons = async () => {
         const updateIcon = useMappingStore.getState().updateIcon;

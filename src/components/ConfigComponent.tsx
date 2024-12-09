@@ -135,7 +135,7 @@ export const ConfigComponent: React.FC<ConfigComponentProps> = ({ onFinish }) =>
       )
     },
     {
-      title: 'Player Settings',
+      title: 'Interaction Settings',
       content: (
         <div className="flex h-full flex-col ">
           <h3 className="text-lg mb-4 font-semibold">Player Preferences</h3>
@@ -156,6 +156,38 @@ export const ConfigComponent: React.FC<ConfigComponentProps> = ({ onFinish }) =>
                     }
                 }
             />
+            <SettingsBooleanComponent
+                handleSettingChange={(value) => updatePreferences({
+                    miniplayer: { ...preferences.miniplayer, visible: value }
+                  })}
+                setting={
+                    {
+                        value: preferences.miniplayer.visible,
+                        type: 'boolean',
+                        label: 'Show Miniplayer',
+                    }
+                }
+            />
+            <SettingsSelectComponent
+                handleSettingChange={(value) => updatePreferences({
+                    miniplayer: { ...preferences.miniplayer, position: value as 'bottom' | 'left' | 'right' }
+                  })}
+                setting={
+                    {
+                        value: preferences.miniplayer.position,
+                        type: 'select',
+                        label: 'Position',
+                        disabled: true,
+                        options: [
+                            { value: 'bottom', label: 'Bottom' },
+                            { value: 'right', label: 'Right' },
+                            { value: 'left', label: 'Left' }
+                        ]
+                    }
+                }
+            />
+            
+            <h3 className="text-lg mb-4 font-semibold">Player Preferences</h3>
             <SettingsSelectComponent
                 handleSettingChange={(value) => updatePreferences({
                     volume: value as VolMode }
@@ -177,10 +209,40 @@ export const ConfigComponent: React.FC<ConfigComponentProps> = ({ onFinish }) =>
       )
     },
     {
-      title: 'Notifications',
+      title: 'Experience Settings',
       content: (
         <div className="flex h-full flex-col ">
-          <h3 className="text-lg mb-4 font-semibold">Notification Settings</h3>
+          <h3 className="text-lg mb-4 font-semibold">Navigation</h3>
+          <div className="flex items-center ">
+            <SettingsBooleanComponent 
+                handleSettingChange={(value) => updatePreferences({
+                  showPullTabs: value }
+                  )}
+                setting={
+                    {
+                        value: preferences.showPullTabs,
+                        type: 'boolean',
+                        label: 'Show Pull Tabs'
+                    }
+                }
+            />
+          </div>
+          <div className="flex items-center ">
+            <SettingsBooleanComponent 
+                handleSettingChange={(value) => updatePreferences({
+                  saveLocation: value }
+                  )}
+                setting={
+                    {
+                        value: preferences.saveLocation,
+                        type: 'boolean',
+                        label: 'Save Location'
+                    }
+                }
+            />
+          </div>
+          
+          <h3 className="text-lg mb-4 font-semibold">Notifications</h3>
           <div className="flex items-center ">
             <SettingsBooleanComponent 
                 handleSettingChange={(value) => updatePreferences({
@@ -204,6 +266,7 @@ export const ConfigComponent: React.FC<ConfigComponentProps> = ({ onFinish }) =>
         <div className="flex h-full flex-col ">
           <h3 className="text-lg mb-4 font-semibold">Syncing Settings</h3>
           <div className='flex flex-col justify-start items-start'>
+            <p className="font-geistMono italic text-xs">Pending implementation</p>
             <Button className="bg-red-500 text-white px-4 py-2 my-2 rounded-md">
               <IconTransfer />
               <p className="font-semibold ml-2">Sync Config With Server</p>

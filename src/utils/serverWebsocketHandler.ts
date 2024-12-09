@@ -1,6 +1,12 @@
 import { useSettingsStore, useWebSocketStore } from "@src/stores";
-import { OutgoingSocketData, SocketData } from "@src/types";
+import { useTimeStore } from "@src/stores/timeStore";
+import { OutgoingSocketData, SocketData, SocketSetTime } from "@src/types";
 
+type SocketHandler = {
+    [type: string]: {
+      [request: string]: (data: SocketData) => void;
+    };
+  };
 
 const handleGetManifest = () => {
     const send = useWebSocketStore.getState().send;
@@ -15,17 +21,29 @@ const handleGetManifest = () => {
     send(returnData);
 }
 
-const socketHandlers = {
+const handleSetTime = (data: SocketSetTime) => {
+    const syncTime = useTimeStore.getState().syncTime;
+
+    if (data.payload.utcTime && data.payload.timezoneOffset) {
+        syncTime(data.payload.utcTime, data.payload.timezoneOffset)
+    }
+
+}
+
+const socketHandlers: SocketHandler = {
     get: {
         manifest: handleGetManifest,
         // Add more get handlers here
     },
+    set: {
+        time: handleSetTime,
+    }
     // Add more type handlers here
 };
 
 export const handleServerSocket = (data: SocketData) => {
     const handler = socketHandlers[data.type]?.[data.request];
     if (handler) {
-        handler();
+        handler(data);
     }
 }

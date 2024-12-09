@@ -13,18 +13,19 @@ const SkipSetupButton: React.FC<SkipSetupButtonProps> = () => {
     const onClick = () => {
         setIsSkipping(true)
         setPreferences({
-            onboarding: false
+            onboarding: false,
         })
         setTimeout(() => {
             setPreferences({
-                onboarding: true
+                onboarding: true,
+                currentView: { name: 'dashboard' }
             })
             setIsSkipping(false)
         }, 500)
     }
 
     return (
-        <Button className="border w-fit items-center" onClick={onClick}>
+        <Button className="border mt-5 md:mt-0 w-fit items-center" onClick={onClick}>
             <IconArrowRight className={`${skipping &&  'translate-x-28 opacity-0'} duration-500 ease-out transition-all`} />
             <p className={`${skipping &&  'opacity-0'} duration-250 transition-opacity text-nowrap text-2xl font-semibold`}>Skip Setup</p>
         </Button>

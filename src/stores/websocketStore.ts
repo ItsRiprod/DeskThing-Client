@@ -2,6 +2,7 @@ import { create } from "zustand";
 import WebSocketManager from "../utils/websocketManager";
 import { OutgoingSocketData, SocketData } from "@src/types";
 import { useSettingsStore } from "./settingsStore";
+import { useMusicStore } from "./musicStore";
 
 export interface WebSocketState {
   socketManager: WebSocketManager;
@@ -28,6 +29,10 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
   const wsUrl = `ws://${manifest.ip}:${manifest.port}`
 
   manager.addStatusListener((status) => {
+    if (status == 'reconnecting') {
+      const pause = useMusicStore.getState().pause
+      pause()
+    }
     set({
       isConnected: status === 'connected',
       isReconnecting: status === 'reconnecting'
@@ -78,6 +83,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
     send: async (message: OutgoingSocketData): Promise<void> => {
       const manager = get().socketManager;
       if (manager) {
+        console.log("Sending message:", message);
         await manager.sendMessage(message);
       } else {
         console.error("WebSocket is not connected");

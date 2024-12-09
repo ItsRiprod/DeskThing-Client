@@ -18,8 +18,9 @@ export const SettingsSelectComponent: React.FC<SettingsSelectProps> = ({ handleS
               {setting.type == 'select' && (
                 <div className="w-96 max-w-s relative">
                   <button
+                  disabled={setting.disabled}
                     onClick={() => setIsOpen(!isOpen)}
-                    className="bg-gray-700 text-white border border-gray-600 rounded-md p-2 w-full focus:outline-none flex justify-between items-center"
+                    className={`${setting.disabled ? 'bg-zinc-800' : 'bg-gray-700'} text-white border border-gray-600 rounded-md p-2 w-full focus:outline-none flex justify-between items-center`}
                   >
                     <span>{currentOption?.label || 'Select option'}</span>
                     <span className={`transform transition-transform ${isOpen ? 'rotate-180' : ''}`}><IconArrowDown /></span>

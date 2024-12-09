@@ -36,6 +36,12 @@ export type ButtonMapping = {
     PressLong
   }
 
+  export interface KeyTrigger {
+    key: string
+    mode: EventMode
+    source?: string
+  }
+
   export type Action = {
     name?: string // User Readable name
     description?: string // User Readable description

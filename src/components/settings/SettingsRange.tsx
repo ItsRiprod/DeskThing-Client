@@ -13,6 +13,7 @@ export const SettingsRangeComponent: React.FC<SettingsRangeProps> = ({ className
     <SettingComponent setting={setting} className={className}>
               {setting.type == 'range' && (
                 <input
+                  disabled={setting.disabled}
                   type="range"
                   value={setting.value}
                   min={setting.min}

@@ -5,6 +5,8 @@ import { useMappingStore, useMusicStore, useSettingsStore } from '@src/stores'
 import { Action, EventMode, ViewMode } from '@src/types'
 import { ScrollingText } from '@src/components/ui/ScrollingText'
 import React, { MouseEvent, useEffect, useState } from 'react'
+import ProgressBar from './ProgressBar'
+import Button from '@src/components/ui/Button'
 
 const fullscreenAction: Action = {
     name: 'Open App',
@@ -24,6 +26,10 @@ const Miniplayer: React.FC = () => {
     const song = useMusicStore((store) => store.song)
     const getSong = useMusicStore((store) => store.requestMusicData)
     const currentView = useSettingsStore((store) => store.preferences.currentView)
+    const isPullTabVisible = useSettingsStore((store) => store.preferences.showPullTabs)
+    const [tabVisible, setTabVisible] = useState(true)
+    const setMiniplayerState = useSettingsStore((store) => store.updatePreferences)
+
 
     const [height, setHeight] = useState('h-16')
     const [width, setWidth] = useState('w-16')
@@ -73,6 +79,7 @@ const Miniplayer: React.FC = () => {
     const onClick = () => {
         if (timeoutId) clearTimeout(timeoutId)
         const newTimeout = setTimeout(() => {
+            if (currentView.name == 'nowplaying' || currentView?.manifest?.isAudioSource) return
             setExpanded(false)
         }, 12000)
         setTimeoutId(newTimeout)
@@ -84,10 +91,48 @@ const Miniplayer: React.FC = () => {
         }
     }
 
+    
+    const onToggleHeight = () => {
+        if (miniplayer.state == ViewMode.PEEK) {
+            setMiniplayerState({
+                miniplayer: {
+                    position: miniplayer.position || 'bottom',
+                    state: ViewMode.HIDDEN,
+                    visible: miniplayer.visible ?? true
+                }
+            })
+        } else if (miniplayer.state == ViewMode.HIDDEN) {
+            setMiniplayerState({
+                miniplayer: {
+                    position: miniplayer.position || 'bottom',
+                    state: ViewMode.PEEK,
+                    visible: miniplayer.visible ?? true
+                }
+            })
+        }
+    }
+
+    useEffect(() => {
+        setTabVisible(true)
+        const timer = setTimeout(() => {
+            setTabVisible(false)
+        }, 2000)
+        return () => clearTimeout(timer)
+    }, [miniplayer.state, currentView])
+
     if (miniplayer.position == 'left') return null
 
     return (
         <div style={{background: theme.background}} className={`absolute left-0 flex flex-col h-fit w-screen bottom-0`}>
+            {isPullTabVisible && 
+                <div className={`absolute rounded-tr-xl flex justify-center -top-16 items-center h-16 w-16 bg-zinc-900 transition-opacity duration-300 ${tabVisible ? 'opacity-100' : 'opacity-0'}`}
+                onMouseEnter={() => setTabVisible(true)}
+                onTouchStart={() => setTabVisible(true)}>
+               <Button className="mr-2" onClick={onToggleHeight}>
+                   <IconArrowDown className={`${miniplayer.state == ViewMode.HIDDEN && 'rotate-180'} transition-transform`} />
+               </Button>
+           </div>
+            }
             <ProgressBar />
             <div className={`${miniplayer.state == 'peek' ? height : 'h-0'} transition-[height] overflow-hidden flex w-full items-center justify-center`}>
                 {!isAudioSource && <button onClick={refreshSong} className={`${height} ${width} flex-shrink-0 flex items-center justify-center`}>
@@ -112,7 +157,7 @@ const Miniplayer: React.FC = () => {
                         </button>}
                     {expanded && <DynamicAction>
                         <div className="flex items-center justify-center cursor-pointer w-full h-full">
-                        <LowerMiniplayer className="w-1/2 h-full" />
+                        <LowerMiniplayer onClick={onToggleHeight} className="w-1/2 h-full" />
                         </div>
                         </DynamicAction>}
                     {expanded && <DynamicAction keyId='DynamicAction1' />}
@@ -157,24 +202,11 @@ const DynamicAction: React.FC<DynamicActionProps> = ({ keyId, children, classNam
 
 interface LowerMiniplayerProps {
     className?: string
+    onClick: () => void
 }
 
-const LowerMiniplayer: React.FC<LowerMiniplayerProps> = ({ className }) => {
-    const miniplayerState = useSettingsStore((store) => store.preferences.miniplayer)
+const LowerMiniplayer: React.FC<LowerMiniplayerProps> = ({ className, onClick }) => {
     const iconColor = useSettingsStore((store) => store.preferences.theme.icons)
-    const setMiniplayerState = useSettingsStore((store) => store.updatePreferences)
-
-    const onClick = () => {
-        if (miniplayerState.state == 'peek') {
-            setMiniplayerState({
-                miniplayer: {
-                    position: miniplayerState.position || 'bottom',
-                    state: ViewMode.HIDDEN,
-                    visible: miniplayerState.visible ?? true
-                }
-            })
-        }
-    }
 
     return (
         <button className='flex items-center justify-center flex-grow h-full cursor-pointer' onClick={onClick}>
@@ -183,33 +215,5 @@ const LowerMiniplayer: React.FC<LowerMiniplayerProps> = ({ className }) => {
     )
 }
 
-interface ProgressBarProps {
-    className?: string
-}
-
-const ProgressBar: React.FC<ProgressBarProps> = ({ className }) => {
-    const miniplayerState = useSettingsStore((store) => store.preferences.miniplayer)
-    const setMiniplayerState = useSettingsStore((store) => store.updatePreferences)
-
-    const onClick = () => {
-        if (miniplayerState.state == 'hidden') {
-            setMiniplayerState({
-                miniplayer: {
-                    position: miniplayerState.position || 'bottom',
-                    state: ViewMode.PEEK,
-                    visible: miniplayerState.visible ?? true
-                }
-            })
-        }
-    }
-
-    return (
-        <button className='w-screen h-2' onClick={onClick}>
-            <div className="h-full w-full bottom-0 bg-gray-200">
-                <IconArrowDown className={className + ' w-full h-2'} />
-            </div>
-        </button>
-    )
-}
 
 export default Miniplayer

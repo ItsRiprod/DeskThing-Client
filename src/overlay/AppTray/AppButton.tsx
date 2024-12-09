@@ -1,5 +1,6 @@
 import ActionIcon from "@src/components/ui/ActionIcon"
-import { useAppStore } from "@src/stores"
+import Button from "@src/components/ui/Button"
+import { useAppStore, useSettingsStore } from "@src/stores"
 import { App } from "@src/types"
 import { useEffect, useState } from "react"
 
@@ -10,6 +11,7 @@ interface AppTrayButtonProps {
 const AppTrayButton: React.FC<AppTrayButtonProps> = ({ app }) => {
     const getAppIcon = useAppStore((store) => store.getAppIcon)
     const [appIcon, setAppIcon] = useState<string>(getAppIcon(app))
+    const setCurrentView = useSettingsStore((store) => store.updatePreferences)
 
     useEffect(() => {
         const getIcon = async () => {
@@ -20,10 +22,14 @@ const AppTrayButton: React.FC<AppTrayButtonProps> = ({ app }) => {
         getIcon()
     }, [app])
 
+    const handleAppClick = () => {
+        setCurrentView({ currentView: app })
+    }
+
     return (
-        <div className="w-full h-32 px-20 py-3">
+        <Button onClick={handleAppClick} className="w-28 h-28 flex-shrink-0">
             <ActionIcon url={appIcon} />
-        </div>
+        </Button>
     )
 }
 

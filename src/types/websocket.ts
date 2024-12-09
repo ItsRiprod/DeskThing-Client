@@ -1,10 +1,68 @@
-import { Action, ActionReference, AllAppSettings, App, AppSettings, AUDIO_REQUESTS, ButtonMapping, ClientManifest, LOG_TYPES, MiniplayerSettings, SongData, Theme } from "."
+import { Action, ActionReference, AllAppSettings, App, AppSettings, AUDIO_REQUESTS, ButtonMapping, ClientManifest, KeyTrigger, LOG_TYPES, MiniplayerSettings, SongData, Theme } from "."
   
-export type SocketData = SocketAction | SocketPingPong | SocketSetIcon | SocketGet | SocketSet | SocketSettings | SocketMappings | SocketConfig | SocketLog | SocketMiniplayer | SocketTheme | SocketMusic
+export type SocketData = SocketAction | SocketPingPong | SocketSetTime | SocketSetIcon | SocketGet | SocketTime | SocketSet | SocketSettings | SocketMappings | SocketConfig | SocketLog | SocketMiniplayer | SocketTheme | SocketMusic
 
 export type OutgoingSocketData = OutgoingSocketAction | OutgoingSocketServer | OutgoingSocketMusic | OutgoingSocketSettings
 
-export type IframeData = IframeAction | IframeMusic | IframeSettings
+export type AppDataRequest = AppDataAction | AppDataMusic | AppDataSettings | AppDataKey | AppDataApps | AppTriggerAction | AppTriggerKey | AppTriggerButton
+
+export interface AppTriggerButton extends BaseSocket {
+  app: 'client'
+  type: 'button'
+  payload: { button: string, flavor: string, mode: 'KeyDown' | 'KeyUp' | 'Down' | 'Up' | 'Left' | 'Right'}
+}
+
+export interface AppTriggerAction extends BaseSocket {
+  app: 'client'
+  type: 'action'
+  payload: ActionReference
+}
+
+export interface AppTriggerKey extends BaseSocket {
+  app: 'client'
+  type: 'key'
+  payload: KeyTrigger
+}
+
+export interface AppDataAction extends BaseSocket {
+  app: 'client'
+  type: 'get'
+  request: 'action'
+  payload: Action
+}
+
+export interface AppDataKey extends BaseSocket {
+  app: 'client'
+  type: 'get'
+  request: 'key2' // this is actually 'key' but smth is weird with ts
+  payload: KeyTrigger
+}
+export interface AppDataMusic extends BaseSocket {
+  app: 'client'
+  type: 'get'
+  request: 'music'
+  payload: undefined
+}
+
+export interface AppDataSettings extends BaseSocket {
+  app: 'client'
+  type: 'get'
+  request: 'settings'
+  payload: undefined
+}
+
+export interface AppDataApps extends BaseSocket {
+  app: 'client'
+  type: 'get'
+  request: 'apps'
+  payload: undefined
+}
+
+/**
+ * iFrame  data types to be sent through the iframe
+ */
+
+export type IframeData = IframeAction | IframeMusic | IframeSettings | IframeApps | IFrameString
 
 export interface IframeAction {
   type: 'action'
@@ -20,6 +78,18 @@ export interface IframeSettings {
   type: 'settings'
   app: 'client'
   payload: AppSettings
+}
+
+export interface IframeApps {
+  type: 'apps'
+  app: 'client'
+  payload: App[]
+}
+
+export interface IFrameString {
+  type: string
+  app: 'client'
+  payload: string
 }
 
 interface BaseSocket {
@@ -70,13 +140,24 @@ export interface SocketSettings extends ClientSocket {
 
 export interface SocketSet extends ClientSocket {
   type: 'set'
-  payload: string | {id: string, icon: string}
+  payload: string | {id: string, icon: string} | { utcTime: number, timezoneOffset: number }
+}
+
+export interface SocketSetTime extends ClientSocket {
+  type: 'set'
+  request: 'time'
+  payload: { utcTime: number, timezoneOffset: number }
 }
 
 export interface SocketSetIcon extends ClientSocket {
   type: 'set'
   request: 'icon'
   payload: {id: string, icon: string}
+}
+
+export interface SocketTime extends ClientSocket {
+  type: 'time'
+  payload: string
 }
 
 export interface SocketGet extends ClientSocket {

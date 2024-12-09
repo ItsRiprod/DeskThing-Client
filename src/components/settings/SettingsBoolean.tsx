@@ -1,6 +1,6 @@
 import React from 'react';
 import SettingComponent from './SettingComponent';
-import { SettingsBoolean } from 'DeskThing-Client/src/types';
+import { SettingsBoolean } from '@src/types';
 import Button from '../ui/Button';
 import { IconToggle } from '@src/assets/Icons';
 
@@ -14,7 +14,7 @@ export const SettingsBooleanComponent: React.FC<SettingsBooleanProps> = ({ class
 
   return (
     <SettingComponent setting={setting} className={className}>
-              <Button onClick={() => handleSettingChange(!setting.value as boolean)}>
+              <Button disabled={setting.disabled} onClick={() => handleSettingChange(!setting.value as boolean)}>
                 <IconToggle
                   iconSize={64}
                   checked={setting.value as boolean}

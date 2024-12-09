@@ -44,6 +44,7 @@ export const SettingsColorComponent: React.FC<SettingsColorProps> = ({ handleSet
                   <span className="mr-2 text-white">{localValue}</span>
                   <div className="relative">
                     <input
+                      disabled={setting.disabled}
                       type="color"
                       value={localValue}
                       onChange={(e) => setLocalValue(e.target.value)}

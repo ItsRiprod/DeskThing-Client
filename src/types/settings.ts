@@ -4,6 +4,7 @@ interface SettingsBase {
   type: 'boolean' | 'list' | 'multiselect' | 'number' | 'range' | 'ranked' | 'select' | 'string' | 'color'
   label: string
   description?: string
+  disabled?: boolean
 }
 
 export interface SettingsNumber extends SettingsBase {
@@ -134,7 +135,16 @@ export type SettingsType =
       currentView?: App
       ShowNotifications: boolean
       Screensaver: App
+      ScreensaverType: ScreensaverSettings
       onboarding: boolean
+      showPullTabs: boolean
+      saveLocation: boolean
+      use24hour: boolean
+    }
+
+    export interface ScreensaverSettings {
+      version: number
+      type: 'black' | 'logo' | 'clock'
     }
 
     export interface MiniplayerSettings {

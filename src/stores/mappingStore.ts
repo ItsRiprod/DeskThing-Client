@@ -1,6 +1,6 @@
 
 import { create } from 'zustand'
-import { Action, ActionReference, ButtonMapping, EventMode } from '@src/types/buttons'
+import { Action, ActionReference, ButtonMapping, EventMode, KeyTrigger } from '@src/types/buttons'
 import { SocketAction, SocketData, SocketMappings, SocketSetIcon } from '@src/types'
 import { useSettingsStore } from './settingsStore';
 import { useAppStore } from './appStore';
@@ -23,6 +23,7 @@ import { ActionHandler } from '@src/utils/serverActionHandler';
         executeKey: (key: string, eventMode: EventMode) => void
         updateIcon: (id: string, icon: string) => void
         getActionUrl: (action: Action | ActionReference) => string
+        getKeyUrl: (key: KeyTrigger) => string
         getButtonAction: (key: string, mode: EventMode) => Action | undefined
     }
 
@@ -46,13 +47,8 @@ export const useMappingStore = create<MappingState>((set, get) => ({
 
   executeAction: (action: Action | ActionReference) => {
     // execute action
-    if (action?.source == 'server') {
-      const actionHandler = ActionHandler.getInstance()
-      actionHandler.runAction(action)
-    } else {
-      console.log(`Executing Non-Server Action:`, action);
-      useSettingsStore.getState().addLog({app: 'MAPPING', payload: `NON-SERVER Actions are NOT SUPPORTED`, type: 'error'});
-    }
+    const actionHandler = ActionHandler.getInstance()
+    actionHandler.runAction(action)
   },
 
   executeKey: (key: string, eventMode: EventMode) => {
@@ -75,13 +71,22 @@ export const useMappingStore = create<MappingState>((set, get) => ({
       if (action.id === 'pref') {
         const apps = useAppStore.getState().apps
         const app = apps[action.value || 0]
-        console.log('App', action.value)
         if (app) {
-          const url = `http://${ip}:${port}/icon/${app.name}/${app.name}.svg?url`;
+          const url = `http://${ip}:${port}/icons/${app.name}/icons/${app.name}.svg?url`;
           return url
         } else {
           const actionIcon = profile?.actions.find(a => a.id === action.id).icon  || action.id
           return new URL(`../../public/icons/${actionIcon}.svg?url`, import.meta.url).href;
+        }
+      }
+      if (action.id === 'open') {
+        const keywords = ['utility', 'settings', 'dashboard', 'nowplaying']
+        if (keywords.includes(action.value)) {
+          const actionIcon = profile?.actions.find(a => a.id === action.id).icon  || action.id
+          return new URL(`../../public/icons/${actionIcon}.svg?url`, import.meta.url).href;
+        } else {
+          const url = `http://${ip}:${port}/icons/${action.value}/icons/${action.value}.svg?url`;
+          return url
         }
       }
 
@@ -90,8 +95,17 @@ export const useMappingStore = create<MappingState>((set, get) => ({
     } else {
       // Fetch from server
       const actionIcon = profile?.actions.find(a => a.id === action.id).icon || action.id
-      return `http://${ip}:${port}/icon/${action.id}/${actionIcon}.svg?url`;
+      return `http://${ip}:${port}/icons/${action.source}/icons/${actionIcon}.svg?url`;
     }
+  },
+
+  getKeyUrl: (key: KeyTrigger) => {
+    const profile = get().profile;
+    const action = profile?.mapping[key.key][key.mode];
+    if (action) {
+      return get().getActionUrl(action)
+    }
+    return '';
   },
 
   updateIcon: (id: string, icon: string) => {

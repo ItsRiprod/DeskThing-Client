@@ -25,6 +25,7 @@ export const SettingsListComponent: React.FC<SettingsListProps> = ({ handleSetti
     <SettingComponent setting={setting} className={className}>
       <div className="w-96 max-w-s relative">
         <button
+          disabled={setting.disabled}
           onClick={() => setIsOpen(!isOpen)}
           className="bg-gray-700 text-white border border-gray-600 rounded-md p-2 w-full focus:outline-none flex justify-between items-center"
         >
@@ -37,7 +38,7 @@ export const SettingsListComponent: React.FC<SettingsListProps> = ({ handleSetti
               <button
                 key={option.value}
                 onClick={() => toggleItem(option.value)}
-                className="block w-full text-left text-white hover:bg-gray-600 px-2 py-1 flex items-center"
+                className="w-full text-left text-white hover:bg-gray-600 px-2 py-1 flex items-center"
               >
                 <input
                   type="checkbox"

@@ -20,6 +20,13 @@ const Wheel: React.FC = () => {
   const [opened, setIsOpened] = useState<boolean>(false)
   const setWheelState = useActionStore((store) => store.setWheelState)
 
+  const handleClose = async () => {
+    setIsOpened(false)
+        setTimeout(() => {
+          setWheelState(false);
+        }, 200)
+  }
+
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
 
@@ -28,10 +35,7 @@ const Wheel: React.FC = () => {
       const isClockwise = e.deltaX > 0 || e.deltaY > 0;
       setTotalRotation((prevRotation) => prevRotation + (isClockwise ? 1 : -1));
       timeoutId = setTimeout(() => {
-        setIsOpened(false)
-        timeoutId = setTimeout(() => {
-          setWheelState(false);
-        }, 200)
+        handleClose()
       }, 8000);
     };
 
@@ -56,9 +60,7 @@ const Wheel: React.FC = () => {
         if (action) {
           executeAction(action);
         }
-        setTimeout(() => {
-          setWheelState(false);
-        }, 200)
+        handleClose()
       }
     }
 
@@ -100,6 +102,7 @@ const Wheel: React.FC = () => {
               key={index}
               className={`w-full h-full duration-300 flex lg:-rotate-90 items-center justify-center transition-all`}>
               <div
+                onClick={handleClose}
                 style={{transform: `rotate(${-totalRotation * 90 - 45}deg)`}}
                 className={`transition-all items-center justify-start w-1/4 h-1/4 flex`}
               >

@@ -19,13 +19,11 @@ export const WebSocketListener = () => {
         if (songData.track_name != undefined && songData.track_name !== prevTrackName) {
           setPrevTrackName(songData.track_name);
           getSong()
-          console.log('Received song data:', prevTrackName, songData.track_name);
         } 
-        setSong(songData);
+        setSong({...songData, id: String(Date.now())});
       };
 
       const messageHandler = (socketData: SocketData) => {
-        console.log('Received message:', socketData);
         if (socketData.app !== 'client') return;
         const handlers = {
           config: () => isSocketApp(socketData) && setApps(socketData.payload),

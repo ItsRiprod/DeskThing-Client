@@ -10,6 +10,7 @@ import DashboardPage from "@src/pages/dashboard"
 const SystemApps = [
     'nowplaying',
     'developer',
+    'landing',
     'preferences',
     'settings',
     'utility',

@@ -36,6 +36,7 @@ export const SettingsNumberComponent: React.FC<SettingsNumberProps> = ({ classNa
                   <>
                     <button onClick={handleDecrement} className={buttonClasses}>-</button>
                     <input
+                      disabled={setting.disabled}
                       type="number"
                       value={setting.value as number}
                       min={setting.min}

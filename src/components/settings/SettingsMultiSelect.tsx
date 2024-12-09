@@ -26,6 +26,7 @@ export const SettingsMultiSelectComponent: React.FC<SettingsMultiSelectProps> = 
       <div className="w-96 max-w-s relative">
         <button
           onClick={() => setIsOpen(!isOpen)}
+          disabled={setting.disabled}
           className="bg-gray-700 text-white border border-gray-600 rounded-md p-2 w-full focus:outline-none flex justify-between items-center"
         >
           <span>{selectedItems.length ? selectedItems.join(', ') : 'Select items'}</span>
@@ -37,7 +38,7 @@ export const SettingsMultiSelectComponent: React.FC<SettingsMultiSelectProps> = 
               <button
                 key={option.value}
                 onClick={() => toggleItem(option.value)}
-                className="block w-full text-left text-white hover:bg-gray-600 px-2 py-1 flex items-center"
+                className="w-full text-left text-white hover:bg-gray-600 px-2 py-1 flex items-center"
               >
                 <input
                   type="checkbox"

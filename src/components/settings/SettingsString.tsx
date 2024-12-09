@@ -15,6 +15,7 @@ export const SettingsStringComponent: React.FC<SettingsStringProps> = ({ classNa
     <SettingComponent setting={setting} className={className}>
       <div className="flex items-center w-full">
         <input
+          disabled={setting.disabled}
           type="text"
           value={setting.value as string}
           maxLength={(setting as SettingsString).maxLength}

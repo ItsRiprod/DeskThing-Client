@@ -41,7 +41,7 @@ const ConfigPage: React.FC<StepProps> = ({ currentStep, setNextSteps, onNextStep
 
     return (
         <div className="max-w-full h-full bg-black flex md:flex-row flex-col">
-            <div className={`${showConfig ? 'md:w-3/4 h-1/2 md:h-full' : 'md:w-0 h-0'} border-r border-gray-500 flex-shrink-0 overflow-hidden md:h-full md:justify-center flex flex-col w-screen duration-500 transition-[width,height,padding]`}>
+            <div className={`${showConfig ? 'md:w-3/4 h-5/6 md:h-full' : 'md:w-0 h-0'} border-r border-gray-500 flex-shrink-0 overflow-hidden md:h-full md:justify-center flex flex-col w-screen duration-500 transition-[width,height,padding]`}>
                 <ConfigComponent onFinish={handleNext} />
             </div>
             <div onClick={handleClose} className="w-full px-3 flex-shrink h-full flex flex-col items-center justify-center bg-zinc-900">

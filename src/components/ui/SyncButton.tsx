@@ -18,7 +18,7 @@ const SyncButton: React.FC<SyncProps> = ({ expanded }) => {
     }
     
     return (
-        <Button className="w-fit border-2 border-cyan-500 items-center" onClick={handleSync}>
+        <Button className="w-fit border-2 mt-5 md:mt-0 border-cyan-500 items-center" onClick={handleSync}>
             <IconRefresh className={`${syncing &&  'animate-spin'}`} />
             <p className={`${expanded ? 'w-fit' : 'w-0'} text-nowrap text-2xl font-semibold mx-2 overflow-hidden transition-[width]`}>
                 Sync With Server

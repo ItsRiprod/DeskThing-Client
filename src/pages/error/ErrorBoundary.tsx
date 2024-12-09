@@ -58,12 +58,17 @@ const ErrorScreen: React.FC<ErrorScreenProps> = ({ message }) => {
   useEffect(() => {
     // Set up the interval to navigate to home page every 30 seconds
     const timer = setInterval(() => {
-      window.location.href = '/';
+      clearCache()
     }, 30000); // 30000 milliseconds = 30 seconds
 
     // Clear the interval when the component unmounts
     return () => clearInterval(timer);
   }, []);
+
+  const clearCache = () => {
+    localStorage.clear()
+    window.location.reload()
+}
 
   return (
     <div className="bg-zinc-800 w-screen h-screen flex justify-center items-center">
@@ -73,7 +78,7 @@ const ErrorScreen: React.FC<ErrorScreenProps> = ({ message }) => {
         <p className="font-geistMono italic text-gray-500">Location: {pathname}</p>
         <div className="w-full flex justify-center pt-5">
           <button
-            onClick={() => window.location.href = '/'}
+            onClick={clearCache}
             className="p-5 justify-self-center border-sky-400 border rounded-lg hover:bg-sky-400 hover:text-black"
           >
             Reload

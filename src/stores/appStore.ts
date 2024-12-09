@@ -6,11 +6,9 @@ import useWebSocketStore from './websocketStore'
   interface AppState {
     apps: App[]
     appSettings: AllAppSettings
-    currentApp: App | null
     setApps: (apps: App[]) => void
     setAppSettings: (appSettings: AllAppSettings) => void
     updateAppSettings: (app: string, appSettings: Partial<AppSettings>) => void
-    setCurrentApp: (app: App | null) => void
     getAppIcon(app: App): string
     saveSettings(appName: string): void
   }
@@ -18,10 +16,8 @@ import useWebSocketStore from './websocketStore'
   export const useAppStore = create<AppState>((set, get) => ({
     apps: [],
     appSettings: undefined,
-    currentApp: null,
     setApps: (apps) => set({ apps }),
     setAppSettings: (appSettings) => set({ appSettings }),
-    setCurrentApp: (app) => set({ currentApp: app }),
     updateAppSettings: (app, appSettings) => {
       set((state) => {
         const updatedAppSettings = {
@@ -53,7 +49,7 @@ import useWebSocketStore from './websocketStore'
     getAppIcon: (app) => {
       const ip = useSettingsStore.getState().manifest.ip
       const port = useSettingsStore.getState().manifest.port
-      return `http://${ip}:${port}/icon/${app.name}/${app.name}.svg`
+      return `http://${ip}:${port}/icons/${app.name}/icons/${app.name}.svg`
     }
   }))
 

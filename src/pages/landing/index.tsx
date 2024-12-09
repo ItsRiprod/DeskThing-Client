@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import WelcomePage from './WelcomeScreen'
 import ConnectingPage from './ConnectingScreen'
+import ConfigPage from './ConfigScreen'
 import { IconArrowLeft, IconArrowRight } from '@src/assets/Icons'
 import { useSettingsStore } from '@src/stores'
-import ConfigPage from './ConfigScreen'
 
 export interface StepProps {
     onNextStep: (reverse?: boolean) => void

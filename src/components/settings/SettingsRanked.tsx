@@ -23,14 +23,14 @@ export const SettingsRankedComponent: React.FC<SettingsRankedProps> = ({ classNa
                     <div key={item} className="flex items-center gap-2 mb-1">
                       <span>{item}</span>
                       <button 
-                        disabled={index === 0} 
+                        disabled={index === 0 || setting.disabled} 
                         onClick={() => moveItem(index, index - 1)}
                         className="px-2 py-1 disabled:opacity-50"
                       >
                         ↑
                       </button>
                       <button 
-                        disabled={index === setting.value.length - 1} 
+                        disabled={index === setting.value.length - 1 || setting.disabled} 
                         onClick={() => moveItem(index, index + 1)}
                         className="px-2 py-1 disabled:opacity-50"
                       >

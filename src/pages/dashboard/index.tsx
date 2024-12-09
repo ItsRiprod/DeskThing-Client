@@ -5,7 +5,7 @@ const DashboardPage = () => {
     const isConnected = useWebSocketStore((state) => state.isConnected)
     const isReconnecting = useWebSocketStore((state) => state.isReconnecting)
     const apps = useAppStore((state) => state.apps)
-    const currentApp = useAppStore((state) => state.currentApp)
+    const currentApp = useSettingsStore((state) => state.preferences.currentView)
     const profile = useMappingStore((state) => state.profile)
     const song = useMusicStore((state) => state.song)
     const preferences = useSettingsStore((state) => state.preferences)
