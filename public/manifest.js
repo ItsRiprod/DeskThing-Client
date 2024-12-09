@@ -6,9 +6,9 @@ window.manifest = {
   "builtFor": "Spotify Car Thing",
   "reactive": true,
   "author": "Riprod",
-  "version": "v0.10.0",
-  "version_code": 10.0,
-  "compatible_server": [9],
+  "version": "v0.10.1",
+  "version_code": 10.1,
+  "compatible_server": [10],
   "port": 8891,
   "ip": "localhost",
   "device_type": {"id": 4, "name": "CarThing"}
