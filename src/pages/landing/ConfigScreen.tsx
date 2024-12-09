@@ -28,6 +28,7 @@ const ConfigPage: React.FC<StepProps> = ({ currentStep, setNextSteps, onNextStep
     const handleClose = () => {
         if (showConfig) {
             setShowConfig(false)
+            setNextSteps(true)
         }
     }
 
@@ -39,6 +40,11 @@ const ConfigPage: React.FC<StepProps> = ({ currentStep, setNextSteps, onNextStep
         }, 2000)
     }
 
+    const showConfigScreen = () => {
+        setShowConfig(true)
+        setNextSteps(false)
+    }
+
     return (
         <div className="max-w-full h-full bg-black flex md:flex-row flex-col">
             <div className={`${showConfig ? 'md:w-3/4 h-5/6 md:h-full' : 'md:w-0 h-0'} border-r border-gray-500 flex-shrink-0 overflow-hidden md:h-full md:justify-center flex flex-col w-screen duration-500 transition-[width,height,padding]`}>
@@ -47,7 +53,7 @@ const ConfigPage: React.FC<StepProps> = ({ currentStep, setNextSteps, onNextStep
             <div onClick={handleClose} className="w-full px-3 flex-shrink h-full flex flex-col items-center justify-center bg-zinc-900">
                 <h1 className="text-4xl">Let's setup the config</h1>
                 <div className={`${showConfig ? 'opacity-0' : 'opacity-100'} transition-[opacity,height] ${onLoad ? 'h-20' : 'h-0'} duration-500 flex items-center`}>
-                    {onLoad && <Button disabled={isSyncing} onClick={() => setShowConfig(!showConfig)} className="mt-4 bg-cyan-500 disabled:bg-cyan-700 animate-drop mx-2">
+                    {onLoad && <Button disabled={isSyncing} onClick={showConfigScreen} className="mt-4 bg-cyan-500 disabled:bg-cyan-700 animate-drop mx-2">
                         <IconWrench />
                         <p className="ml-2">Edit Config</p>
                     </Button>}

@@ -196,6 +196,7 @@ export const ConfigComponent: React.FC<ConfigComponentProps> = ({ onFinish }) =>
                     {
                         value: preferences.volume,
                         type: 'select',
+                        disabled: true,
                         label: 'Wheel Type',
                         options: [
                             { value: VolMode.WHEEL, label: 'Weapon Wheel' },

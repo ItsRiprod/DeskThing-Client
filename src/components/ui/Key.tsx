@@ -19,7 +19,7 @@ const Key: React.FC<KeyProps> = ({ keyId, className }) => {
         
     }, [getButtonAction, profile, keyId])
 
-    if (action.id == 'hidden') return null
+    if (!action || action.id == 'hidden') return null
 
     return (
         <ActionComponent action={action} className={className} />
