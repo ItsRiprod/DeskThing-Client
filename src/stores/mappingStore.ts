@@ -56,8 +56,7 @@ export const useMappingStore = create<MappingState>((set, get) => ({
     if (profile?.mapping[key] && profile.mapping[key][eventMode]) {
       const action = profile.mapping[key][eventMode];
       if (action && action.enabled) {
-        // Execute the action - could be sending a WebSocket message, invoking a function, etc.
-        console.log(`Executing action: ${action}`);
+        get().executeAction(action);
       }
     }
   },

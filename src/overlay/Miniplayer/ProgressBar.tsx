@@ -145,6 +145,7 @@ const ProgressBar: React.FC<ProgressBarProps> = memo(() => {
             onMouseLeave={handleMouseUp}
             onMouseMove={handleMouseMove}
         >
+            <div className="w-full absolute h-5 -top-5"></div>
             <div 
                 style={{width: `${progress/totalLength * 100}%`,backgroundColor: primary}} 
                 className="h-full w-full bottom-0 bg-gray-200"

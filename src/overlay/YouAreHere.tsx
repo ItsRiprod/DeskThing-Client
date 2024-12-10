@@ -9,7 +9,7 @@ interface YouAreHereProps {
 }
 
 export const YouAreHere: FC<YouAreHereProps> = ({ setShow }) => {
-    const [isOpen, setIsOpen] = useState(false)
+    const [isOpen, setIsOpen] = useState(true)
     const location = useLocation()
     const hasDoneOnboarding = useSettingsStore((state) => state.preferences.onboarding)
     const setPreferences = useSettingsStore((state) => state.updatePreferences)
@@ -43,7 +43,7 @@ export const YouAreHere: FC<YouAreHereProps> = ({ setShow }) => {
     }
 
     return (
-        <div className={`fixed flex-col justify-between p-4 bg-black/75 z-10 w-full ${isOpen ? 'h-full md:h-full' : 'h-0'} transition-[height] overflow-hidden top-0 flex items-center justify-center`}>
+        <div className={`fixed flex-col justify-between p-4 bg-black z-10 w-full ${isOpen ? 'h-full md:h-full' : 'h-0'} transition-[height] overflow-hidden top-0 flex items-center justify-center`}>
             <div className="flex flex-col">
                 <p className="text-4xl animate-drop">Welcome Back to</p>
                 <IconLogo className="w-fit h-16 animate-dropDelay" />

@@ -107,31 +107,27 @@ export class ActionHandler {
   PlayPause = () => {
     const songData = useMusicStore.getState().song;
     if (songData?.is_playing || false) {
-      this.handleSendCommand(AUDIO_REQUESTS.PAUSE);
+      useMusicStore.getState().pause()
       useMappingStore.getState().updateIcon("play", "");
     } else {
-      this.handleSendCommand(AUDIO_REQUESTS.PLAY, songData?.id || '');
+      useMusicStore.getState().play()
       useMappingStore.getState().updateIcon("play", "pause");
     }
-    useMusicStore
-      .getState()
-      .setSong({ ...songData, is_playing: !songData?.is_playing || false });
   };
 
   Skip = () => {
-    const songData = useMusicStore.getState().song;
-    this.handleSendCommand(AUDIO_REQUESTS.NEXT, songData.id);
+    useMusicStore.getState().next()
   };
 
   Seek = (ms: number) => {
+    useMusicStore.getState().seek(ms);
     this.handleSendCommand(AUDIO_REQUESTS.SEEK, ms);
   };
 
   Rewind = () => {
-    const songData = useMusicStore.getState().song;
-    this.handleSendCommand(AUDIO_REQUESTS.PREVIOUS, songData.id);
+    useMusicStore.getState().previous()
     setTimeout(() => {
-      useMusicStore.getState().requestMusicData();
+      useMusicStore.getState().requestMusicData()
     }, 1000);
   };
 
@@ -142,10 +138,7 @@ export class ActionHandler {
     } else {
       useMappingStore.getState().updateIcon("shuffle", "");
     }
-    this.handleSendCommand(AUDIO_REQUESTS.SHUFFLE, !songData?.shuffle_state || false);
-    useMusicStore
-      .getState()
-      .setSong({ ...songData, shuffle_state: !songData?.shuffle_state || false });
+    useMusicStore.getState().setShuffle();
   };
 
   Repeat = () => {
@@ -167,10 +160,7 @@ export class ActionHandler {
       default:
         newRepeatState = "off";
     }
-    useMusicStore
-      .getState()
-      .setSong({ ...songData, repeat_state: newRepeatState });
-    this.handleSendCommand(AUDIO_REQUESTS.REPEAT, newRepeatState);
+    useMusicStore.getState().setRepeat(newRepeatState)
   };
 
   Pref = (action: Action) => {
@@ -207,22 +197,16 @@ export class ActionHandler {
   };
 
   VolUp = () => {
-    const volume = useMusicStore.getState().song?.volume;
+    const volume = useMusicStore.getState().song.volume;
     if (volume <= 95) {
-      this.handleSendCommand(AUDIO_REQUESTS.VOLUME, volume + 5);
-      useMusicStore
-        .getState()
-        .setSong({ ...useMusicStore.getState().song, volume: volume + 5 });
+      useMusicStore.getState().setVolume(volume + 5);
     }
   };
 
   VolDown = () => {
-    const volume = useMusicStore.getState().song?.volume;
+    const volume = useMusicStore.getState().song.volume;
     if (volume >= 5) {
-      this.handleSendCommand(AUDIO_REQUESTS.VOLUME, volume - 5);
-      useMusicStore
-        .getState()
-        .setSong({ ...useMusicStore.getState().song, volume: volume - 5 });
+      useMusicStore.getState().setVolume(volume - 5);
     }
   };
 

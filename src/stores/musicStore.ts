@@ -4,8 +4,8 @@
 import { SocketData, SocketMusic } from '@src/types'
 import { useMappingStore } from './mappingStore'
 
-  interface MusicState {
-    song: SongData | null
+  export interface MusicState {
+    song?: SongData | null
     setSong: (song: SongData) => void
     requestMusicData: () => void
     next: () => void
@@ -39,7 +39,7 @@ import { useMappingStore } from './mappingStore'
 
       const updateIcons = async () => {
         const updateIcon = useMappingStore.getState().updateIcon;
-        newData.is_playing !== undefined && updateIcon('play', newData.is_playing ? 'pause' : '');
+        newData?.is_playing !== undefined && updateIcon('play', newData?.is_playing ? 'pause' : '');
       }
 
       updateIcons();
@@ -54,7 +54,7 @@ import { useMappingStore } from './mappingStore'
     next: () => {
       const previousState = get().song;
       set({ song: { ...previousState, track_progress: 0 } });
-      createWSAction(AUDIO_REQUESTS.NEXT).catch(() => {
+      createWSAction(AUDIO_REQUESTS.NEXT, 'set', previousState.id).catch(() => {
         set({ song: previousState });
       });
     },
@@ -85,7 +85,7 @@ import { useMappingStore } from './mappingStore'
     
     play: () => {
       const previousState = get().song;
-      set({ song: { ...previousState, is_playing: !previousState.is_playing } });
+      set({ song: { ...previousState, is_playing: !previousState?.is_playing || false } });
       createWSAction(AUDIO_REQUESTS.PLAY).catch(() => {
         set({ song: previousState });
       });
@@ -141,20 +141,21 @@ import { useMappingStore } from './mappingStore'
   }))
     let debounceTimers: { [key in AUDIO_REQUESTS]?: NodeJS.Timeout } = {};
 
-    const createWSAction = async (request: AUDIO_REQUESTS, type: 'get' | 'set' = 'set', payload?: number): Promise<void> => {
+    const createWSAction = async (request: AUDIO_REQUESTS, type: 'get' | 'set' = 'set', payload?: number | string): Promise<void> => {
       try {
         const send = useWebSocketStore.getState().send;
       
         // Clear any existing timeout for this request type
         if (debounceTimers[request]) {
           clearTimeout(debounceTimers[request]);
+          console.log(`Cleared timeout for ${request}`);
         }
 
         // Set a new timeout
         debounceTimers[request] = setTimeout(() => {
           send({ app: 'music', type, request, payload });
           delete debounceTimers[request];
-        }, 500); // 100ms debounce delay
+        }, 300); // 100ms debounce delay
       } catch (error) {
         throw error;
       }
