@@ -115,7 +115,7 @@ export interface OutgoingSocketMusic {
   app: 'music'
   type: string
   request?: AUDIO_REQUESTS
-  payload?: number
+  payload?: number | string
 }
 
 export interface OutgoingSocketSettings {

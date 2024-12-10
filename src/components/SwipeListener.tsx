@@ -71,6 +71,30 @@ export const SwipeListener = () => {
         window.removeEventListener('touchend', touchEndHandler);
       }
     }, []);
-  
+
+    useEffect(() => {
+
+      const handleScroll = (event: WheelEvent) => {
+        if (event.defaultPrevented) return;
+        const deltaY = event.deltaY;
+        const deltaX = event.deltaX;
+
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          // Horizontal scroll
+          const action = getActions('Scroll', deltaX > 0 ? EventMode.ScrollRight : EventMode.ScrollLeft);
+          action && executeAction(action);
+        } else {
+          // Vertical scroll
+          const action = getActions('Scroll', deltaY > 0 ? EventMode.ScrollDown : EventMode.ScrollUp);
+          action && executeAction(action);
+        }
+      };
+
+      window.addEventListener('wheel', handleScroll, { passive: true });
+
+      return () => {
+        window.removeEventListener('wheel', handleScroll);
+      };
+    }, [])  
     return null;
 };
