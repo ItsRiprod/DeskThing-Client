@@ -34,9 +34,9 @@ export class ManifestStore {
     "builtFor": "Spotify Car Thing",
     "reactive": true,
     "author": "Riprod",
-    "version": "v0.9.0",
-    "version_code": 9.0,
-    "compatible_server": [9], // Compatible with all versions of 9.X
+    "version": "v0.10.3",
+    "version_code": 10.3,
+    "compatible_server": [10], // Compatible with all versions of 9.X
     "port": 8891,
     "ip": "loading-ip",
     "default_view": "landing",

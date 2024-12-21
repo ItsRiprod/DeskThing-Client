@@ -4,7 +4,7 @@ export type SocketData = SocketAction | SocketPingPong | SocketSetTime | SocketS
 
 export type OutgoingSocketData = OutgoingSocketAction | OutgoingSocketServer | OutgoingSocketMusic | OutgoingSocketSettings
 
-export type AppDataRequest = AppDataAction | AppDataMusic | AppDataSettings | AppDataKey | AppDataApps | AppTriggerAction | AppTriggerKey | AppTriggerButton
+export type AppDataRequest = AppDataAction | AppDataMusic | AppDataSettings | AppDataKey | AppDataApps | AppDataManifest | AppTriggerAction | AppTriggerKey | AppTriggerButton
 
 export interface AppTriggerButton extends BaseSocket {
   app: 'client'
@@ -58,11 +58,18 @@ export interface AppDataApps extends BaseSocket {
   payload: undefined
 }
 
+export interface AppDataManifest extends BaseSocket {
+  app: 'client'
+  type: 'get'
+  request: 'manifest'
+  payload: undefined
+}
+
 /**
  * iFrame  data types to be sent through the iframe
  */
 
-export type IframeData = IframeAction | IframeMusic | IframeSettings | IframeApps | IFrameString
+export type IframeData = IframeAction | IframeMusic | IframeSettings | IframeApps | IFrameString | IframeManifest
 
 export interface IframeAction {
   type: 'action'
@@ -84,6 +91,12 @@ export interface IframeApps {
   type: 'apps'
   app: 'client'
   payload: App[]
+}
+
+export interface IframeManifest {
+  type: 'manifest'
+  app: 'client'
+  payload: ClientManifest
 }
 
 export interface IFrameString {

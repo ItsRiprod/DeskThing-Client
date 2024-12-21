@@ -22,6 +22,7 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }) => {
   const executeAction = useMappingStore(((state) => state.executeAction))
   const executeKey = useMappingStore(((state) => state.executeKey))
   const currentTime = useTimeStore((state) => state.currentTimeFormatted)
+  const manifest = useSettingsStore((state) => state.manifest)
 
   // Handles triggering actions
   const handleAction = (data: AppTriggerAction) => {
@@ -91,7 +92,11 @@ const handleKey = (data: AppTriggerKey) => {
     if (data.type == 'get') {
         const actionUrl = getActionUrl(data.payload)
         send({ type: data.payload.id, app: 'client', payload: actionUrl })
+      }
     }
+    
+  const handleManifest = () => {
+      send({ type: 'manifest', app: 'client', payload: manifest })    
   }
 
   const buttonHandlers: {
@@ -109,7 +114,8 @@ const handleKey = (data: AppTriggerKey) => {
     settings: handleSettings,
     apps: handleApps,
     key: handleKeyIcon,
-    action: handleActionIcon
+    action: handleActionIcon,
+    manifest: handleManifest
   }
 
   const send = (data: IframeData) => {
@@ -132,15 +138,24 @@ const handleKey = (data: AppTriggerKey) => {
   }, [currentView, addWebsocketListener])
 
   useEffect(() => {
-    send({ type: 'music', app: 'client', payload: music })
+    if (music) {
+      send({ type: 'music', app: 'client', payload: music })
+    }
   }, [music])
+  useEffect(() => {
+    if (apps) {
+      send({ type: 'apps', app: 'client', payload: apps })
+    }
+  }, [apps])
   useEffect(() => {
     if (appSettings && appSettings[currentView]) {
       send({ type: 'settings', app: 'client', payload: appSettings[currentView] })
     }
   }, [appSettings, currentView])
   useEffect(() => {
-    send({ type: 'time', app: 'client', payload: currentTime })
+    if (currentTime) {
+      send({ type: 'time', app: 'client', payload: currentTime })
+    }
   }, [currentTime])
   
   useEffect(() => {
@@ -149,7 +164,7 @@ const handleKey = (data: AppTriggerKey) => {
       if (appSettings && appSettings[currentView]) {
         send({ type: 'settings', app: 'client', payload: appSettings[currentView] })
       }
-      send({ type: 'time', app: 'client', payload: currentTime })
+      currentTime && send({ type: 'time', app: 'client', payload: currentTime })
     }
 
     const id = setTimeout(sendDefaultData, 1000)
@@ -165,7 +180,11 @@ const handleKey = (data: AppTriggerKey) => {
 
         if (appDataRequest.app == 'client') {
             if (appDataRequest.type === 'get') {
+              if (handlers[appDataRequest.request]) {
                 handlers[appDataRequest.request](appDataRequest)
+              } else {
+                console.log('Unknown request type: ', appDataRequest.request)
+              }
             } else if (appDataRequest.type === 'button') {
                 buttonHandlers.button(appDataRequest)
             } else if (appDataRequest.type === 'key') {

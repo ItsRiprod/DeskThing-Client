@@ -6,6 +6,7 @@ import { useSettingsStore } from './settingsStore';
 import { useAppStore } from './appStore';
 import { defaults } from '../assets/defaultMapping'
 import { ActionHandler } from '@src/utils/serverActionHandler';
+import { useActionStore } from './actionStore';
 
 /**
  * Hey YOU when you go to fix updateIcon remember what needs to be changed:
@@ -52,6 +53,23 @@ export const useMappingStore = create<MappingState>((set, get) => ({
   },
 
   executeKey: (key: string, eventMode: EventMode) => {
+    if (key == 'Scroll') {
+      const wheelState = useActionStore.getState().wheelState
+      if (wheelState) {
+        if (eventMode == EventMode.ScrollUp || eventMode == EventMode.ScrollRight) {
+          const incrementWheelRotation = useActionStore.getState().incrementWheelRotation
+          incrementWheelRotation()
+          return
+        } else if (eventMode == EventMode.ScrollDown || eventMode == EventMode.ScrollLeft) {
+          const decrementWheelRotation = useActionStore.getState().decrementWheelRotation
+          decrementWheelRotation()
+        } else {
+          console.error('Unknown scroll event mode', eventMode)
+        }
+        return
+      }
+    }
+
     const profile = get().profile;
     if (profile?.mapping[key] && profile.mapping[key][eventMode]) {
       const action = profile.mapping[key][eventMode];

@@ -4,6 +4,7 @@ import { EventMode } from "@src/types/buttons";
 
 export const ButtonListener = () => {
     const executeAction = useMappingStore((store) => store.executeAction)
+    const executeKey = useMappingStore((store) => store.executeKey)
     const getActions = useMappingStore((store) => store.getButtonAction)
 
     useEffect(() => {
@@ -61,6 +62,30 @@ export const ButtonListener = () => {
         longPressTimeouts.forEach(timeout => clearTimeout(timeout));
       }
     }, []);
+
+    useEffect(() => {
+
+      const handleScroll = (event: WheelEvent) => {
+        if (event.defaultPrevented) return;
+        const deltaY = event.deltaY;
+        const deltaX = event.deltaX;
+
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          // Horizontal scroll
+          executeKey('Scroll', deltaX > 0 ? EventMode.ScrollRight : EventMode.ScrollLeft);
+          
+        } else {
+          // Vertical scroll
+          executeKey('Scroll', deltaY > 0 ? EventMode.ScrollDown : EventMode.ScrollUp);
+        }
+      };
+
+      window.addEventListener('wheel', handleScroll, { passive: true });
+
+      return () => {
+        window.removeEventListener('wheel', handleScroll);
+      };
+    }, [])
   
     return null;
 };

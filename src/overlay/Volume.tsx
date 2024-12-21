@@ -20,7 +20,6 @@ const VolumeOverlay: React.FC = () => {
     }, [musicVolume])
 
     useEffect(() => {
-        console.log('Music Volume:', musicVolume)
         setIsVisible(true)
         const timer = setTimeout(() => {
             setIsVisible(false)

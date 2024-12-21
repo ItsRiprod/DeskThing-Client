@@ -7,30 +7,43 @@ export const SwipeListener = () => {
     const getActions = useMappingStore((store) => store.getButtonAction)
 
     useEffect(() => {
-      let touchStartX: number | null = null;
-      let touchStartY: number | null = null;
-      let touchStartTime: number | null = null;
+      let startX: number | null = null;
+      let startY: number | null = null;
+      let startTime: number | null = null;
       const swipeThreshold = 50;
       const swipeTimeThreshold = 500; // 500ms timeout for swipe
 
-      const touchStartHandler = (e: TouchEvent) => {
+      const startHandler = (e: TouchEvent | MouseEvent) => {
         if (e.defaultPrevented) return;
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-        touchStartTime = Date.now();
+        if (e instanceof TouchEvent) {
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+        } else {
+          startX = e.clientX;
+          startY = e.clientY;
+        }
+        startTime = Date.now();
       };
 
-      const touchEndHandler = (e: TouchEvent) => {
+      const endHandler = (e: TouchEvent | MouseEvent) => {
         if (e.defaultPrevented) return;
-        if (!touchStartX || !touchStartY || !touchStartTime) return;
+        if (!startX || !startY || !startTime) return;
 
-        const touchEndX = e.changedTouches[0].clientX;
-        const touchEndY = e.changedTouches[0].clientY;
-        const touchEndTime = Date.now();
+        let endX: number;
+        let endY: number;
 
-        const deltaX = touchEndX - touchStartX;
-        const deltaY = touchEndY - touchStartY;
-        const deltaTime = touchEndTime - touchStartTime;
+        if (e instanceof TouchEvent) {
+          endX = e.changedTouches[0].clientX;
+          endY = e.changedTouches[0].clientY;
+        } else {
+          endX = e.clientX;
+          endY = e.clientY;
+        }
+        const endTime = Date.now();
+
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
+        const deltaTime = endTime - startTime;
 
         if (deltaTime <= swipeTimeThreshold) {
           if (Math.abs(deltaX) > Math.abs(deltaY)) {
@@ -58,43 +71,22 @@ export const SwipeListener = () => {
           }
         }
 
-        touchStartX = null;
-        touchStartY = null;
-        touchStartTime = null;
+        startX = null;
+        startY = null;
+        startTime = null;
       };
 
-      window.addEventListener('touchstart', touchStartHandler, { passive: true });
-      window.addEventListener('touchend', touchEndHandler, { passive: true });
+      window.addEventListener('touchstart', startHandler, { passive: true });
+      window.addEventListener('touchend', endHandler, { passive: true });
+      window.addEventListener('mousedown', startHandler, { passive: true });
+      window.addEventListener('mouseup', endHandler, { passive: true });
       
       return () => {
-        window.removeEventListener('touchstart', touchStartHandler);
-        window.removeEventListener('touchend', touchEndHandler);
+        window.removeEventListener('touchstart', startHandler);
+        window.removeEventListener('touchend', endHandler);
+        window.removeEventListener('mousedown', startHandler);
+        window.removeEventListener('mouseup', endHandler);
       }
-    }, []);
-
-    useEffect(() => {
-
-      const handleScroll = (event: WheelEvent) => {
-        if (event.defaultPrevented) return;
-        const deltaY = event.deltaY;
-        const deltaX = event.deltaX;
-
-        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-          // Horizontal scroll
-          const action = getActions('Scroll', deltaX > 0 ? EventMode.ScrollRight : EventMode.ScrollLeft);
-          action && executeAction(action);
-        } else {
-          // Vertical scroll
-          const action = getActions('Scroll', deltaY > 0 ? EventMode.ScrollDown : EventMode.ScrollUp);
-          action && executeAction(action);
-        }
-      };
-
-      window.addEventListener('wheel', handleScroll, { passive: true });
-
-      return () => {
-        window.removeEventListener('wheel', handleScroll);
-      };
-    }, [])  
+    }, []);  
     return null;
 };

@@ -23,12 +23,11 @@ const handleGetManifest = () => {
 
 const handleSetTime = (data: SocketSetTime) => {
     const syncTime = useTimeStore.getState().syncTime;
-
-    if (data.payload.utcTime && data.payload.timezoneOffset) {
-        syncTime(data.payload.utcTime, data.payload.timezoneOffset)
-    }
-
-}
+          if (data.payload.utcTime && data.payload.timezoneOffset) {
+            
+              syncTime(data.payload.utcTime, data.payload.timezoneOffset);
+          }
+  }
 
 const socketHandlers: SocketHandler = {
     get: {

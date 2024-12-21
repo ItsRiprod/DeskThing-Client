@@ -18,9 +18,20 @@ const ActionIcon: React.FC<ActionProps> = ({ url, className }) => {
         
         const fetchIcon = async () => {
             try {
-                const rawSvg = await fetch(url, { signal: abortController.signal })
+                const rawSvg = await fetch(url, { 
+                    signal: abortController.signal,
+                    headers: {
+                        'Accept': 'image/svg+xml'
+                    }
+                })
                 if (rawSvg.ok) {
-                    setSvgContent(await rawSvg.text())
+                    const contentType = rawSvg.headers.get('content-type')
+                    if (contentType && contentType.includes('svg')) {
+                        const text = await rawSvg.text()
+                        setSvgContent(text)
+                    } else {
+                        setSvgContent(null)
+                    }
                 }
             } catch  (error) {
                 if (error instanceof Error && error.name !== 'AbortError') {

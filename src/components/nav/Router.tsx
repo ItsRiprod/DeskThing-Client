@@ -6,6 +6,7 @@ import { Route, Routes, useNavigate } from "react-router-dom"
 import NowPlaying from "@src/pages/nowplaying"
 import UtilityPage from "@src/pages/settings"
 import DashboardPage from "@src/pages/dashboard"
+import ClockPage from "@src/pages/clock"
 
 const SystemApps = [
     'nowplaying',
@@ -14,7 +15,8 @@ const SystemApps = [
     'preferences',
     'settings',
     'utility',
-    'dashboard'
+    'dashboard',
+    'clock'
 ]
 
 const NavRouter: React.FC = () => {
@@ -44,6 +46,7 @@ const NavRouter: React.FC = () => {
           <Route path={'/developer'} element={<LandingPage />} />
           <Route path={'/nowplaying'} element={<NowPlaying />} />
           <Route path={'/dashboard'} element={<DashboardPage />} />
+          <Route path={'/clock'} element={<ClockPage />} />
           <Route path={'/settings'} element={<UtilityPage />} />
           <Route path={'/utility'} element={<UtilityPage />} />
           <Route path={'/utility/:app'} element={<UtilityPage />} />

@@ -1,5 +1,6 @@
 import Button from "@src/components/ui/Button"
 import { useAppStore, useMappingStore, useMusicStore, useSettingsStore, useWebSocketStore } from "@src/stores"
+import { useTimeStore } from "@src/stores/timeStore"
 
 const DashboardPage = () => {
     const isConnected = useWebSocketStore((state) => state.isConnected)
@@ -12,12 +13,17 @@ const DashboardPage = () => {
     const updatePreferences = useSettingsStore((state) => state.updatePreferences)
     const manifest = useSettingsStore((state) => state.manifest)
     const logs = useSettingsStore((state) => state.logs)
+    const currentTime = useTimeStore((state) => state.currentTimeFormatted)
 
     const handleRestartOnboarding = () => {
         updatePreferences({
             onboarding: false,
             currentView: { name: 'landing'}
         })
+    }
+
+    const handleClockRoute = () => {
+        updatePreferences({ currentView: { name: 'clock' }})
     }
 
     return (
@@ -33,12 +39,10 @@ const DashboardPage = () => {
                 </div>
             </section>
 
-            <section className="m-2 bg-zinc-900 rounded-lg p-4 shadow-lg">
-                <h2 className="text-xl font-bold text-gray-200 mb-3">Apps</h2>
-                <div className="space-y-2">
-                    <div className="text-gray-300">Loaded Apps: {apps.length}</div>
-                    <div className="text-gray-300">Current App: {currentApp?.name || 'None'}</div>
-                </div>
+            <section className="m-2 bg-zinc-900 flex items-center justify-center rounded-lg p-4 shadow-lg">
+                <Button onClick={handleClockRoute} className="bg-zinc-500">
+                    <p>Open Clock</p>
+                </Button>
             </section>
 
             <section className="m-2 bg-zinc-900 rounded-lg p-4 shadow-lg">
@@ -53,11 +57,17 @@ const DashboardPage = () => {
                     <div className="text-gray-300">Playing: {song?.is_playing ? 'Yes' : 'No'}</div>
                     <div className="text-gray-300">Volume: {song?.volume || 0}%</div>
                 </div>
+                <h2 className="text-xl font-bold text-gray-200 mb-3">Apps</h2>
+                <div className="space-y-2">
+                    <div className="text-gray-300">Loaded Apps: {apps.length}</div>
+                    <div className="text-gray-300">Current App: {currentApp?.name || 'None'}</div>
+                </div>
             </section>
 
             <section className="m-2 bg-zinc-900 rounded-lg p-4 shadow-lg">
                 <h2 className="text-xl font-bold text-gray-200 mb-3">Settings</h2>
                 <div className="space-y-2">
+                    <div className="text-gray-300">Time: {currentTime}</div>
                     <div className="text-gray-300">Theme: {preferences.theme.scale}</div>
                     <div className="text-gray-300">Primary Color: {preferences.theme.primary}</div>
                     <div className="text-gray-300">Volume Mode: {preferences.volume}</div>

@@ -1,6 +1,7 @@
 import { IconRefresh } from "@src/assets/Icons"
 import { useState } from "react"
 import Button from "./Button"
+import { useSettingsStore } from "@src/stores"
 
 interface SyncProps {
     expanded?: boolean
@@ -8,11 +9,18 @@ interface SyncProps {
 
 const SyncButton: React.FC<SyncProps> = ({ expanded }) => {
     const [syncing, setIsSyncing] = useState(false)
-
+    const setPreferences = useSettingsStore(((state) => state.updatePreferences))
     const handleSync = () => {
         setIsSyncing(true)
         // TODO: Sync with server
+        setPreferences({
+            onboarding: false,
+        })
         setTimeout(() => {
+            setPreferences({
+                onboarding: true,
+                currentView: { name: 'dashboard' }
+            })
             setIsSyncing(false)
         }, 1000)
     }

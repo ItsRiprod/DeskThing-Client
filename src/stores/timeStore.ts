@@ -21,6 +21,7 @@ import { useSettingsStore } from './settingsStore';
       const clientTime = Date.now(); // Client's current time in ms
       const serverTimeOffset = utcTime - clientTime; // Calculate server offset
   
+
       set({
         utcTime,
         timezoneOffset,
@@ -37,16 +38,13 @@ import { useSettingsStore } from './settingsStore';
       const currentTime = new Date(Date.now() + serverTimeOffset); // Adjust for server offset
       const is24Hour = useSettingsStore.getState().preferences.use24hour
       // Convert to server timezone
-      const adjustedTime = new Date(currentTime.getTime() + timezoneOffset * 60 * 1000);
-      
-      // Format the time
-      const formattedTime = adjustedTime.toLocaleString('en-US', {
-        timeZone: 'UTC', // Adjust this if you want to specify the server timezone
-        hour12: !is24Hour,
-        hour: 'numeric',
-        minute: '2-digit',
-      });
+      const adjustedTime = new Date(currentTime.getTime() + (timezoneOffset * 60000))
 
+      // Format the time based on server time
+      const [hours, minutes] = [adjustedTime.getUTCHours(), adjustedTime.getUTCMinutes()];
+      const ampm = is24Hour ? '' : hours >= 12 ? 'PM' : 'AM';
+      const formattedHours = is24Hour ? hours : (hours % 12 || 12);
+      const formattedTime = `${formattedHours}:${minutes.toString().padStart(2, '0')}${!is24Hour ? ' ' + ampm : ''}`;
       console.log('Time is: ', formattedTime)
   
       set({ currentTimeFormatted: formattedTime });

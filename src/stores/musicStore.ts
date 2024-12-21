@@ -24,6 +24,7 @@ import { useMappingStore } from './mappingStore'
   export const useMusicStore = create<MusicState>((set, get) => ({
       song: null,
       setSong: (newData) => {
+        console.log('Received song')
         const currentSong = get().song
       
         if (!currentSong) {
@@ -40,6 +41,8 @@ import { useMappingStore } from './mappingStore'
       const updateIcons = async () => {
         const updateIcon = useMappingStore.getState().updateIcon;
         newData?.is_playing !== undefined && updateIcon('play', newData?.is_playing ? 'pause' : '');
+        newData?.repeat_state !== undefined && updateIcon('repeat', newData?.repeat_state == 'all' ? 'repeatActive' : newData?.repeat_state == 'off' ? 'repeatDisabled' : '');
+        newData?.shuffle_state !== undefined && updateIcon('shuffle', newData?.shuffle_state ? '' : 'shuffleDisabled');
       }
 
       updateIcons();
@@ -47,7 +50,6 @@ import { useMappingStore } from './mappingStore'
     },
 
     requestMusicData: () => {
-      console.log('Requesting song data')
       createWSAction(AUDIO_REQUESTS.SONG, 'get');
     },
 

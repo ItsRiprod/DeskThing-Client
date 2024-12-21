@@ -79,12 +79,13 @@ const Miniplayer: React.FC = () => {
     const onClick = () => {
         if (timeoutId) clearTimeout(timeoutId)
         const newTimeout = setTimeout(() => {
-            if (currentView.name == 'nowplaying' || currentView?.manifest?.isAudioSource) return
+            if (currentView.name != 'nowplaying' || !currentView?.manifest?.isAudioSource) return
             setExpanded(false)
         }, 12000)
         setTimeoutId(newTimeout)
         
         if (expanded) {
+            if (currentView.name != 'nowplaying' || !currentView?.manifest?.isAudioSource) return
             setExpanded(false)
         } else {
             setExpanded(true)

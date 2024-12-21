@@ -48,6 +48,18 @@ export const ConfigComponent: React.FC<ConfigComponentProps> = ({ onFinish }) =>
         <div className="flex h-full flex-col">
           <h3 className="text-lg mb-4 font-semibold">Choose Your Theme</h3>
           <div className="flex flex-col">
+          <SettingsBooleanComponent
+                handleSettingChange={(value) => updatePreferences({
+                    use24hour: value
+                  })}
+                setting={
+                    {
+                        value: preferences.use24hour,
+                        type: 'boolean',
+                        label: '24 hour time',
+                    }
+                }
+            />
           <SettingsSelectComponent
                 handleSettingChange={(value) => updatePreferences({
                     theme: { ...preferences.theme, scale: value as 'small' | 'medium' | 'large' }
