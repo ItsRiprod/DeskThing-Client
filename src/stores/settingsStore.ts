@@ -1,14 +1,16 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { ClientManifest, ClientPreferences, log, ViewMode, VolMode } from '@src/types/settings'
+import { ClientManifest, ClientPreferences, Theme, ViewMode, VolMode } from '@deskthing/types'
+import { Log } from '@src/types'
 interface SettingsState {
-  logs: log[]
+  logs: Log[]
   manifest: ClientManifest
   preferences: ClientPreferences
-  addLog: (log: log) => void
+  addLog: (log: Log) => void
   clearLogs: () => void
   updateManifest: (settings: Partial<ClientManifest>) => void
   updatePreferences: (preferences: Partial<ClientPreferences>) => void
+  updateTheme: (preferences: Partial<Theme>) => void
   resetPreferences: () => void
 }
 
@@ -40,22 +42,39 @@ const defaultPreferences: ClientPreferences = {
     textLight: '#ffffff',
     textDark: '#000000',
     icons: '#ffffff',
-    background: '#000000',
+    background: '#000000'
   },
   volume: VolMode.WHEEL,
-  currentView: {name: 'landing'},
+  currentView: {
+    name: 'landing',
+    enabled: true,
+    running: true,
+    timeStarted: 0,
+    prefIndex: 0
+  },
   ShowNotifications: true,
-  Screensaver: {name: 'default'},
+  Screensaver: {
+    name: 'default',
+    enabled: true,
+    running: true,
+    timeStarted: 0,
+    prefIndex: 0
+  },
   onboarding: false,
   showPullTabs: false,
   saveLocation: true,
   ScreensaverType: {
     version: 1,
-    type: 'logo'
+    type: 'clock'
   },
   use24hour: false
 }
 
+/**
+ * Provides a state management store for the application's settings, including logs, manifest, and preferences.
+ * The store uses the `zustand` library with the `persist` middleware to save and restore the state.
+ * The store includes methods to manage the logs, update the manifest and preferences, and reset the preferences to their default values.
+ */
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
@@ -71,17 +90,22 @@ export const useSettingsStore = create<SettingsState>()(
         set((state) => ({
           manifest: { ...state.manifest, ...newSettings }
         })),
-      updatePreferences: (newPreferences) => set((state) => ({
-        preferences: { ...state.preferences, ...newPreferences }
-      })),
-      resetPreferences: () => set({ preferences: defaultPreferences }),
+      updatePreferences: (newPreferences) =>
+        set((state) => ({
+          preferences: { ...state.preferences, ...newPreferences }
+        })),
+      updateTheme: (newTheme) =>
+        set((state) => ({
+          preferences: { ...state.preferences, theme: { ...state.preferences.theme, ...newTheme } }
+        })),
+      resetPreferences: () => set({ preferences: defaultPreferences })
     }),
     {
       name: 'settings-storage',
       onRehydrateStorage: () => (state) => {
         setTimeout(() => {
           if (window.manifest) {
-            state?.updateManifest({...defaultManifest, ...window.manifest})
+            state?.updateManifest({ ...defaultManifest, ...window.manifest })
           }
           if (!state.preferences) {
             state.updatePreferences(defaultPreferences)

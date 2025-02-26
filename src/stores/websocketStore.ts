@@ -1,25 +1,37 @@
-import { create } from "zustand";
-import WebSocketManager from "../utils/websocketManager";
-import { OutgoingSocketData, SocketData } from "@src/types";
-import { useSettingsStore } from "./settingsStore";
-import { useMusicStore } from "./musicStore";
+import { create } from 'zustand'
+import WebSocketManager from '../utils/websocketManager'
+import { OutgoingSocketData, SocketData } from '@src/types'
+import { useSettingsStore } from './settingsStore'
+import { useMusicStore } from './musicStore'
 
+/**
+ * Provides a WebSocket store that manages the connection and communication with a WebSocket server.
+ *
+ * The store includes the following functionality:
+ * - Connecting and disconnecting the WebSocket connection
+ * - Reconnecting the WebSocket connection when it is lost
+ * - Sending messages to the WebSocket server
+ * - Adding and removing listeners for incoming WebSocket messages
+ *
+ * The store uses the `WebSocketManager` utility class to handle the low-level WebSocket connection and communication.
+ * The store also integrates with the `settingsStore` to update the WebSocket connection URL when the settings change.
+ */
 export interface WebSocketState {
-  socketManager: WebSocketManager;
-  isConnected: boolean;
-  isReconnecting: boolean;
-  connect: (url: string) => void;
-  disconnect: () => void;
+  socketManager: WebSocketManager
+  isConnected: boolean
+  isReconnecting: boolean
+  connect: (url: string) => void
+  disconnect: () => void
   reconnect: () => void
-  send: (message: OutgoingSocketData) => Promise<void>;
-  addListener: (listener: (msg: SocketData) => void) => (() => void);
-  removeListener: (listener: (msg: SocketData) => void) => void;
+  send: (message: OutgoingSocketData) => Promise<void>
+  addListener: (listener: (msg: SocketData) => void) => () => void
+  removeListener: (listener: (msg: SocketData) => void) => void
 }
 
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
-    WebSocketManager.getInstance().disconnect();
-  });
+    WebSocketManager.getInstance().disconnect()
+  })
 }
 
 export const useWebSocketStore = create<WebSocketState>((set, get) => {
@@ -54,17 +66,17 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
     isReconnecting: false,
 
     connect: (url: string) => {
-      manager.connect(url);
+      manager.connect(url)
     },
 
     disconnect: () => {
-      const manager = get().socketManager;
+      const manager = get().socketManager
       if (manager) {
-        manager.disconnect();
-        set({ 
+        manager.disconnect()
+        set({
           isConnected: false,
-          isReconnecting: false 
-        });
+          isReconnecting: false
+        })
       }
     },
 
@@ -72,38 +84,38 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
       const manager = get().socketManager
       if (manager) {
         manager.reconnect()
-        set({ 
+        set({
           isConnected: false,
-          isReconnecting: true 
-        });
+          isReconnecting: true
+        })
       }
-
     },
 
     send: async (message: OutgoingSocketData): Promise<void> => {
-      const manager = get().socketManager;
+      const manager = get().socketManager
       if (manager) {
-        console.log("Sending message:", message);
-        await manager.sendMessage(message);
+        console.log('Sending message:', message)
+        await manager.sendMessage(message)
       } else {
-        console.error("WebSocket is not connected");
+        console.error('WebSocket is not connected')
       }
     },
 
-    addListener: (listener: (msg: SocketData) => void): () => void => {
-      const manager = get().socketManager;
+    addListener: (listener: (msg: SocketData) => void): (() => void) => {
+      const manager = get().socketManager
       if (manager) {
-        manager.addListener(listener);
+        manager.addListener(listener)
       }
       return () => manager.removeListener(listener)
     },
 
     removeListener: (listener: (msg: SocketData) => void) => {
-      const manager = get().socketManager;
+      const manager = get().socketManager
       if (manager) {
-        manager.removeListener(listener);
+        manager.removeListener(listener)
       }
-    },
-}});
+    }
+  }
+})
 
-export default useWebSocketStore;
+export default useWebSocketStore

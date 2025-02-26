@@ -11,6 +11,11 @@ interface ActionState {
   setWheelState: (state: boolean) => void
 }
 
+/**
+ * Provides a Zustand store for managing the state of various UI elements, such as the wheel state, wheel rotation, and screensaver active state.
+ *
+ * @module stores/actionStore
+ */
 export const useActionStore = create<ActionState>()((set) => ({
   wheelState: false,
   wheelRotation: 0,

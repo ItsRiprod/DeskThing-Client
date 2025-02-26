@@ -39,7 +39,7 @@ export { default as IconWrench } from './Icons/IconWrench'
 
 /**
  * Button Icons
-*/
+ */
 export { default as IconPlayPause } from './Icons/IconPause'
 export { default as IconPlay } from './Icons/IconPlay'
 export { default as IconPref } from './Icons/IconCarThing'

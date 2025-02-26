@@ -1,15 +1,49 @@
-import { Action, ActionReference, AllAppSettings, App, AppSettings, AUDIO_REQUESTS, ButtonMapping, ClientManifest, KeyTrigger, LOG_TYPES, MiniplayerSettings, SongData, Theme } from "."
-  
-export type SocketData = SocketAction | SocketPingPong | SocketSetTime | SocketSetIcon | SocketGet | SocketTime | SocketSet | SocketSettings | SocketMappings | SocketConfig | SocketLog | SocketMiniplayer | SocketTheme | SocketMusic
+import { LOGGING_LEVELS, App, AppSettings, ClientManifest, MiniplayerSettings, Theme, Action, ActionReference, AUDIO_REQUESTS, KeyTrigger, SongData } from '@DeskThing/types'
+import { CombinedButtonMapping } from '.'
 
-export type OutgoingSocketData = OutgoingSocketAction | OutgoingSocketServer | OutgoingSocketMusic | OutgoingSocketSettings
 
-export type AppDataRequest = AppDataAction | AppDataMusic | AppDataSettings | AppDataKey | AppDataApps | AppDataManifest | AppTriggerAction | AppTriggerKey | AppTriggerButton
+
+export type SocketData =
+  | SocketAction
+  | SocketPingPong
+  | SocketSetTime
+  | SocketSetIcon
+  | SocketGet
+  | SocketTime
+  | SocketSet
+  | SocketSettings
+  | SocketMappings
+  | SocketConfig
+  | SocketLog
+  | SocketMiniplayer
+  | SocketTheme
+  | SocketMusic
+
+export type OutgoingSocketData =
+  | OutgoingSocketAction
+  | OutgoingSocketServer
+  | OutgoingSocketMusic
+  | OutgoingSocketSettings
+
+export type AppDataRequest =
+  | AppDataAction
+  | AppDataMusic
+  | AppDataSettings
+  | AppDataKey
+  | AppDataApps
+  | AppDataManifest
+  | AppTriggerAction
+  | AppTriggerKey
+  | AppTriggerButton
 
 export interface AppTriggerButton extends BaseSocket {
   app: 'client'
   type: 'button'
-  payload: { button: string, flavor: string, mode: 'KeyDown' | 'KeyUp' | 'Down' | 'Up' | 'Left' | 'Right'}
+  payload: {
+    button: string
+    flavor: string
+    mode: 'KeyDown' | 'KeyUp' | 'Down' | 'Up' | 'Left' | 'Right'
+  }
 }
 
 export interface AppTriggerAction extends BaseSocket {
@@ -69,7 +103,13 @@ export interface AppDataManifest extends BaseSocket {
  * iFrame  data types to be sent through the iframe
  */
 
-export type IframeData = IframeAction | IframeMusic | IframeSettings | IframeApps | IFrameString | IframeManifest
+export type IframeData =
+  | IframeAction
+  | IframeMusic
+  | IframeSettings
+  | IframeApps
+  | IFrameString
+  | IframeManifest
 
 export interface IframeAction {
   type: 'action'
@@ -106,9 +146,9 @@ export interface IFrameString {
 }
 
 interface BaseSocket {
-  app: 'client' | 'server' | 'music';
+  app: 'client' | 'server' | 'music'
   type: string
-  request?: string;
+  request?: string
 }
 
 export interface OutgoingSocketAction {
@@ -118,11 +158,11 @@ export interface OutgoingSocketAction {
   payload: Action | ActionReference
 }
 export interface OutgoingSocketServer {
-    app: 'server'
-    type: string
-    request?: string
-    payload?: string | number | { app: string, index: number } | ClientManifest
-}  
+  app: 'server'
+  type: string
+  request?: string
+  payload?: string | number | { app: string; index: number } | ClientManifest
+}
 
 export interface OutgoingSocketMusic {
   app: 'music'
@@ -135,11 +175,12 @@ export interface OutgoingSocketSettings {
   app: string
   type: 'set'
   request: 'settings'
-  payload?: { id: string, value: any}
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload?: { id: string; value: any }
 }
 
 interface ClientSocket extends BaseSocket {
-  app: 'client';
+  app: 'client'
 }
 
 export interface SocketPingPong extends ClientSocket {
@@ -148,24 +189,24 @@ export interface SocketPingPong extends ClientSocket {
 
 export interface SocketSettings extends ClientSocket {
   type: 'settings'
-  payload: AllAppSettings
+  payload: Record<string, AppSettings>
 }
 
 export interface SocketSet extends ClientSocket {
   type: 'set'
-  payload: string | {id: string, icon: string} | { utcTime: number, timezoneOffset: number }
+  payload: string | { id: string; icon: string } | { utcTime: number; timezoneOffset: number }
 }
 
 export interface SocketSetTime extends ClientSocket {
   type: 'set'
   request: 'time'
-  payload: { utcTime: number, timezoneOffset: number }
+  payload: { utcTime: number; timezoneOffset: number }
 }
 
 export interface SocketSetIcon extends ClientSocket {
   type: 'set'
   request: 'icon'
-  payload: {id: string, icon: string}
+  payload: { id: string; icon: string }
 }
 
 export interface SocketTime extends ClientSocket {
@@ -190,7 +231,7 @@ export interface SocketMiniplayer extends ClientSocket {
 
 export interface SocketMappings extends ClientSocket {
   type: 'button_mappings'
-  payload: ButtonMapping
+  payload: CombinedButtonMapping
 }
 
 export interface SocketAction extends ClientSocket {
@@ -204,7 +245,7 @@ export interface SocketConfig extends ClientSocket {
 }
 
 export interface SocketLog extends ClientSocket {
-  type: LOG_TYPES
+  type: LOGGING_LEVELS
   payload: string
 }
 

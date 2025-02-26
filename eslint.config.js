@@ -1,31 +1,33 @@
 import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
+import { browser } from 'globals'
+import react from 'eslint-plugin-react'
 import prettier from 'eslint-plugin-prettier'
 
-export default tseslint.config(
+export default [
   { ignores: ['dist'] },
+  js.configs.recommended,
+  react.configs.recommended,
+  react.configs['jsx-runtime'],
   {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended, 'prettier'],
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: browser,
     },
     plugins: {
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
+      'react': react,
       'prettier': prettier
     },
     rules: {
-      ...reactHooks.configs.recommended.rules,
-      'prettier/prettier': 'error',
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
+      'prettier/prettier': ['error', {
+        endOfLine: 'auto'
+      }],
+      '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^_' }]
     },
+    settings: {
+      react: {
+        version: 'detect'
+      }
+    }
   },
-)
+]

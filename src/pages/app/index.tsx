@@ -1,8 +1,13 @@
-import { useParams } from "react-router-dom"
-import WebPage from "./Web"
-import { useWebSocketStore } from "@src/stores"
-import { IconLogoGearLoading } from "@src/assets/Icons"
+import { useParams } from 'react-router-dom'
+import WebPage from './Web'
+import { useWebSocketStore } from '@src/stores'
+import { IconLogoGearLoading } from '@src/assets/Icons'
 
+/**
+ * Renders the main application page, which displays either a WebPage component or a loading indicator based on the WebSocket connection status.
+ *
+ * @returns {JSX.Element} The rendered application page.
+ */
 export default function AppPage() {
   const { app } = useParams()
   const isConnected = useWebSocketStore((state) => state.isConnected)
