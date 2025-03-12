@@ -1,7 +1,6 @@
 import { useSearchParams } from 'react-router-dom'
 import UtilityApp from './Utility'
 import AppSettingsPage from './AppSettings'
-import { useEffect } from 'react'
 
 /**
  * Renders the Utility page, which displays either the UtilityApp or the AppSettingsPage component based on the 'app' query parameter in the URL.
@@ -13,10 +12,6 @@ import { useEffect } from 'react'
  */
 const UtilityPage = () => {
   const [searchParams] = useSearchParams()
-
-  useEffect(() => {
-    console.log(searchParams.get('app'))
-  }, [searchParams])
 
   return searchParams.get('app') ? (
     <AppSettingsPage appName={searchParams.get('app')} />

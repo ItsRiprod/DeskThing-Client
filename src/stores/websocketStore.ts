@@ -94,7 +94,6 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
     send: async (message: OutgoingSocketData): Promise<void> => {
       const manager = get().socketManager
       if (manager) {
-        console.log('Sending message:', message)
         await manager.sendMessage(message)
       } else {
         console.error('WebSocket is not connected')

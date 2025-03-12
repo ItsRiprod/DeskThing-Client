@@ -7,6 +7,7 @@ import {
 import { OutgoingSocketData, SocketConfig, SocketSettings } from '@src/types'
 import { useSettingsStore } from './settingsStore'
 import useWebSocketStore from './websocketStore'
+import Logger from '@src/utils/Logger'
 
 interface AppState {
   apps: App[]
@@ -49,7 +50,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const settings = get().appSettings[appName]
 
     for (const [key, value] of Object.entries(settings)) {
-      console.log(`Updating setting ${key} to ${value.value}`)
+      Logger.info(`Updating setting ${key} to ${value.value}`)
       const data: OutgoingSocketData = {
         app: appName,
         type: 'set',

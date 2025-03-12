@@ -12,5 +12,5 @@ window.manifest = {
   "compatible_server": [10],
   "port": 8891,
   "ip": "localhost",
-  "device_type": {"id": 4, "name": "CarThing"}
+  "device_type": { "method": 0, "id": 4, "name": "CarThing"}
 }

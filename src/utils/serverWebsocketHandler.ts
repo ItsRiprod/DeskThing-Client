@@ -15,6 +15,7 @@
 import { useSettingsStore, useWebSocketStore } from '@src/stores'
 import { useTimeStore } from '@src/stores/timeStore'
 import { OutgoingSocketData, SocketData, SocketSetTime } from '@src/types'
+import Logger from './Logger'
 
 type SocketHandler = {
   [type: string]: {
@@ -31,7 +32,7 @@ const handleGetManifest = () => {
     app: 'server',
     payload: manifest
   }
-  console.log('Sending', returnData)
+  Logger.info('Sending manifest', returnData)
   send(returnData)
 }
 

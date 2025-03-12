@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { ClientManifest, ClientPreferences, Theme, ViewMode, VolMode } from '@deskthing/types'
 import { Log } from '@src/types'
-interface SettingsState {
+export interface SettingsState {
   logs: Log[]
   manifest: ClientManifest
   preferences: ClientPreferences
@@ -27,7 +27,8 @@ const defaultManifest: ClientManifest = {
   compatible_server: [],
   port: 8891,
   ip: 'localhost',
-  device_type: { id: 0, name: '' }
+  device_type: { method: 0, id: 0, name: '' },
+  repository: ''
 }
 const defaultPreferences: ClientPreferences = {
   miniplayer: {
@@ -83,7 +84,7 @@ export const useSettingsStore = create<SettingsState>()(
       preferences: defaultPreferences,
       addLog: (log) =>
         set((state) => ({
-          logs: [...state.logs, { ...log }]
+          logs: [...state.logs.slice(-99), { ...log }]
         })),
       clearLogs: () => set({ logs: [] }),
       updateManifest: (newSettings) =>

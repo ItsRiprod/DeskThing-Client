@@ -12,7 +12,8 @@ import {
   OutgoingSocketServer
 } from '@src/types'
 import { useActionStore } from '@src/stores/actionStore'
-import { Action, AUDIO_REQUESTS, EventMode, ActionReference, ViewMode, LOGGING_LEVELS } from '@DeskThing/types'
+import { Action, AUDIO_REQUESTS, EventMode, ActionReference, ViewMode } from '@DeskThing/types'
+import Logger from './Logger'
 
 /**
  * The `ActionHandler` class is a singleton that manages the execution of actions in the application.
@@ -57,7 +58,7 @@ export class ActionHandler {
 
   public runAction = async (action: Action | ActionReference): Promise<void> => {
     const { source } = action
-    console.log('Running action:', action.id)
+    Logger.info(`Running action: ${action.id}`)
 
     if (source === 'server') {
       this.handleServerAction(action)
@@ -108,8 +109,6 @@ export class ActionHandler {
         full: ViewMode.FULL
       }
     }
-
-    console.log(action.value, currentState)
 
     const newState = stateTransitions[action.value][currentState]
     useSettingsStore.getState().updatePreferences({ appTrayState: newState })
@@ -242,21 +241,15 @@ export class ActionHandler {
     try {
       if (!doc.fullscreenElement) {
         document.documentElement.requestFullscreen()
-        useSettingsStore
-          .getState()
-          .addLog({ type: LOGGING_LEVELS.LOG, app: 'ACTION', payload: 'Entering fullscreen' })
+        Logger.info('Entering Fullscreen')
         useMappingStore.getState().updateIcon('fullscreen', 'fullscreenActive')
       } else {
         doc.exitFullscreen()
-        useSettingsStore
-          .getState()
-          .addLog({ type: LOGGING_LEVELS.LOG, app: 'ACTION', payload: 'Leaving fullscreen' })
+        Logger.info('Leaving Fullscreen')
         useMappingStore.getState().updateIcon('fullscreen', '')
       }
     } catch (error) {
-      useSettingsStore
-        .getState()
-        .addLog({ type: LOGGING_LEVELS.ERROR, app: 'ACTION', payload: `Error! ${error}` })
+      Logger.error(`Error with Fullscreen!`, error)
     }
   }
 

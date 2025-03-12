@@ -15,10 +15,12 @@ import {
   AppTriggerButton,
   AppTriggerAction,
   AppTriggerKey,
-  OutgoingSocketAction
+  OutgoingSocketAction,
+  AppTriggerLog
 } from '@src/types'
 import { EventMode } from '@deskthing/types'
 import { useRef, useEffect } from 'react'
+import Logger from '@src/utils/Logger'
 
 interface WebPageProps {
   currentView: string
@@ -53,7 +55,7 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }) => {
 
   // Handles triggering actions
   const handleAction = (data: AppTriggerAction) => {
-    executeAction(data.payload)
+    executeAction({ source: currentView, ...data.payload })
   }
 
   // Handles any button presses from the iframe to the main app
@@ -123,6 +125,10 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }) => {
     }
   }
 
+  const handleLog = (data: AppTriggerLog) => {
+    Logger.log(data.request, currentView, data.payload.message, ...data.payload.data)
+  }
+
   const handleManifest = () => {
     send({ type: 'manifest', app: 'client', payload: manifest })
   }
@@ -131,13 +137,15 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }) => {
     button: (data: AppTriggerButton) => void
     key: (data: AppTriggerKey) => void
     action: (data: AppTriggerAction) => void
+    log: (data: AppTriggerLog) => void
   } = {
     button: handleButton,
     key: handleKey,
-    action: handleAction
+    action: handleAction,
+    log: handleLog
   }
 
-  const handlers = {
+  const getRequestHandlers = {
     music: handleMusic,
     settings: handleSettings,
     apps: handleApps,
@@ -207,10 +215,10 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }) => {
 
       if (appDataRequest.app == 'client') {
         if (appDataRequest.type === 'get') {
-          if (handlers[appDataRequest.request]) {
-            handlers[appDataRequest.request](appDataRequest)
+          if (getRequestHandlers[appDataRequest.request]) {
+            getRequestHandlers[appDataRequest.request](appDataRequest)
           } else {
-            console.log('Unknown request type: ', appDataRequest.request)
+            Logger.error('Unknown request type: ', appDataRequest.request)
           }
         } else if (appDataRequest.type === 'button') {
           buttonHandlers.button(appDataRequest)
@@ -218,6 +226,8 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }) => {
           buttonHandlers.key(appDataRequest)
         } else if (appDataRequest.type === 'action') {
           buttonHandlers.action(appDataRequest)
+        } else if (appDataRequest.type === 'log') {
+          buttonHandlers.log(appDataRequest)
         }
       } else {
         sendSocket({

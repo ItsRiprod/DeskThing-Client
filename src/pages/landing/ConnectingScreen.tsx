@@ -3,6 +3,7 @@ import { IconDisconnect, IconLogoGearLoading } from '../../assets/Icons'
 import { useSettingsStore, useWebSocketStore } from '@src/stores'
 import { StepProps } from '.'
 import Button from '@src/components/ui/Button'
+import Logger from '@src/utils/Logger'
 
 /**
  * The `ConnectingPage` component is responsible for rendering the connecting screen of the application. It displays the connection status, allows the user to disconnect or reconnect to the DeskThing Server, and triggers the next steps in the application flow.
@@ -29,7 +30,7 @@ const ConnectingPage: React.FC<StepProps> = ({ setNextSteps }) => {
     const timeoutId = setTimeout(() => {
       setOnLoad(true)
       setNextSteps(true)
-      console.log('Showing next steps')
+      Logger.info('ConnectionPage: Showing next steps')
     }, 1000)
 
     return clearTimeout(timeoutId)

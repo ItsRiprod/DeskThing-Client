@@ -1,6 +1,7 @@
 import { useMusicStore, useSettingsStore } from '@src/stores'
 import { ViewMode } from '@deskthing/types'
 import { useEffect, useState, memo } from 'react'
+import Logger from '@src/utils/Logger'
 
 interface ProgressBarProps {
   className?: string
@@ -78,7 +79,7 @@ const ProgressBar: React.FC<ProgressBarProps> = memo(() => {
 
   const handleMouseUp = () => {
     if (miniplayerState.state == 'hidden') return
-    console.log('mouse up', progress)
+    Logger.info('mouse up ' + progress)
     if (totalLength <= progress) {
       next()
       setTotalLength(9999)
@@ -91,7 +92,7 @@ const ProgressBar: React.FC<ProgressBarProps> = memo(() => {
       previous()
       setCurrentProgress(0)
     } else if (isDragging) {
-      console.log('seeking to ', progress)
+      Logger.info('seeking to ' + progress)
       seek(Math.round(progress))
     }
     setIsDragging(false)

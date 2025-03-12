@@ -1,5 +1,5 @@
 import { LOGGING_LEVELS, App, AppSettings, ClientManifest, MiniplayerSettings, Theme, Action, ActionReference, AUDIO_REQUESTS, KeyTrigger, SongData } from '@DeskThing/types'
-import { CombinedButtonMapping } from '.'
+import { CombinedButtonMapping, Log } from '.'
 
 
 
@@ -24,6 +24,7 @@ export type OutgoingSocketData =
   | OutgoingSocketServer
   | OutgoingSocketMusic
   | OutgoingSocketSettings
+  | OutgoingSocketLog
 
 export type AppDataRequest =
   | AppDataAction
@@ -35,6 +36,17 @@ export type AppDataRequest =
   | AppTriggerAction
   | AppTriggerKey
   | AppTriggerButton
+  | AppTriggerLog
+
+export interface AppTriggerLog extends BaseSocket {
+  app: 'client'
+  type: 'log'
+  request: LOGGING_LEVELS
+  payload: {
+    message: string,
+    data: any[]
+  }
+}
 
 export interface AppTriggerButton extends BaseSocket {
   app: 'client'
@@ -177,6 +189,12 @@ export interface OutgoingSocketSettings {
   request: 'settings'
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload?: { id: string; value: any }
+}
+
+export interface OutgoingSocketLog {
+  app: 'server'
+  type: 'log'
+  payload: Log
 }
 
 interface ClientSocket extends BaseSocket {

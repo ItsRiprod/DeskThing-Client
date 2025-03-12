@@ -3,6 +3,7 @@ import { AUDIO_REQUESTS, SongData } from '@deskthing/types'
 import useWebSocketStore from './websocketStore'
 import { useMappingStore } from './mappingStore'
 import { SocketData, SocketMusic } from '@src/types'
+import Logger from '@src/utils/Logger'
 
 /**
  * The `useMusicStore` is a Zustand store that manages the state of the music player.
@@ -29,7 +30,7 @@ export interface MusicState {
 export const useMusicStore = create<MusicState>((set, get) => ({
   song: null,
   setSong: (newData) => {
-    console.log('Received song')
+    Logger.info(`Received song ${newData.id}`)
     const currentSong = get().song
 
     if (!currentSong) {
@@ -169,7 +170,6 @@ const createWSAction = async (
     // Clear any existing timeout for this request type
     if (debounceTimers[request]) {
       clearTimeout(debounceTimers[request])
-      console.log(`Cleared timeout for ${request}`)
     }
 
     // Set a new timeout

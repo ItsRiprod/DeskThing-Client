@@ -2,6 +2,7 @@ import { IconArrowLeft, IconLoading, IconSave } from '@src/assets/Icons'
 import Settings from '@src/components/settings'
 import Button from '@src/components/ui/Button'
 import { useAppStore, useWebSocketStore } from '@src/stores'
+import Logger from '@src/utils/Logger'
 import React, { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
@@ -47,7 +48,7 @@ const AppSettingsPage: React.FC<AppSettingsProps> = ({ appName }) => {
       ...settings,
       [key]: { ...settings[key], value }
     }
-    console.log(updatedSettings)
+    Logger.info('Updated settings: ', updatedSettings)
     updateAppSettings(appName, updatedSettings)
   }
 

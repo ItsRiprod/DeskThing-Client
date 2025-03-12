@@ -19,7 +19,7 @@ interface ScrollingTextProps {
  * @param {number} [props.fadeWidth] - The width in pixels of the fade effect on the left and right edges of the text.
  * @returns {JSX.Element} - The rendered ScrollingText component.
  */
-export function ScrollingText({ text, className = '', fadeWidth = 8 }: ScrollingTextProps) {
+export function ScrollingText({ text, className = '', fadeWidth = 8 }: ScrollingTextProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLDivElement>(null)
   const dupeTextRef = useRef<HTMLDivElement>(null)

@@ -3,6 +3,7 @@ import { StepProps } from '.'
 import ConfigComponent from '@src/components/ConfigComponent'
 import Button from '@src/components/ui/Button'
 import { IconRefresh, IconWrench } from '@src/assets/Icons'
+import Logger from '@src/utils/Logger'
 
 /**
  * The `ConfigPage` component is responsible for rendering the configuration screen of the application.
@@ -20,13 +21,9 @@ const ConfigPage: React.FC<StepProps> = ({ currentStep, setNextSteps, onNextStep
     setTimeout(() => {
       setNextSteps(true)
       setOnLoad(true)
-      console.log('Showing next steps', currentStep)
+      Logger.info('Showing next steps', currentStep)
     }, 1000)
   }, [currentStep])
-
-  useEffect(() => {
-    console.log('Loaded')
-  }, [])
 
   const handleNext = () => {
     onNextStep()
@@ -40,7 +37,8 @@ const ConfigPage: React.FC<StepProps> = ({ currentStep, setNextSteps, onNextStep
   }
 
   const handleSync = () => {
-    console.log('Syncing')
+    Logger.info('Syncing with server...')
+    Logger.warn('Server sync is not supported in this version!')
     setIsSyncing(true)
     setTimeout(() => {
       setIsSyncing(false)

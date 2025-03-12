@@ -4,6 +4,7 @@
  * @author Riprod
  * @version 0.8.0
 */
+import Logger from '@src/utils/Logger'
 import React, { ErrorInfo, ReactNode, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
@@ -30,14 +31,14 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   }
 
   static getDerivedStateFromError(error: Error) {
-    console.log(error)
+    Logger.error('Encountered an error: ', error)
     // Update state so the next render will show the fallback UI.
     return { hasError: true }
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // You can log the error to an error reporting service
-    console.error('Uncaught error:', error, errorInfo)
+    Logger.error('Uncaught error:', error, errorInfo)
 
     // Update the state with the error message
     this.setState({ errorMessage: error.message })

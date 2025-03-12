@@ -1,6 +1,7 @@
 
 import { OutgoingSocketData, SocketData } from '@src/types'
 import { handleServerSocket } from './serverWebsocketHandler'
+import Logger from './Logger'
 
 type SocketEventListener = (msg: SocketData) => void
 type ConnectionStatus = 'connected' | 'disconnected' | 'reconnecting'
@@ -69,14 +70,14 @@ class WebSocketManager {
     }
 
     this.socket.onopen = () => {
-      console.log(`Connected to ${this.url}`)
+      Logger.info(`Connected to ${this.url}`)
       this.reconnecting = false
       this.startHeartbeat()
       this.notifyStatusChange('connected')
     }
 
     this.socket.onclose = (reason) => {
-      console.log('Disconnected, attempting to reconnect...', this.code, reason)
+      Logger.info('Disconnected, attempting to reconnect...', this.code, reason)
       this.stopHeartbeat()
       this.notifyStatusChange('disconnected')
       setTimeout(() => {
@@ -109,7 +110,7 @@ class WebSocketManager {
   }
 
   reconnect() {
-    console.log('Reconnecting in 10s...')
+    Logger.info('Reconnecting in 10s...')
     if (this.reconnecting) return
     this.reconnecting = true
     this.notifyStatusChange('reconnecting')
@@ -117,7 +118,7 @@ class WebSocketManager {
     this.disconnect()
 
     setTimeout(() => {
-      console.log('Conecting...')
+      Logger.info('Conecting...')
       this.connect()
       this.reconnecting = false
     }, 10000) // Reconnect after 10 seconds

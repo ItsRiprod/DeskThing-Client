@@ -15,5 +15,6 @@ export default defineConfig({
       '@src': path.resolve(__dirname, './src')
     }
   },
-  base: '/usr/share/qt-superbird-app/webapp/'
+  // base: '/usr/share/qt-superbird-app/webapp/'
+  base: './'
 })
