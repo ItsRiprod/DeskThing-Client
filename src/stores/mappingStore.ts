@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { Action, ActionReference, EventMode, KeyTrigger } from '@deskthing/types'
+import { Action, ActionReference, EventMode, KeyTrigger, Key } from '@deskthing/types'
 import { SocketAction, SocketData, CombinedButtonMapping, SocketMappings, SocketSetIcon } from '@src/types'
 import { useSettingsStore } from './settingsStore'
 import { useAppStore } from './appStore'
@@ -29,7 +29,7 @@ interface MappingState {
   setProfile: (profile: CombinedButtonMapping) => void
   executeAction: (action: Action | ActionReference) => void
   executeKey: (key: string, eventMode: EventMode) => void
-  updateIcon: (id: string, icon: string) => void
+  updateIcon: (id: string, icon: string, source?: string) => void
   getActionUrl: (action: Action | ActionReference) => string
   getKeyUrl: (key: KeyTrigger) => string
   getButtonAction: (key: string, mode: EventMode) => Action | undefined
@@ -130,8 +130,8 @@ export const useMappingStore = create<MappingState>((set, get) => ({
     return ''
   },
 
-  updateIcon: (id: string, icon: string) => {
-    if (get().profile.actions.find((a) => a.id === id)?.icon === icon) {
+  updateIcon: (id: string, icon: string, source: string = 'server') => {
+    if (get().profile.actions.find((a) => a.id === id && a.source === source)?.icon === icon) {
       return
     }
 

@@ -1,8 +1,8 @@
 import { create } from 'zustand'
-import WebSocketManager from '../utils/websocketManager'
-import { OutgoingSocketData, SocketData } from '@src/types'
+import { WebSocketManager } from '../utils/websocketManager' 
 import { useSettingsStore } from './settingsStore'
 import { useMusicStore } from './musicStore'
+import { DeviceToDeskthing, SendToDeviceFromServerPayload } from '@DeskThing/types'
 
 /**
  * Provides a WebSocket store that manages the connection and communication with a WebSocket server.
@@ -23,22 +23,17 @@ export interface WebSocketState {
   connect: (url: string) => void
   disconnect: () => void
   reconnect: () => void
-  send: (message: OutgoingSocketData) => Promise<void>
-  addListener: (listener: (msg: SocketData) => void) => () => void
-  removeListener: (listener: (msg: SocketData) => void) => void
-}
-
-if (import.meta.hot) {
-  import.meta.hot.dispose(() => {
-    WebSocketManager.getInstance().disconnect()
-  })
+  send: (message: DeviceToDeskthing) => Promise<void>
+  addListener: <T extends string>(listener: (msg: SendToDeviceFromServerPayload<T> & { app: T }) => void) => () => void
+  removeListener: <T extends string>(listener: (msg: SendToDeviceFromServerPayload<T> & { app: T }) => void) => void
 }
 
 export const useWebSocketStore = create<WebSocketState>((set, get) => {
-  const manager = WebSocketManager.getInstance()
-
+  
   const manifest = useSettingsStore.getState().manifest
   const wsUrl = `ws://${manifest.ip}:${manifest.port}`
+
+  const manager = new WebSocketManager(manifest.id, wsUrl)
 
   manager.addStatusListener((status) => {
     if (status == 'reconnecting') {
@@ -50,13 +45,16 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
       isReconnecting: status === 'reconnecting'
     })
   })
-
-  manager.connect(wsUrl)
+  
+  manager.connect()
 
   useSettingsStore.subscribe((state) => {
     const newWsUrl = `ws://${state.manifest.ip}:${state.manifest.port}`
     if (newWsUrl !== wsUrl) {
       manager.connect(newWsUrl)
+    }
+    if (state.manifest.id !== manager.getConnectionId()) {
+      manager.setId(state.manifest.id)
     }
   })
 
@@ -91,7 +89,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
       }
     },
 
-    send: async (message: OutgoingSocketData): Promise<void> => {
+    send: async (message: DeviceToDeskthing): Promise<void> => {
       const manager = get().socketManager
       if (manager) {
         await manager.sendMessage(message)
@@ -100,7 +98,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
       }
     },
 
-    addListener: (listener: (msg: SocketData) => void): (() => void) => {
+    addListener: <T extends string>(listener: (msg: SendToDeviceFromServerPayload<T> & { app: T }) => void): (() => void) => {
       const manager = get().socketManager
       if (manager) {
         manager.addListener(listener)
@@ -108,7 +106,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
       return () => manager.removeListener(listener)
     },
 
-    removeListener: (listener: (msg: SocketData) => void) => {
+    removeListener: <T extends string>(listener: (msg: SendToDeviceFromServerPayload<T> & { app: T }) => void) => {
       const manager = get().socketManager
       if (manager) {
         manager.removeListener(listener)

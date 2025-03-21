@@ -17,7 +17,7 @@ interface AppTrayButtonProps {
 const AppTrayButton: React.FC<AppTrayButtonProps> = ({ app }) => {
   const getAppIcon = useAppStore((store) => store.getAppIcon)
   const [appIcon, setAppIcon] = useState<string>(getAppIcon(app))
-  const setCurrentView = useSettingsStore((store) => store.updatePreferences)
+  const setCurrentView = useSettingsStore((store) => store.updateCurrentView)
 
   useEffect(() => {
     const getIcon = async () => {
@@ -29,7 +29,7 @@ const AppTrayButton: React.FC<AppTrayButtonProps> = ({ app }) => {
   }, [app])
 
   const handleAppClick = () => {
-    setCurrentView({ currentView: app })
+    setCurrentView(app)
   }
 
   return (

@@ -7,18 +7,16 @@ import {
   useWebSocketStore
 } from '@src/stores'
 import { useTimeStore } from '@src/stores/timeStore'
+import { AppTriggerButton, AppTriggerAction, AppTriggerKey } from '@src/types'
 import {
-  IframeData,
-  AppDataRequest,
-  AppDataKey,
-  AppDataAction,
-  AppTriggerButton,
-  AppTriggerAction,
-  AppTriggerKey,
-  OutgoingSocketAction,
-  AppTriggerLog
-} from '@src/types'
-import { EventMode } from '@deskthing/types'
+  DEVICE_EVENTS,
+  DeviceToDeskthing,
+  EventMode,
+  FromDeviceData,
+  FromDeviceDataEvents,
+  ToDeviceData,
+  ToDeviceDataEvents
+} from '@deskthing/types'
 import { useRef, useEffect } from 'react'
 import Logger from '@src/utils/Logger'
 
@@ -37,7 +35,7 @@ interface WebPageProps {
  * @param {string} props.currentView - The current view of the application.
  * @returns {JSX.Element} - The rendered `WebPage` component.
  */
-const WebPage: React.FC<WebPageProps> = ({ currentView }) => {
+const WebPage: React.FC<WebPageProps> = ({ currentView }: WebPageProps): JSX.Element => {
   const ip = useSettingsStore((state) => state.manifest.ip)
   const port = useSettingsStore((state) => state.manifest.port)
   const iframeRef = useRef<HTMLIFrameElement>(null)
@@ -89,63 +87,56 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }) => {
   }
 
   // Handles any music requests from the iframe to the main app
-  const handleMusic = (data: AppDataRequest) => {
-    if (data.type == 'get') {
-      send({ type: 'music', app: 'client', payload: music })
-    }
+  const handleMusic = () => {
+    send({ type: FromDeviceDataEvents.MUSIC, app: 'client', payload: music })
   }
 
   // Handles any settings requests from the iframe to the main app
-  const handleSettings = (data: AppDataRequest) => {
-    if (data.type == 'get') {
-      send({ type: 'settings', app: 'client', payload: appSettings[currentView] })
-    }
+  const handleSettings = () => {
+    send({ type: FromDeviceDataEvents.SETTINGS, app: 'client', payload: appSettings[currentView] })
   }
 
   // Handles any apps requests from the iframe to the main app
-  const handleApps = (data: AppDataRequest) => {
-    if (data.type == 'get') {
-      send({ type: 'apps', app: 'client', payload: apps })
-    }
+  const handleApps = () => {
+    send({ type: FromDeviceDataEvents.APPS, app: 'client', payload: apps })
   }
 
   // Handles any key icon requests from the iframe to the main app
-  const handleKeyIcon = (data: AppDataKey) => {
-    if (data.type == 'get') {
-      const actionUrl = getKeyUrl(data.payload)
-      send({ type: data.payload.key, app: 'client', payload: actionUrl })
-    }
+  const handleKeyIcon = (
+    payload: Extract<ToDeviceData, { request: 'key'; app: 'client'; type: 'get' }>['payload']
+  ) => {
+    const actionUrl = getKeyUrl(payload)
+    send({ type: payload.key, app: 'client', payload: actionUrl })
   }
 
   // Handles any action icon requests from the iframe to the main app
-  const handleActionIcon = (data: AppDataAction) => {
-    if (data.type == 'get') {
-      const actionUrl = getActionUrl(data.payload)
-      send({ type: data.payload.id, app: 'client', payload: actionUrl })
-    }
+  const handleActionIcon = (
+    payload: Extract<ToDeviceData, { request: 'action'; app: 'client'; type: 'get' }>['payload']
+  ) => {
+    const actionUrl = getActionUrl(payload)
+    send({ type: payload.id, app: 'client', payload: actionUrl })
   }
 
-  const handleLog = (data: AppTriggerLog) => {
+  const handleLog = (data: Extract<ToDeviceData, { app: 'client'; type: 'log' }>) => {
     Logger.log(data.request, currentView, data.payload.message, ...data.payload.data)
   }
 
   const handleManifest = () => {
-    send({ type: 'manifest', app: 'client', payload: manifest })
+    send({ type: FromDeviceDataEvents.MANIFEST, app: 'client', payload: manifest })
   }
 
-  const buttonHandlers: {
-    button: (data: AppTriggerButton) => void
-    key: (data: AppTriggerKey) => void
-    action: (data: AppTriggerAction) => void
-    log: (data: AppTriggerLog) => void
-  } = {
+  const buttonHandlers = {
     button: handleButton,
     key: handleKey,
     action: handleAction,
     log: handleLog
   }
 
-  const getRequestHandlers = {
+  const getRequestHandlers: {
+    [key in Extract<ToDeviceData, { app: 'client'; type: 'get' }>['request']]: (
+      data: Extract<ToDeviceData, { request: key; app: 'client'; type: 'get' }>['payload']
+    ) => void
+  } = {
     music: handleMusic,
     settings: handleSettings,
     apps: handleApps,
@@ -154,7 +145,7 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }) => {
     manifest: handleManifest
   }
 
-  const send = (data: IframeData) => {
+  const send = (data: FromDeviceData) => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
       const augmentedData = { ...data, source: 'deskthing' }
       iframeRef.current.contentWindow.postMessage(augmentedData, '*')
@@ -164,7 +155,7 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }) => {
   useEffect(() => {
     const removeListener = addWebsocketListener((data) => {
       if (data.app != currentView) return
-      send(data as IframeData)
+      send(data as FromDeviceData)
     })
 
     return () => {
@@ -174,17 +165,21 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }) => {
 
   useEffect(() => {
     if (music) {
-      send({ type: 'music', app: 'client', payload: music })
+      send({ type: FromDeviceDataEvents.MUSIC, app: 'client', payload: music })
     }
   }, [music])
   useEffect(() => {
     if (apps) {
-      send({ type: 'apps', app: 'client', payload: apps })
+      send({ type: FromDeviceDataEvents.APPS, app: 'client', payload: apps })
     }
   }, [apps])
   useEffect(() => {
     if (appSettings && appSettings[currentView]) {
-      send({ type: 'settings', app: 'client', payload: appSettings[currentView] })
+      send({
+        type: FromDeviceDataEvents.SETTINGS,
+        app: 'client',
+        payload: appSettings[currentView]
+      })
     }
   }, [appSettings, currentView])
   useEffect(() => {
@@ -195,11 +190,15 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }) => {
 
   useEffect(() => {
     const sendDefaultData = async () => {
-      send({ type: 'music', app: 'client', payload: music })
+      send({ type: FromDeviceDataEvents.MUSIC, app: 'client', payload: music })
       if (appSettings && appSettings[currentView]) {
-        send({ type: 'settings', app: 'client', payload: appSettings[currentView] })
+        send({
+          type: FromDeviceDataEvents.SETTINGS,
+          app: 'client',
+          payload: appSettings[currentView]
+        })
       }
-      currentTime && send({ type: 'time', app: 'client', payload: currentTime })
+      currentTime && send({ type: FromDeviceDataEvents.TIME, app: 'client', payload: currentTime })
     }
 
     const id = setTimeout(sendDefaultData, 1000)
@@ -211,17 +210,21 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }) => {
     const handleIframeEvent = (event: MessageEvent) => {
       if (event.origin != `http://${ip}:${port}`) return
 
-      const appDataRequest = event.data.payload as AppDataRequest
+      const appDataRequest = event.data.payload as ToDeviceData
 
       if (appDataRequest.app == 'client') {
-        if (appDataRequest.type === 'get') {
+        if (appDataRequest.type === ToDeviceDataEvents.GET) {
           if (getRequestHandlers[appDataRequest.request]) {
-            getRequestHandlers[appDataRequest.request](appDataRequest)
+            const handler = getRequestHandlers[appDataRequest.request] as (
+              payload: typeof appDataRequest.payload
+            ) => void
+            handler(appDataRequest.payload)
           } else {
             Logger.error('Unknown request type: ', appDataRequest.request)
           }
-        } else if (appDataRequest.type === 'button') {
-          buttonHandlers.button(appDataRequest)
+        } else if ((appDataRequest.type as string) === 'button') {
+          // legacy
+          buttonHandlers.button(appDataRequest as unknown as AppTriggerButton)
         } else if (appDataRequest.type === 'key') {
           buttonHandlers.key(appDataRequest)
         } else if (appDataRequest.type === 'action') {
@@ -231,9 +234,10 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }) => {
         }
       } else {
         sendSocket({
-          ...appDataRequest,
-          app: appDataRequest.app || currentView
-        } as OutgoingSocketAction)
+          type: DEVICE_EVENTS.APP_PAYLOAD,
+          payload: appDataRequest,
+          app: typeof appDataRequest.app == 'string' ? appDataRequest.app : currentView
+        })
       }
     }
 
@@ -249,6 +253,7 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }) => {
       <TimeUpdater />
       <iframe
         ref={iframeRef}
+        key={currentView}
         src={`http://${ip}:${port}/app/${currentView}`}
         style={{ width: '100%', height: '100%', border: 'none' }}
         title="Web View"

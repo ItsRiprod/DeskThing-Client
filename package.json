@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "host": "vite --host",
-    "build": "tsc && vite build --base=\"./\"",
+    "build": "npx @deskthing/cli package-client",
+    "build:legacy": "tsc && vite build --base=\"./\"",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0 --fix",
     "preview": "vite preview"
   },

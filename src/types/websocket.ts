@@ -1,4 +1,4 @@
-import { LOGGING_LEVELS, App, AppSettings, ClientManifest, MiniplayerSettings, Theme, Action, ActionReference, AUDIO_REQUESTS, KeyTrigger, SongData } from '@DeskThing/types'
+import { LOGGING_LEVELS, App, AppSettings, ClientManifest, MiniplayerSettings, Theme, Action, ActionReference, AUDIO_REQUESTS, KeyTrigger, SongData, DeviceToDeskthing } from '@DeskThing/types'
 import { CombinedButtonMapping, Log } from '.'
 
 
@@ -18,13 +18,6 @@ export type SocketData =
   | SocketMiniplayer
   | SocketTheme
   | SocketMusic
-
-export type OutgoingSocketData =
-  | OutgoingSocketAction
-  | OutgoingSocketServer
-  | OutgoingSocketMusic
-  | OutgoingSocketSettings
-  | OutgoingSocketLog
 
 export type AppDataRequest =
   | AppDataAction
@@ -111,52 +104,6 @@ export interface AppDataManifest extends BaseSocket {
   payload: undefined
 }
 
-/**
- * iFrame  data types to be sent through the iframe
- */
-
-export type IframeData =
-  | IframeAction
-  | IframeMusic
-  | IframeSettings
-  | IframeApps
-  | IFrameString
-  | IframeManifest
-
-export interface IframeAction {
-  type: 'action'
-  app: 'client'
-  payload: Action
-}
-export interface IframeMusic {
-  type: 'music'
-  app: 'client'
-  payload: SongData
-}
-export interface IframeSettings {
-  type: 'settings'
-  app: 'client'
-  payload: AppSettings
-}
-
-export interface IframeApps {
-  type: 'apps'
-  app: 'client'
-  payload: App[]
-}
-
-export interface IframeManifest {
-  type: 'manifest'
-  app: 'client'
-  payload: ClientManifest
-}
-
-export interface IFrameString {
-  type: string
-  app: 'client'
-  payload: string
-}
-
 interface BaseSocket {
   app: 'client' | 'server' | 'music'
   type: string
@@ -178,7 +125,7 @@ export interface OutgoingSocketServer {
 
 export interface OutgoingSocketMusic {
   app: 'music'
-  type: string
+  type: 'set'
   request?: AUDIO_REQUESTS
   payload?: number | string
 }

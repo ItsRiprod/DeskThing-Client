@@ -1,5 +1,10 @@
 import { create } from 'zustand'
-import { AUDIO_REQUESTS, SongData } from '@deskthing/types'
+import {
+  AUDIO_REQUESTS,
+  DeviceToDeskthing,
+  SongData,
+  SongEvent
+} from '@deskthing/types'
 import useWebSocketStore from './websocketStore'
 import { useMappingStore } from './mappingStore'
 import { SocketData, SocketMusic } from '@src/types'
@@ -23,7 +28,7 @@ export interface MusicState {
   seek: (position: number) => void
   like: () => void
   setVolume: (volume: number) => void
-  setRepeat: (state: 'off' | 'all' | 'track') => void
+  setRepeat: (state: 'context' | 'track' | 'off') => void
   setShuffle: () => void
 }
 
@@ -50,7 +55,7 @@ export const useMusicStore = create<MusicState>((set, get) => ({
       newData?.repeat_state !== undefined &&
         updateIcon(
           'repeat',
-          newData?.repeat_state == 'all'
+          newData?.repeat_state == 'context'
             ? 'repeatActive'
             : newData?.repeat_state == 'off'
               ? 'repeatDisabled'
@@ -64,13 +69,18 @@ export const useMusicStore = create<MusicState>((set, get) => ({
   },
 
   requestMusicData: () => {
-    createWSAction(AUDIO_REQUESTS.SONG, 'get')
+    createWSAction({ request: AUDIO_REQUESTS.SONG, app: 'music', type: SongEvent.GET })
   },
 
   next: () => {
     const previousState = get().song
     set({ song: { ...previousState, track_progress: 0 } })
-    createWSAction(AUDIO_REQUESTS.NEXT, 'set', previousState.id).catch(() => {
+    createWSAction({
+      request: AUDIO_REQUESTS.NEXT,
+      app: 'music',
+      type: SongEvent.SET,
+      payload: previousState.id
+    }).catch(() => {
       set({ song: previousState })
     })
   },
@@ -78,9 +88,11 @@ export const useMusicStore = create<MusicState>((set, get) => ({
   previous: () => {
     const previousState = get().song
     set({ song: { ...previousState, track_progress: 0 } })
-    createWSAction(AUDIO_REQUESTS.PREVIOUS).catch(() => {
-      set({ song: previousState })
-    })
+    createWSAction({ request: AUDIO_REQUESTS.PREVIOUS, app: 'music', type: SongEvent.SET }).catch(
+      () => {
+        set({ song: previousState })
+      }
+    )
   },
 
   rewind: () => {
@@ -88,15 +100,21 @@ export const useMusicStore = create<MusicState>((set, get) => ({
     set({
       song: { ...previousState, track_progress: Math.min(previousState.track_progress - 15000, 0) }
     })
-    createWSAction(AUDIO_REQUESTS.REWIND).catch(() => {
-      set({ song: previousState })
-    })
+    createWSAction({ request: AUDIO_REQUESTS.REWIND, app: 'music', type: SongEvent.SET }).catch(
+      () => {
+        set({ song: previousState })
+      }
+    )
   },
 
   fastForward: () => {
     const previousState = get().song
     set({ song: { ...previousState, track_progress: previousState.track_progress + 15000 } })
-    createWSAction(AUDIO_REQUESTS.FAST_FORWARD).catch(() => {
+    createWSAction({
+      request: AUDIO_REQUESTS.FAST_FORWARD,
+      app: 'music',
+      type: SongEvent.SET
+    }).catch(() => {
       set({ song: previousState })
     })
   },
@@ -104,23 +122,32 @@ export const useMusicStore = create<MusicState>((set, get) => ({
   play: () => {
     const previousState = get().song
     set({ song: { ...previousState, is_playing: !previousState?.is_playing || false } })
-    createWSAction(AUDIO_REQUESTS.PLAY).catch(() => {
-      set({ song: previousState })
-    })
+    createWSAction({ request: AUDIO_REQUESTS.PLAY, app: 'music', type: SongEvent.SET }).catch(
+      () => {
+        set({ song: previousState })
+      }
+    )
   },
 
   pause: () => {
     const previousState = get().song
     set({ song: { ...previousState, is_playing: false } })
-    createWSAction(AUDIO_REQUESTS.PAUSE).catch(() => {
-      set({ song: previousState })
-    })
+    createWSAction({ request: AUDIO_REQUESTS.PAUSE, app: 'music', type: SongEvent.SET }).catch(
+      () => {
+        set({ song: previousState })
+      }
+    )
   },
 
   seek: (position: number) => {
     const previousState = get().song
     set({ song: { ...get().song, track_progress: position } })
-    createWSAction(AUDIO_REQUESTS.SEEK, 'set', position).catch(() => {
+    createWSAction({
+      request: AUDIO_REQUESTS.SEEK,
+      payload: position,
+      app: 'music',
+      type: SongEvent.SET
+    }).catch(() => {
       set({ song: previousState })
     })
   },
@@ -128,7 +155,12 @@ export const useMusicStore = create<MusicState>((set, get) => ({
   like: () => {
     const previousState = get().song
     set({ song: { ...previousState, liked: !previousState.liked } })
-    createWSAction(AUDIO_REQUESTS.LIKE).catch(() => {
+    createWSAction({
+      request: AUDIO_REQUESTS.LIKE,
+      payload: !previousState.liked,
+      app: 'music',
+      type: SongEvent.SET
+    }).catch(() => {
       set({ song: previousState })
     })
   },
@@ -136,15 +168,25 @@ export const useMusicStore = create<MusicState>((set, get) => ({
   setVolume: (volume: number) => {
     const previousState = get().song
     set({ song: { ...get().song, volume: volume } })
-    createWSAction(AUDIO_REQUESTS.VOLUME, 'set', volume).catch(() => {
+    createWSAction({
+      request: AUDIO_REQUESTS.VOLUME,
+      payload: volume,
+      app: 'music',
+      type: SongEvent.SET
+    }).catch(() => {
       set({ song: previousState })
     })
   },
 
-  setRepeat: (state: 'off' | 'all' | 'track') => {
+  setRepeat: (state: 'context' | 'track' | 'off') => {
     const previousState = get().song
     set({ song: { ...previousState, repeat_state: state } })
-    createWSAction(AUDIO_REQUESTS.REPEAT).catch(() => {
+    createWSAction({
+      request: AUDIO_REQUESTS.REPEAT,
+      payload: state,
+      app: 'music',
+      type: SongEvent.SET
+    }).catch(() => {
       set({ song: previousState })
     })
   },
@@ -152,7 +194,12 @@ export const useMusicStore = create<MusicState>((set, get) => ({
   setShuffle: () => {
     const previousState = get().song
     set({ song: { ...previousState, shuffle_state: !previousState.shuffle_state } })
-    createWSAction(AUDIO_REQUESTS.SHUFFLE).catch(() => {
+    createWSAction({
+      request: AUDIO_REQUESTS.SHUFFLE,
+      payload: !previousState.shuffle_state,
+      app: 'music',
+      type: SongEvent.SET
+    }).catch(() => {
       set({ song: previousState })
     })
   }
@@ -160,22 +207,20 @@ export const useMusicStore = create<MusicState>((set, get) => ({
 const debounceTimers: { [key in AUDIO_REQUESTS]?: NodeJS.Timeout } = {}
 
 const createWSAction = async (
-  request: AUDIO_REQUESTS,
-  type: 'get' | 'set' = 'set',
-  payload?: number | string
+  songData: Extract<DeviceToDeskthing, { app: 'music' }>
 ): Promise<void> => {
   try {
     const send = useWebSocketStore.getState().send
 
     // Clear any existing timeout for this request type
-    if (debounceTimers[request]) {
-      clearTimeout(debounceTimers[request])
+    if (debounceTimers[songData.request]) {
+      clearTimeout(debounceTimers[songData.request])
     }
 
     // Set a new timeout
-    debounceTimers[request] = setTimeout(() => {
-      send({ app: 'music', type, request, payload })
-      delete debounceTimers[request]
+    debounceTimers[songData.request] = setTimeout(() => {
+      send(songData)
+      delete debounceTimers[songData.request]
     }, 300) // 100ms debounce delay
   } catch (error) {
     throw error

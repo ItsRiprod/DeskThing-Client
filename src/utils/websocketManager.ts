@@ -1,9 +1,7 @@
-
-import { OutgoingSocketData, SocketData } from '@src/types'
-import { handleServerSocket } from './serverWebsocketHandler'
 import Logger from './Logger'
+import { DEVICE_EVENTS, DeviceToDeskthing, FromDeskthingToDeviceEvents, SendToDeviceFromServerPayload } from '@DeskThing/types'
 
-type SocketEventListener = (msg: SocketData) => void
+type SocketEventListener = (msg: SendToDeviceFromServerPayload<string>) => void
 type ConnectionStatus = 'connected' | 'disconnected' | 'reconnecting'
 type StatusListener = (status: ConnectionStatus) => void
 
@@ -11,8 +9,7 @@ type StatusListener = (status: ConnectionStatus) => void
  * Manages the WebSocket connection and provides methods for sending and receiving messages.
  * This class is a singleton, and can be accessed using the `getInstance()` method.
  */
-class WebSocketManager {
-  private static instance: WebSocketManager
+export class WebSocketManager {
   private socket: WebSocket | null = null
   private listeners: SocketEventListener[] = []
   private statusListeners: StatusListener[] = []
@@ -22,16 +19,20 @@ class WebSocketManager {
   private pongTimeout: NodeJS.Timeout | null = null
   private missedPongs = 0
   private readonly MAX_MISSED_PONGS = 3
+  private connectionId: string | null = null
   private code = Math.random() * 1000000
 
-  constructor() {}
+  constructor(connectionId: string, url: string) {
+    this.connectionId = connectionId
+    this.url = url
+  }
 
-  public static getInstance(): WebSocketManager {
-    if (!WebSocketManager.instance) {
-      WebSocketManager.instance = new WebSocketManager()
-    }
+  getConnectionId() {
+    return this.connectionId
+  }
 
-    return WebSocketManager.instance
+  setId(id: string) {
+    this.connectionId = id
   }
 
   async closeExisting() {
@@ -89,15 +90,13 @@ class WebSocketManager {
       console.error('WebSocket error:', error)
     }
 
-    this.socket.onmessage = (event) => {
-      const data = JSON.parse(event.data)
+    this.socket.onmessage = <T extends string>(event) => {
+      const data = JSON.parse(event.data) as Extract<SendToDeviceFromServerPayload<T>, { app: T }>
       if (data.app == 'client') {
-        if (data.type == 'pong') {
+        if (data.type == FromDeskthingToDeviceEvents.PONG) {
           this.resetPongTimeout()
-        } else if (data.type == 'ping') {
-          this.sendMessage({ app: 'server', type: 'pong' })
-        } else {
-          handleServerSocket(data)
+        } else if (data.type == FromDeskthingToDeviceEvents.PING) {
+          this.sendMessage({ app: 'server', type: DEVICE_EVENTS.PONG })
         }
       }
 
@@ -124,9 +123,9 @@ class WebSocketManager {
     }, 10000) // Reconnect after 10 seconds
   }
 
-  sendMessage(message: OutgoingSocketData) {
+  sendMessage(message: DeviceToDeskthing) {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify(message))
+      this.socket.send(JSON.stringify({ ...message, connectionId: this.connectionId }))
     } else {
       console.error('WebSocket is not connected')
     }
@@ -152,7 +151,7 @@ class WebSocketManager {
     this.statusListeners.forEach((listener) => listener(status))
   }
 
-  private notifyListeners(data: SocketData) {
+  private notifyListeners<T extends string>(data: SendToDeviceFromServerPayload<T>) {
     this.listeners.forEach((listener) => listener(data))
   }
 
@@ -163,7 +162,7 @@ class WebSocketManager {
     // Send "ping" every 30 seconds
     this.heartbeatInterval = setInterval(() => {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-        this.sendMessage({ app: 'server', type: 'ping' })
+        this.sendMessage({ app: 'server', type: DEVICE_EVENTS.PING })
         this.startPongTimeout()
       }
     }, 30000)
@@ -193,17 +192,8 @@ class WebSocketManager {
     }, 10000)
   }
 
-  public static resetInstance() {
-    if (WebSocketManager.instance) {
-      WebSocketManager.instance.disconnect()
-      WebSocketManager.instance = null
-    }
-  }
-
   private resetPongTimeout() {
     this.missedPongs = 0 // Reset missed pong count on successful pong
     if (this.pongTimeout) clearTimeout(this.pongTimeout)
   }
 }
-
-export default WebSocketManager

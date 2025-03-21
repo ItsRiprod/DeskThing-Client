@@ -2,12 +2,13 @@ import { create } from 'zustand'
 import {
   AppSettings,
   App,
-  SocketData
+  SocketData,
+  DeviceToDeskthing,
+  DEVICE_EVENTS
 } from '@deskthing/types'
-import { OutgoingSocketData, SocketConfig, SocketSettings } from '@src/types'
+import { SocketConfig, SocketSettings } from '@src/types'
 import { useSettingsStore } from './settingsStore'
 import useWebSocketStore from './websocketStore'
-import Logger from '@src/utils/Logger'
 
 interface AppState {
   apps: App[]
@@ -49,20 +50,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     const send = useWebSocketStore.getState().send
     const settings = get().appSettings[appName]
 
-    for (const [key, value] of Object.entries(settings)) {
-      Logger.info(`Updating setting ${key} to ${value.value}`)
-      const data: OutgoingSocketData = {
-        app: appName,
-        type: 'set',
-        request: 'settings',
-        payload: {
-          id: key,
-          value: value.value
-        }
-      }
-      send(data)
-      await new Promise((resolve) => setTimeout(resolve, 300))
+    const data: DeviceToDeskthing = {
+      app: appName,
+      type: DEVICE_EVENTS.SETTINGS,
+      request: 'set',
+      payload: settings
     }
+    send(data)
   },
   getAppIcon: (app) => {
     const ip = useSettingsStore.getState().manifest.ip

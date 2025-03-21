@@ -5,14 +5,18 @@ import {
   useMappingStore,
   useWebSocketStore
 } from '../stores'
-import {
-  OutgoingSocketAction,
-  OutgoingSocketData,
-  OutgoingSocketMusic,
-  OutgoingSocketServer
-} from '@src/types'
 import { useActionStore } from '@src/stores/actionStore'
-import { Action, AUDIO_REQUESTS, EventMode, ActionReference, ViewMode } from '@DeskThing/types'
+import {
+  Action,
+  AUDIO_REQUESTS,
+  EventMode,
+  ActionReference,
+  ViewMode,
+  DeviceToDeskthing,
+  DEVICE_EVENTS,
+  SongEvent,
+  MusicEventPayloads
+} from '@DeskThing/types'
 import Logger from './Logger'
 
 /**
@@ -42,7 +46,7 @@ export class ActionHandler {
     return ActionHandler.instance
   }
 
-  private sendMessage = async (data: OutgoingSocketData) => {
+  private sendMessage = async (data: DeviceToDeskthing) => {
     const send = useWebSocketStore.getState().send
     await send(data)
   }
@@ -73,8 +77,8 @@ export class ActionHandler {
       handler(action)
     } else {
       console.warn(`No handler found for action: ${action.id}`)
-      const socketData: OutgoingSocketAction = {
-        type: 'action',
+      const socketData: DeviceToDeskthing = {
+        type: DEVICE_EVENTS.ACTION,
         app: 'server',
         payload: action
       }
@@ -84,8 +88,8 @@ export class ActionHandler {
 
   private async handleAppAction(action: Action | ActionReference): Promise<void> {
     try {
-      const socketData: OutgoingSocketAction = {
-        type: 'action',
+      const socketData: DeviceToDeskthing = {
+        type: DEVICE_EVENTS.ACTION,
         app: 'server',
         payload: action
       }
@@ -155,10 +159,10 @@ export class ActionHandler {
     let newRepeatState
     switch (songData.repeat_state) {
       case 'off':
-        newRepeatState = 'all'
+        newRepeatState = 'context'
         useMappingStore.getState().updateIcon('repeat', '')
         break
-      case 'all':
+      case 'context':
         newRepeatState = 'track'
         useMappingStore.getState().updateIcon('repeat', 'repeatActive')
         break
@@ -198,9 +202,9 @@ export class ActionHandler {
 
   Swap = async (action: Action) => {
     const currentView = useSettingsStore.getState().preferences.currentView.name
-    const socketData: OutgoingSocketServer = {
+    const socketData: DeviceToDeskthing = {
       app: 'server',
-      type: 'set',
+      type: DEVICE_EVENTS.SET,
       request: 'update_pref_index',
       payload: {
         app: currentView,
@@ -225,13 +229,19 @@ export class ActionHandler {
     }
   }
 
-  private handleSendCommand = (request: AUDIO_REQUESTS, payload = null) => {
-    const data: OutgoingSocketMusic = {
-      type: 'set',
+  private handleSendCommand = <
+    R extends Extract<MusicEventPayloads, { type: SongEvent.SET }>['request'],
+    P extends Extract<MusicEventPayloads, { type: SongEvent.SET; request: R }>['payload']
+  >(
+    request: R,
+    payload: P
+  ) => {
+    const data = {
       app: 'music',
+      type: SongEvent.SET,
       request: request,
       payload: payload
-    }
+    } as MusicEventPayloads
     this.sendMessage(data)
   }
 

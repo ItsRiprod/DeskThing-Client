@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { ClientManifest, ClientPreferences, Theme, ViewMode, VolMode } from '@deskthing/types'
-import { Log } from '@src/types'
+import { App, ClientManifest, ClientPreferences, DEVICE_EVENTS, Log, Theme, ViewMode, VolMode } from '@deskthing/types'
+import useWebSocketStore from './websocketStore'
 export interface SettingsState {
   logs: Log[]
   manifest: ClientManifest
@@ -10,6 +10,7 @@ export interface SettingsState {
   clearLogs: () => void
   updateManifest: (settings: Partial<ClientManifest>) => void
   updatePreferences: (preferences: Partial<ClientPreferences>) => void
+  updateCurrentView: (view: App) => void
   updateTheme: (preferences: Partial<Theme>) => void
   resetPreferences: () => void
 }
@@ -78,7 +79,7 @@ const defaultPreferences: ClientPreferences = {
  */
 export const useSettingsStore = create<SettingsState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       logs: [],
       manifest: defaultManifest,
       preferences: defaultPreferences,
@@ -95,6 +96,21 @@ export const useSettingsStore = create<SettingsState>()(
         set((state) => ({
           preferences: { ...state.preferences, ...newPreferences }
         })),
+      updateCurrentView: (newView) => {
+        const send = useWebSocketStore.getState().send
+        send({
+          app: 'server',
+          type: DEVICE_EVENTS.VIEW,
+          request: 'change',
+          payload: {
+            currentApp: newView.name,
+            previousApp: get().preferences.currentView.name
+          }
+        })
+        set((state) => ({
+          preferences: { ...state.preferences, currentView: newView }
+        }))
+      },
       updateTheme: (newTheme) =>
         set((state) => ({
           preferences: { ...state.preferences, theme: { ...state.preferences.theme, ...newTheme } }

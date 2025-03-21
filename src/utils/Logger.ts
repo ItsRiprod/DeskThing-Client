@@ -1,8 +1,7 @@
 
-import { LOGGING_LEVELS } from '@DeskThing/types'
+import { DEVICE_EVENTS, Log, LOGGING_LEVELS } from '@DeskThing/types'
 import { SettingsState, useSettingsStore } from '@src/stores/settingsStore'
 import { useWebSocketStore, WebSocketState } from '@src/stores/websocketStore'
-import { Log } from '@src/types'
 
 export class Logger {
   private static instance: Logger
@@ -24,11 +23,12 @@ export class Logger {
     return Logger.instance
   }
 
-  private formatMessage(type: LOGGING_LEVELS, payload: string, app?: string): Log {
+  private formatMessage(level: LOGGING_LEVELS, message: string, app?: string): Log {
     return {
-      type,
-      payload,
-      app: app || 'server'
+      level,
+      message,
+      source: app || 'server',
+      date: new Date().toISOString()
     }
   }
 
@@ -60,7 +60,7 @@ export class Logger {
     try {
       await this.webSocketStore?.send({
         app: 'server',
-        type: 'log',
+        type: DEVICE_EVENTS.LOG,
         payload: logEntry
       })
     } catch (error) {

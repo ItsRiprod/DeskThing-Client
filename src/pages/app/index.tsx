@@ -15,7 +15,7 @@ export default function AppPage() {
   if (isConnected) {
     return (
       <div className="w-screen h-full bg-black">
-        <WebPage currentView={app || ''} />
+        <WebPage key={app} currentView={app || ''} />
       </div>
     )
   } else {
