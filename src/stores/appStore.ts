@@ -4,7 +4,7 @@ import {
   App,
   SocketData,
   DeviceToDeskthing,
-  DEVICE_EVENTS
+  DEVICE_DESKTHING
 } from '@deskthing/types'
 import { SocketConfig, SocketSettings } from '@src/types'
 import { useSettingsStore } from './settingsStore'
@@ -52,7 +52,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     const data: DeviceToDeskthing = {
       app: appName,
-      type: DEVICE_EVENTS.SETTINGS,
+      type: DEVICE_DESKTHING.SETTINGS,
       request: 'set',
       payload: settings
     }

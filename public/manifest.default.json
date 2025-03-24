@@ -1,16 +1,21 @@
-window.manifest = {
+{
   "name": "Deskthing Client",
   "id": "deskthing",
   "short_name": "DT",
   "description": "The base DeskthingUI for the DeskThing",
-  "builtFor": "Spotify Car Thing",
   "reactive": true,
   "repository": "https://github.com/ItsRiprod/Deskthing-Client/",
   "author": "Riprod",
-  "version": "v0.11.0",
-  "version_code": 11.0,
-  "compatible_server": [10],
-  "port": 8891,
-  "ip": "localhost",
-  "device_type": { "method": 0, "id": 4, "name": "CarThing"}
+  "version": "0.11.0",
+  "compatibility": {
+    "server": ">=0.11.0",
+    "app": ">=0.11.0"
+  },
+  "context": {
+    "method": 1,
+    "id": 4,
+    "name": "CarThing",
+    "ip": "localhost",
+    "port": 8891
+  }
 }

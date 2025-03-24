@@ -1,4 +1,4 @@
-import { LOGGING_LEVELS, App, AppSettings, ClientManifest, MiniplayerSettings, Theme, Action, ActionReference, AUDIO_REQUESTS, KeyTrigger, SongData, DeviceToDeskthing } from '@DeskThing/types'
+import { LOGGING_LEVELS, App, AppSettings, ClientManifest, MiniplayerSettings, Theme, Action, ActionReference, AUDIO_REQUESTS, KeyReference, SongData } from '@DeskThing/types'
 import { CombinedButtonMapping, Log } from '.'
 
 
@@ -54,13 +54,13 @@ export interface AppTriggerButton extends BaseSocket {
 export interface AppTriggerAction extends BaseSocket {
   app: 'client'
   type: 'action'
-  payload: ActionReference
+  payload: ActionReference | Action
 }
 
 export interface AppTriggerKey extends BaseSocket {
   app: 'client'
   type: 'key'
-  payload: KeyTrigger
+  payload: KeyReference
 }
 
 export interface AppDataAction extends BaseSocket {
@@ -74,7 +74,7 @@ export interface AppDataKey extends BaseSocket {
   app: 'client'
   type: 'get'
   request: 'key2' // this is actually 'key' but smth is weird with ts
-  payload: KeyTrigger
+  payload: KeyReference
 }
 export interface AppDataMusic extends BaseSocket {
   app: 'client'

@@ -1,15 +1,27 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { App, ClientManifest, ClientPreferences, DEVICE_EVENTS, Log, Theme, ViewMode, VolMode } from '@deskthing/types'
+import {
+  App,
+  Client,
+  ClientConfigurations,
+  ClientConnectionMethod,
+  ClientManifest,
+  ClientPlatformIDs,
+  DEVICE_DESKTHING,
+  Log,
+  Theme,
+  ViewMode,
+  VolMode
+} from '@deskthing/types'
 import useWebSocketStore from './websocketStore'
 export interface SettingsState {
   logs: Log[]
   manifest: ClientManifest
-  preferences: ClientPreferences
+  preferences: ClientConfigurations
   addLog: (log: Log) => void
   clearLogs: () => void
   updateManifest: (settings: Partial<ClientManifest>) => void
-  updatePreferences: (preferences: Partial<ClientPreferences>) => void
+  updatePreferences: (preferences: Partial<ClientConfigurations>) => void
   updateCurrentView: (view: App) => void
   updateTheme: (preferences: Partial<Theme>) => void
   resetPreferences: () => void
@@ -20,18 +32,26 @@ const defaultManifest: ClientManifest = {
   id: '',
   short_name: '',
   description: '',
-  builtFor: '',
+  context: {
+    method: ClientConnectionMethod.Unknown,
+    id: ClientPlatformIDs.Unknown,
+    name: 'Unknown Connection Method',
+    ip: 'localhost',
+    port: 8891
+  },
   reactive: false,
   author: '',
-  version: '0.0.1',
-  version_code: 1,
-  compatible_server: [],
-  port: 8891,
-  ip: 'localhost',
-  device_type: { method: 0, id: 0, name: '' },
+  version: '0.11.0',
+  compatibility: {
+    server: '>=0.11.0',
+    app: '>=0.10.0'
+  },
   repository: ''
 }
-const defaultPreferences: ClientPreferences = {
+
+const defaultPreferences: ClientConfigurations = {
+  profileId: 'unset',
+  version: '0.11.0',
   miniplayer: {
     state: ViewMode.PEEK,
     visible: true,
@@ -100,7 +120,7 @@ export const useSettingsStore = create<SettingsState>()(
         const send = useWebSocketStore.getState().send
         send({
           app: 'server',
-          type: DEVICE_EVENTS.VIEW,
+          type: DEVICE_DESKTHING.VIEW,
           request: 'change',
           payload: {
             currentApp: newView.name,
@@ -119,15 +139,23 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'settings-storage',
+      partialize: (state) => ({
+        manifest: state.manifest,
+        preferences: state.preferences
+      }),
       onRehydrateStorage: () => (state) => {
+        if (state.manifest?.version != defaultManifest.version) {
+          state?.updateManifest(defaultManifest)
+        }
         setTimeout(() => {
           if (window.manifest) {
+            console.log('manifest loaded', window.manifest)
             state?.updateManifest({ ...defaultManifest, ...window.manifest })
           }
           if (!state.preferences) {
             state.updatePreferences(defaultPreferences)
           }
-        }, 300)
+        }, 2000)
       }
     }
   )

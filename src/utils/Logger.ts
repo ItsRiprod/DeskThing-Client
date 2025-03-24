@@ -1,5 +1,5 @@
 
-import { DEVICE_EVENTS, Log, LOGGING_LEVELS } from '@DeskThing/types'
+import { DEVICE_DESKTHING, Log, LOGGING_LEVELS } from '@DeskThing/types'
 import { SettingsState, useSettingsStore } from '@src/stores/settingsStore'
 import { useWebSocketStore, WebSocketState } from '@src/stores/websocketStore'
 
@@ -60,7 +60,7 @@ export class Logger {
     try {
       await this.webSocketStore?.send({
         app: 'server',
-        type: DEVICE_EVENTS.LOG,
+        type: DEVICE_DESKTHING.LOG,
         payload: logEntry
       })
     } catch (error) {

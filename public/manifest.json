@@ -1,20 +1,21 @@
 {
-    "name": "DeskThing",
-    "short_name": "DeskThing",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#000000",
-    "description": "The DeskThing client",
-    "icons": [
-      {
-        "src": "images/icon-192x192.png",
-        "sizes": "192x192",
-        "type": "image/png"
-      },
-      {
-        "src": "images/icon-512x512.png",
-        "sizes": "512x512",
-        "type": "image/png"
-      }
-    ]
+  "name": "Deskthing Client",
+  "id": "deskthing",
+  "short_name": "DT",
+  "description": "The base DeskthingUI for the DeskThing",
+  "reactive": true,
+  "repository": "https://github.com/ItsRiprod/Deskthing-Client/",
+  "author": "Riprod",
+  "version": "0.11.0",
+  "compatibility": {
+    "server": ">=0.11.0",
+    "app": ">=0.11.0"
+  },
+  "context": {
+    "method": 1,
+    "id": 4,
+    "name": "CarThing",
+    "ip": "localhost",
+    "port": 8891
   }
+}

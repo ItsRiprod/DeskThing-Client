@@ -1,16 +1,7 @@
-interface ServerManifest {
-  name: string
-  id: string
-  short_name: string
-  description: string
-  builtFor: string
-  reactive: boolean
-  author: string
-  version: string
-  port: number
-  ip: string
-}
+import { ClientManifest } from "@DeskThing/types"
 
-interface Window {
-  manifest?: ServerManifest
+declare global {
+  interface Window {
+    manifest?: ClientManifest
+  }
 }

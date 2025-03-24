@@ -1,6 +1,6 @@
 import { create } from 'zustand'
-import { Action, ActionReference, EventMode, KeyTrigger, Key } from '@deskthing/types'
-import { SocketAction, SocketData, CombinedButtonMapping, SocketMappings, SocketSetIcon } from '@src/types'
+import { Action, ActionReference, EventMode, MappingProfile, KeyReference } from '@deskthing/types'
+import { SocketAction, SocketData, SocketMappings, SocketSetIcon } from '@src/types'
 import { useSettingsStore } from './settingsStore'
 import { useAppStore } from './appStore'
 import { defaults } from '../assets/defaultMapping'
@@ -25,13 +25,13 @@ import { useActionStore } from './actionStore'
  * The store also handles special logic for scroll events.
  */
 interface MappingState {
-  profile: CombinedButtonMapping | null
-  setProfile: (profile: CombinedButtonMapping) => void
+  profile: MappingProfile | null
+  setProfile: (profile: MappingProfile) => void
   executeAction: (action: Action | ActionReference) => void
   executeKey: (key: string, eventMode: EventMode) => void
   updateIcon: (id: string, icon: string, source?: string) => void
   getActionUrl: (action: Action | ActionReference) => string
-  getKeyUrl: (key: KeyTrigger) => string
+  getKeyUrl: (key: KeyReference) => string
   getButtonAction: (key: string, mode: EventMode) => Action | undefined
 }
 
@@ -88,7 +88,7 @@ export const useMappingStore = create<MappingState>((set, get) => ({
   getActionUrl: (action: Action | ActionReference) => {
     const manifest = useSettingsStore.getState().manifest
     const profile = get().profile
-    const { ip, port } = manifest
+    const { ip, port } = manifest.context
     if (action.source === 'server') {
       if (action.id === 'pref') {
         const apps = useAppStore.getState().apps
@@ -121,9 +121,9 @@ export const useMappingStore = create<MappingState>((set, get) => ({
     }
   },
 
-  getKeyUrl: (key: KeyTrigger) => {
+  getKeyUrl: (key: KeyReference) => {
     const profile = get().profile
-    const action = profile?.mapping[key.key][key.mode]
+    const action = profile?.mapping[key.id][key.mode || EventMode.KeyDown]
     if (action) {
       return get().getActionUrl(action)
     }

@@ -12,24 +12,17 @@
  * Additional handlers can be added to the `socketHandlers` object as needed.
  */
 
-import { useAppStore, useMappingStore, useSettingsStore, useWebSocketStore } from '@src/stores'
+import { useAppStore, useClientStore, useMappingStore, useSettingsStore, useWebSocketStore } from '@src/stores'
 import { useTimeStore } from '@src/stores/timeStore'
 import Logger from './Logger'
-import {
-  DEVICE_EVENTS,
-  FromDeskthingToDevice,
-  FromDeskthingToDeviceEvents,
-  FromDeviceDataClient,
-  DeviceToDeskthing,
-  FromDeviceDataEvents,
-  SendToDeviceFromServerPayload
-} from '@DeskThing/types'
+import { DEVICE_CLIENT, DESKTHING_DEVICE, DeskThingToDeviceCore, DEVICE_DESKTHING, DeviceToDeskthingData, DeskThingToDeviceData } from '@DeskThing/types'
 
-type FromDeskthingPayload<T> = Extract<FromDeskthingToDevice | FromDeviceDataClient, { type: T }>
+
+type DeskThingToDevice<T extends DESKTHING_DEVICE> = Extract<DeskThingToDeviceCore, { type: T }>
 
 type SocketHandler = {
-  [T in FromDeskthingToDeviceEvents | Partial<FromDeviceDataEvents>]: (
-    data: FromDeskthingPayload<T>
+  [T in DESKTHING_DEVICE]: (
+    data: DeskThingToDevice<T>
   ) => void
 }
 
@@ -39,13 +32,13 @@ const sendData = (data) => {
   send(data)
 }
 
-const handleGetManifest = (data: FromDeskthingPayload<FromDeskthingToDeviceEvents.GET>) => {
+const handleGetManifest = (data: DeskThingToDevice<DESKTHING_DEVICE.GET>) => {
   switch (data.request) {
     case 'manifest': {
       const manifest = useSettingsStore.getState().manifest
 
-      const returnData: DeviceToDeskthing = {
-        type: DEVICE_EVENTS.MANIFEST,
+      const returnData: DeviceToDeskthingData = {
+        type: DEVICE_DESKTHING.MANIFEST,
         app: 'server',
         payload: manifest
       }
@@ -60,7 +53,7 @@ const handleGetManifest = (data: FromDeskthingPayload<FromDeskthingToDeviceEvent
   }
 }
 
-const handleSetTime = (data: FromDeskthingPayload<FromDeviceDataEvents.TIME>) => {
+const handleSetTime = (data: DeskThingToDevice<DESKTHING_DEVICE.TIME>) => {
   const syncTime = useTimeStore.getState().syncTime
 
   if (typeof data.payload === 'string') return // not useful
@@ -71,74 +64,76 @@ const handleSetTime = (data: FromDeskthingPayload<FromDeviceDataEvents.TIME>) =>
 }
 
 const HANDLE_GLOBAL_SETTINGS = (
-  data: FromDeskthingPayload<FromDeskthingToDeviceEvents.GLOBAL_SETTINGS>
+  data: DeskThingToDevice<DESKTHING_DEVICE.GLOBAL_SETTINGS>
 ) => {
   const setAppSettings = useAppStore.getState().setAppSettings
   setAppSettings(data.payload)
 }
-const HANDLE_MAPPINGS = (data: FromDeskthingPayload<FromDeskthingToDeviceEvents.MAPPINGS>) => {
+const HANDLE_MAPPINGS = (data: DeskThingToDevice<DESKTHING_DEVICE.MAPPINGS>) => {
   const setMappings = useMappingStore.getState().setProfile
   setMappings(data.payload)
 }
-const HANDLE_ERROR = (data: FromDeskthingPayload<FromDeskthingToDeviceEvents.ERROR>) => {
+const HANDLE_ERROR = (data: DeskThingToDevice<DESKTHING_DEVICE.ERROR>) => {
   Logger.error('Received error', data.payload)
 }
-const HANDLE_PONG = (_data: FromDeskthingPayload<FromDeskthingToDeviceEvents.PONG>) => {
+const HANDLE_PONG = (_data: DeskThingToDevice<DESKTHING_DEVICE.PONG>) => {
   // do nothing
 }
-const HANDLE_PING = (_data: FromDeskthingPayload<FromDeskthingToDeviceEvents.PING>) => {
+const HANDLE_PING = (_data: DeskThingToDevice<DESKTHING_DEVICE.PING>) => {
   // do nothing
 }
-const HANDLE_HEARTBEAT = (_data: FromDeskthingPayload<FromDeskthingToDeviceEvents.HEARTBEAT>) => {
+const HANDLE_HEARTBEAT = (_data: DeskThingToDevice<DESKTHING_DEVICE.HEARTBEAT>) => {
   // do nothing
 }
-const HANDLE_MANIFEST = (_data: FromDeskthingPayload<FromDeviceDataEvents.MANIFEST>) => {
-  // do nothing
-}
-const HANDLE_MUSIC = (_data: FromDeskthingPayload<FromDeviceDataEvents.MUSIC>) => {
+
+const HANDLE_MUSIC = (_data: DeskThingToDevice<DESKTHING_DEVICE.MUSIC>) => {
   // dont actually do anything
 }
-const HANDLE_SETTINGS = (data: FromDeskthingPayload<FromDeviceDataEvents.SETTINGS>) => {
+
+const HANDLE_SETTINGS = (data: DeskThingToDevice<DESKTHING_DEVICE.SETTINGS>) => {
   const updateAppSettings = useAppStore.getState().updateAppSettings
   const { app, ...updatedSettings } = data.payload
   updateAppSettings(app, updatedSettings)
 }
 
-const HANDLE_APPS = (data: FromDeskthingPayload<FromDeviceDataEvents.APPS>) => {
+const HANDLE_APPS = (data: DeskThingToDevice<DESKTHING_DEVICE.APPS>) => {
   const setApps = useAppStore.getState().setApps
   setApps(data.payload)
 }
 
-const HANDLE_ACTION = (_data: FromDeskthingPayload<FromDeviceDataEvents.ACTION>) => {
-  // Do nothing
-}
-
-const HANDLE_ICON = (data: FromDeskthingPayload<FromDeviceDataEvents.ICON>) => {
+const HANDLE_ICON = (data: DeskThingToDevice<DESKTHING_DEVICE.ICON>) => {
   const updateIcon = useMappingStore.getState().updateIcon
   updateIcon(data.payload.action.id, data.payload.icon, data.payload.source)
 }
 
-const socketHandlers: SocketHandler = {
-  get: handleGetManifest,
-  [FromDeviceDataEvents.TIME]: handleSetTime,
-  [FromDeskthingToDeviceEvents.GLOBAL_SETTINGS]: HANDLE_GLOBAL_SETTINGS,
-  [FromDeskthingToDeviceEvents.MAPPINGS]: HANDLE_MAPPINGS,
-  [FromDeskthingToDeviceEvents.ERROR]: HANDLE_ERROR,
-  [FromDeskthingToDeviceEvents.PONG]: HANDLE_PONG,
-  [FromDeskthingToDeviceEvents.PING]: HANDLE_PING,
-  [FromDeskthingToDeviceEvents.HEARTBEAT]: HANDLE_HEARTBEAT,
-  [FromDeviceDataEvents.MANIFEST]: HANDLE_MANIFEST,
-  [FromDeviceDataEvents.MUSIC]: HANDLE_MUSIC,
-  [FromDeviceDataEvents.SETTINGS]: HANDLE_SETTINGS,
-  [FromDeviceDataEvents.APPS]: HANDLE_APPS,
-  [FromDeviceDataEvents.ACTION]: HANDLE_ACTION,
-  [FromDeviceDataEvents.ICON]: HANDLE_ICON
+const HANDLE_META_DATA = (data: DeskThingToDevice<DESKTHING_DEVICE.META_DATA>) => {
+  const updateClient = useClientStore.getState().updateClient
+  console.log('Handling meta data', data)
+  updateClient(data.payload)
+
+  // TODO: Handle the rest of this payload
 }
 
-export const handleServerSocket = <T extends string>(data: SendToDeviceFromServerPayload<T>) => {
-  const handler = socketHandlers[data.type]?.[data.request]
+const socketHandlers: SocketHandler = {
+  [DESKTHING_DEVICE.GET]: handleGetManifest,
+  [DESKTHING_DEVICE.TIME]: handleSetTime,
+  [DESKTHING_DEVICE.GLOBAL_SETTINGS]: HANDLE_GLOBAL_SETTINGS,
+  [DESKTHING_DEVICE.MAPPINGS]: HANDLE_MAPPINGS,
+  [DESKTHING_DEVICE.ERROR]: HANDLE_ERROR,
+  [DESKTHING_DEVICE.PONG]: HANDLE_PONG,
+  [DESKTHING_DEVICE.PING]: HANDLE_PING,
+  [DESKTHING_DEVICE.HEARTBEAT]: HANDLE_HEARTBEAT,
+  [DESKTHING_DEVICE.SETTINGS]: HANDLE_SETTINGS,
+  [DESKTHING_DEVICE.APPS]: HANDLE_APPS,
+  [DESKTHING_DEVICE.ICON]: HANDLE_ICON,
+  [DESKTHING_DEVICE.META_DATA]: HANDLE_META_DATA,
+  [DESKTHING_DEVICE.MUSIC]: HANDLE_MUSIC
+}
+
+export const handleServerSocket = (data: DeskThingToDeviceCore) => {
+  const handler = socketHandlers[data.type]
 
   if (handler) {
-    handler(data)
+    handler(data as any)
   }
 }

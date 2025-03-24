@@ -13,7 +13,7 @@ import {
   ActionReference,
   ViewMode,
   DeviceToDeskthing,
-  DEVICE_EVENTS,
+  DEVICE_DESKTHING,
   SongEvent,
   MusicEventPayloads
 } from '@DeskThing/types'
@@ -78,7 +78,7 @@ export class ActionHandler {
     } else {
       console.warn(`No handler found for action: ${action.id}`)
       const socketData: DeviceToDeskthing = {
-        type: DEVICE_EVENTS.ACTION,
+        type: DEVICE_DESKTHING.ACTION,
         app: 'server',
         payload: action
       }
@@ -89,7 +89,7 @@ export class ActionHandler {
   private async handleAppAction(action: Action | ActionReference): Promise<void> {
     try {
       const socketData: DeviceToDeskthing = {
-        type: DEVICE_EVENTS.ACTION,
+        type: DEVICE_DESKTHING.ACTION,
         app: 'server',
         payload: action
       }
@@ -204,7 +204,7 @@ export class ActionHandler {
     const currentView = useSettingsStore.getState().preferences.currentView.name
     const socketData: DeviceToDeskthing = {
       app: 'server',
-      type: DEVICE_EVENTS.SET,
+      type: DEVICE_DESKTHING.SET,
       request: 'update_pref_index',
       payload: {
         app: currentView,

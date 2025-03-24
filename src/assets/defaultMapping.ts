@@ -1,5 +1,4 @@
-import { EventMode, Action } from '@deskthing/types'
-import { CombinedButtonMapping } from '@src/types'
+import { EventMode, Action, MappingProfile } from '@deskthing/types'
 const actions: Action[] = [
   {
     name: 'WheelSelect',
@@ -169,12 +168,9 @@ const actions: Action[] = [
   }
 ]
 
-export const defaults: CombinedButtonMapping = {
-  id: 'default',
-  name: 'The Default Mapping',
-  description: 'The default mapping for the DeskThing',
-  version: '0.9.2',
-  version_code: 9.2,
+export const defaults: MappingProfile = {
+  profileId: 'default',
+  keys: [],
   mapping: {
     Wheel1: {
       [EventMode.KeyDown]: {

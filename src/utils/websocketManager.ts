@@ -1,7 +1,7 @@
 import Logger from './Logger'
-import { DEVICE_EVENTS, DeviceToDeskthing, FromDeskthingToDeviceEvents, SendToDeviceFromServerPayload } from '@DeskThing/types'
+import { DEVICE_DESKTHING, DeviceToDeskthingData, DESKTHING_DEVICE, DeskThingToDeviceData, DeskThingToDeviceCore } from '@DeskThing/types'
 
-type SocketEventListener = (msg: SendToDeviceFromServerPayload<string>) => void
+type SocketEventListener = (msg: DeskThingToDeviceCore & { app?: string }) => void
 type ConnectionStatus = 'connected' | 'disconnected' | 'reconnecting'
 type StatusListener = (status: ConnectionStatus) => void
 
@@ -67,6 +67,7 @@ export class WebSocketManager {
 
     if (this.url != this.socket?.url) {
       await this.closeExisting()
+      console.log(`Creating a new WebSocket instance on ${this.url}`)
       this.socket = new WebSocket(this.url)
     }
 
@@ -90,13 +91,13 @@ export class WebSocketManager {
       console.error('WebSocket error:', error)
     }
 
-    this.socket.onmessage = <T extends string>(event) => {
-      const data = JSON.parse(event.data) as Extract<SendToDeviceFromServerPayload<T>, { app: T }>
+    this.socket.onmessage = (event) => {
+      const data = JSON.parse(event.data) as DeskThingToDeviceCore & { app: string }
       if (data.app == 'client') {
-        if (data.type == FromDeskthingToDeviceEvents.PONG) {
+        if (data.type == DESKTHING_DEVICE.PONG) {
           this.resetPongTimeout()
-        } else if (data.type == FromDeskthingToDeviceEvents.PING) {
-          this.sendMessage({ app: 'server', type: DEVICE_EVENTS.PONG })
+        } else if (data.type == DESKTHING_DEVICE.PING) {
+          this.sendMessage({ app: 'server', type: DEVICE_DESKTHING.PONG })
         }
       }
 
@@ -123,9 +124,11 @@ export class WebSocketManager {
     }, 10000) // Reconnect after 10 seconds
   }
 
-  sendMessage(message: DeviceToDeskthing) {
+  sendMessage(message: DeviceToDeskthingData) {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify({ ...message, connectionId: this.connectionId }))
+      const socketMessage = { ...message, connectionId: this.connectionId }
+      console.debug(`[${message.app} ${message.type}]`, socketMessage)
+      this.socket.send(JSON.stringify(socketMessage))
     } else {
       console.error('WebSocket is not connected')
     }
@@ -151,7 +154,7 @@ export class WebSocketManager {
     this.statusListeners.forEach((listener) => listener(status))
   }
 
-  private notifyListeners<T extends string>(data: SendToDeviceFromServerPayload<T>) {
+  private notifyListeners(data: DeskThingToDeviceCore & { app: string }) {
     this.listeners.forEach((listener) => listener(data))
   }
 
@@ -162,7 +165,7 @@ export class WebSocketManager {
     // Send "ping" every 30 seconds
     this.heartbeatInterval = setInterval(() => {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-        this.sendMessage({ app: 'server', type: DEVICE_EVENTS.PING })
+        this.sendMessage({ app: 'server', type: DEVICE_DESKTHING.PING })
         this.startPongTimeout()
       }
     }, 30000)

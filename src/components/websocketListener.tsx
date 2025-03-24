@@ -1,8 +1,7 @@
 import { useMusicStore, useWebSocketStore } from '@src/stores'
 import {
-  FromDeskthingToDevice,
-  FromDeviceDataClient,
-  FromDeviceDataEvents,
+  DESKTHING_DEVICE,
+  DeskThingToDeviceCore,
   SongData
 } from '@deskthing/types'
 import { useEffect, useState } from 'react'
@@ -28,13 +27,12 @@ export const WebSocketListener = () => {
       setSong({ ...songData, id: String(Date.now()) })
     }
 
-    const messageHandler = (socketData: FromDeviceDataClient | FromDeskthingToDevice) => {
+    const messageHandler = (socketData: DeskThingToDeviceCore & { app?: string }) => {
       if (socketData.app !== 'client') return
 
-      if (socketData.type == FromDeviceDataEvents.MUSIC) {
+      if (socketData.type == DESKTHING_DEVICE.MUSIC) {
         handleSongData(socketData.payload)
       }
-
       handleServerSocket(socketData)
     }
 
