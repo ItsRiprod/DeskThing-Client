@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { StepProps } from '.'
 import ConfigComponent from '@src/components/ConfigComponent'
 import Button from '@src/components/ui/Button'
-import { IconRefresh, IconWrench } from '@src/assets/Icons'
+import { IconWrench } from '@src/assets/Icons'
 import Logger from '@src/utils/Logger'
+import SyncButton from '@src/components/ui/SyncButton'
 
 /**
  * The `ConfigPage` component is responsible for rendering the configuration screen of the application.
@@ -16,7 +17,6 @@ import Logger from '@src/utils/Logger'
 const ConfigPage: React.FC<StepProps> = ({ currentStep, setNextSteps, onNextStep }) => {
   const [onLoad, setOnLoad] = useState(false)
   const [showConfig, setShowConfig] = useState(false)
-  const [isSyncing, setIsSyncing] = useState(false)
   useEffect(() => {
     setTimeout(() => {
       setNextSteps(true)
@@ -36,14 +36,25 @@ const ConfigPage: React.FC<StepProps> = ({ currentStep, setNextSteps, onNextStep
     }
   }
 
-  const handleSync = () => {
-    Logger.info('Syncing with server...')
-    Logger.warn('Server sync is not supported in this version!')
-    setIsSyncing(true)
-    setTimeout(() => {
-      setIsSyncing(false)
-    }, 2000)
-  }
+  useEffect(() => {
+    const handleScroll = (e: Event) => {
+      e.stopPropagation()
+      e.stopImmediatePropagation()
+    }
+
+    const handleWheel = (e: WheelEvent) => {
+      e.stopPropagation()
+      e.stopImmediatePropagation()
+    }
+
+    window.addEventListener('scroll', handleScroll, { capture: true, passive: false })
+    window.addEventListener('wheel', handleWheel, { capture: true, passive: false })
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll, { capture: true })
+      window.removeEventListener('wheel', handleWheel, { capture: true })
+    }
+  }, [])
 
   const showConfigScreen = () => {
     setShowConfig(true)
@@ -63,29 +74,18 @@ const ConfigPage: React.FC<StepProps> = ({ currentStep, setNextSteps, onNextStep
       >
         <h1 className="text-4xl">Let's setup the config</h1>
         <div
-          className={`${showConfig ? 'opacity-0' : 'opacity-100'} transition-[opacity,height] ${onLoad ? 'h-20' : 'h-0'} duration-500 flex items-center`}
+          className={`${showConfig ? 'opacity-0' : 'opacity-100'} space-x-4 transition-[opacity,height] ${onLoad ? 'h-20' : 'h-0'} duration-500 flex items-center`}
         >
           {onLoad && (
             <Button
-              disabled={isSyncing}
               onClick={showConfigScreen}
-              className="mt-4 bg-cyan-500 disabled:bg-cyan-700 animate-drop mx-2"
+              className="w-fit animate-drop border-2 mt-5 md:mt-0 border-emerald-500 items-center"
             >
               <IconWrench />
-              <p className="ml-2">Edit Config</p>
+              <p className="text-nowrap text-2xl font-semibold mx-2">Edit Config</p>
             </Button>
           )}
-          {onLoad && (
-            <Button
-              disabled={isSyncing}
-              onClick={handleSync}
-              className="mt-4 disabled:bg-green-700 bg-green-500 animate-dropDelay mx-2"
-            >
-              <IconRefresh className={`${isSyncing && 'animate-spin'}`} />
-              <p className="ml-2">Sync With Server</p>
-            </Button>
-          )}
-        </div>
+          {onLoad && <SyncButton expanded className="animate-dropDelay" />}        </div>
       </div>
     </div>
   )

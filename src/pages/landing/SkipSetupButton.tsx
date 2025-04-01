@@ -3,7 +3,9 @@ import Button from '@src/components/ui/Button'
 import { useSettingsStore } from '@src/stores'
 import { useState } from 'react'
 
-interface SkipSetupButtonProps {}
+interface SkipSetupButtonProps {
+  text?: string
+}
 
 /**
  * A button component that allows the user to skip the setup process.
@@ -12,7 +14,7 @@ interface SkipSetupButtonProps {}
  * to the `dashboard`.
  * The button also displays an arrow icon that animates when the button is clicked.
  */
-const SkipSetupButton: React.FC<SkipSetupButtonProps> = () => {
+const SkipSetupButton: React.FC<SkipSetupButtonProps> = ({ text = "Skip Setup"}) => {
   const setPreferences = useSettingsStore((state) => state.updatePreferences)
   const [skipping, setIsSkipping] = useState(false)
 
@@ -44,7 +46,7 @@ const SkipSetupButton: React.FC<SkipSetupButtonProps> = () => {
       <p
         className={`${skipping && 'opacity-0'} duration-250 transition-opacity text-nowrap text-2xl font-semibold`}
       >
-        Skip Setup
+        {text}
       </p>
     </Button>
   )

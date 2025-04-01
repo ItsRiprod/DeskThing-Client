@@ -6,7 +6,7 @@ import {
   ViewMode,
   VolMode,
   Client
-} from '@DeskThing/types'
+} from '@deskthing/types'
 import { create } from 'zustand'
 import { useSettingsStore } from './settingsStore'
 import { useMappingStore } from './mappingStore'

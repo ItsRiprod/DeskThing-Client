@@ -1,10 +1,12 @@
 import { IconRefresh } from '@src/assets/Icons'
 import { useState } from 'react'
 import Button from './Button'
-import { useSettingsStore } from '@src/stores'
+import { useSettingsStore, useWebSocketStore } from '@src/stores'
+import { DEVICE_DESKTHING } from '@deskthing/types'
 
 interface SyncProps {
   expanded?: boolean
+  className?: string
 }
 
 /**
@@ -16,15 +18,23 @@ interface SyncProps {
  * @param {boolean} [props.expanded] - Whether the button should display the "Sync With Server" label.
  * @returns {React.ReactElement} - The `SyncButton` component.
  */
-const SyncButton: React.FC<SyncProps> = ({ expanded }) => {
+const SyncButton: React.FC<SyncProps> = ({ expanded, className }) => {
   const [syncing, setIsSyncing] = useState(false)
   const setPreferences = useSettingsStore((state) => state.updatePreferences)
-  const handleSync = () => {
+  const send = useWebSocketStore((state) => state.send)
+
+  const handleSync = async (): Promise<void> => {
     setIsSyncing(true)
-    // TODO: Sync with server
+    await send({
+      type: DEVICE_DESKTHING.CONFIG,
+      request: 'get',
+      app: 'server'
+    })
+
     setPreferences({
       onboarding: false
     })
+
     setTimeout(() => {
       setPreferences({
         onboarding: true,
@@ -42,7 +52,7 @@ const SyncButton: React.FC<SyncProps> = ({ expanded }) => {
 
   return (
     <Button
-      className="w-fit border-2 mt-5 md:mt-0 border-cyan-500 items-center"
+      className={`${className} w-fit border-2 mt-5 md:mt-0 border-cyan-500 items-center`}
       onClick={handleSync}
     >
       <IconRefresh className={`${syncing && 'animate-spin'}`} />

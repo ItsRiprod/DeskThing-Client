@@ -7,11 +7,10 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    screens: {
-      'xs': '400px',
-      ...defaultTheme.screens,
-    },
     extend: {
+      screens: {
+        'xs': '400px',
+      },
       fontFamily: {
         geist: ['Geist', 'sans-serif'],
         Wingding: ['Wingding', 'monospace'],

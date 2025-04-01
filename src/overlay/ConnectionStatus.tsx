@@ -1,5 +1,6 @@
 import { IconLoading } from '@src/assets/Icons'
 import { useWebSocketStore } from '@src/stores/'
+import { useUIStore } from '@src/stores/uiStore'
 
 /**
  * Renders a component that displays the connection status of the WebSocket connection.
@@ -11,11 +12,12 @@ import { useWebSocketStore } from '@src/stores/'
 export const ServerStatus = () => {
   const isConnected = useWebSocketStore((state) => state.isConnected)
   const isReconnecting = useWebSocketStore((state) => state.isReconnecting)
+  const isScreensaverActive = useUIStore((state) => state.isScreensaverActive)
 
-  if (isConnected) return null
+  if (isConnected || isScreensaverActive) return null
 
   return (
-    <div className="fixed top-4 left-4 z-50 flex items-center rounded-lg bg-rose-950 px-4 py-2 text-sm text-white">
+    <div className="fixed top-4 left-4 z-40 flex items-center rounded-lg bg-rose-950 px-4 py-2 text-sm text-white">
       {isReconnecting ? (
         <div className="flex items-center">
           <IconLoading iconSize={12} strokeWidth={5} className='animate-spin mr-2' />

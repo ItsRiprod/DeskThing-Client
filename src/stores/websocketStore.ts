@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { WebSocketManager } from '../utils/websocketManager' 
 import { useSettingsStore } from './settingsStore'
 import { useMusicStore } from './musicStore'
-import { DeviceToDeskthingData, DeskThingToDeviceData, DeskThingToDeviceCore } from '@DeskThing/types'
+import { DeviceToDeskthingData, DeskThingToDeviceData, DeskThingToDeviceCore } from '@deskthing/types'
 import { useClientStore } from './clientStore'
 
 /**

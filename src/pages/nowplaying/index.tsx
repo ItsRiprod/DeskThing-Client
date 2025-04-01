@@ -21,7 +21,7 @@ export default function NowPlaying() {
 
   const refreshSong = async () => {
     setIsRefreshing(true)
-    await refresh()
+    await refresh(true)
     setTimeout(() => setIsRefreshing(false), Math.random() * 1000 + 1000)
   }
 

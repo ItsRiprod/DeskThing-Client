@@ -3,7 +3,7 @@ import {
   AppSettings,
   App,
   SocketData,
-  DeviceToDeskthing,
+  DeviceToDeskthingData,
   DEVICE_DESKTHING
 } from '@deskthing/types'
 import { SocketConfig, SocketSettings } from '@src/types'
@@ -50,7 +50,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const send = useWebSocketStore.getState().send
     const settings = get().appSettings[appName]
 
-    const data: DeviceToDeskthing = {
+    const data: DeviceToDeskthingData = {
       app: appName,
       type: DEVICE_DESKTHING.SETTINGS,
       request: 'set',
@@ -59,8 +59,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     send(data)
   },
   getAppIcon: (app) => {
-    const ip = useSettingsStore.getState().manifest.ip
-    const port = useSettingsStore.getState().manifest.port
+    const ip = useSettingsStore.getState().manifest.context.ip
+    const port = useSettingsStore.getState().manifest.context.port
     return `http://${ip}:${port}/icons/${app.name}/icons/${app.name}.svg`
   }
 }))

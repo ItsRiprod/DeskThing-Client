@@ -4,53 +4,64 @@
   import { ScreenSaverLogo } from './Logo';
 import { IconX } from '@src/assets/Icons';
 import Button from '@src/components/ui/Button';
+import { useUIStore } from '@src/stores/uiStore'
 
   const ScreenSaverWrapper: React.FC = () => {
     const preferences = useSettingsStore((state) => state.preferences);
-    const [screensaverActive, setScreensaverActive] = useState(false);
     const [screenSaverDismissed, setScreenSaverDismissed] = useState(false);
-    const [dismissedTimeoutId, setDismissedTimeoutId] = useState<NodeJS.Timeout | null>(null);
-    useEffect(() => {
-      if (screenSaverDismissed) return
+    const screensaverActive = useUIStore((state) => state.isScreensaverActive)
+    const setScreensaverActive = useUIStore((state) => state.setScreensaverActive)
+    const [lastActivity, setLastActivity] = useState(Date.now());
+    const [requireManualDismiss, setRequireManualDismiss] = useState(false);
+    const INACTIVITY_TIMEOUT = 15000;
 
-        const timeoutId = setTimeout(() => {
-            setScreensaverActive(true);
-        }, 5000);
-        return () => {
-            clearTimeout(timeoutId);
-        };
-    }, [screensaverActive, screenSaverDismissed])
-
-    const restartDismissedTimeout = () => {
-      if (dismissedTimeoutId) {
-        clearTimeout(dismissedTimeoutId);
+    const handleUserActivity = () => {
+      setLastActivity(Date.now());
+      if (screensaverActive && !requireManualDismiss) {
+        setScreensaverActive(false);
       }
-      const timeoutId = setTimeout(() => {
-        setScreenSaverDismissed(false);
-      }, 15000);
-      setDismissedTimeoutId(timeoutId);
     };
 
     useEffect(() => {
-
-      const handleActivity = () => {
-        restartDismissedTimeout()
-      };
-
-      window.addEventListener('keydown', handleActivity);
-      window.addEventListener('mousedown', handleActivity);
+      window.addEventListener('keydown', handleUserActivity);
+      window.addEventListener('mousedown', handleUserActivity);
+      window.addEventListener('mousemove', handleUserActivity);
+      window.addEventListener('touchstart', handleUserActivity);
+      window.addEventListener('wheel', handleUserActivity);
+  
       return () => {
-        window.removeEventListener('mousedown', handleActivity);
-        window.removeEventListener('keydown', handleActivity);
+        window.removeEventListener('keydown', handleUserActivity);
+        window.removeEventListener('mousedown', handleUserActivity);
+        window.removeEventListener('mousemove', handleUserActivity);
+        window.removeEventListener('touchstart', handleUserActivity);
+        window.removeEventListener('wheel', handleUserActivity);
       };
-    }, [screenSaverDismissed])
+    }, [screensaverActive, requireManualDismiss]);
+
+    useEffect(() => {
+      if (screenSaverDismissed) return;
+  
+      const intervalId = setInterval(() => {
+        const currentTime = Date.now();
+        const timeSinceLastActivity = currentTime - lastActivity;
+        
+        if (timeSinceLastActivity > INACTIVITY_TIMEOUT && !screensaverActive) {
+          setScreensaverActive(true);
+          setRequireManualDismiss(true);
+
+        }
+      }, 1000);
+  
+      return () => clearInterval(intervalId);
+    }, [lastActivity, screensaverActive, screenSaverDismissed]);
+  
 
     const handleClose = () => {
-        setScreensaverActive(false);
-        setScreenSaverDismissed(true);
-        restartDismissedTimeout()
+      setScreensaverActive(false);
+      setScreenSaverDismissed(false);
+      setRequireManualDismiss(false);
+      setLastActivity(Date.now());
     };
-
 
     const renderScreenSaver = () => {
       switch (preferences.ScreensaverType?.type || 'black') {
@@ -62,13 +73,13 @@ import Button from '@src/components/ui/Button';
         default:
           return null;
       }
-    };
+    }
 
     return (
         <div className={`${screensaverActive ? 'max-h-full z-10' : 'max-h-0'} w-full overflow-hidden duration-[3s] fixed h-full flex items-center justify-center transition-all`}>
             <div className={`${screensaverActive ? 'bg-black opacity-100' : 'bg-black/0 opacity-0'} w-screen duration-[5s] shrink-0 h-screen transition-all`}>
                 {renderScreenSaver()}
-                <Button  className="absolute top-2 right-2" onClick={handleClose}>
+                <Button  className="absolute bottom-2 right-2" onClick={handleClose}>
                   <IconX />
                 </Button>
             </div>

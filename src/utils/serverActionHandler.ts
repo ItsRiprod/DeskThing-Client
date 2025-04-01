@@ -12,11 +12,11 @@ import {
   EventMode,
   ActionReference,
   ViewMode,
-  DeviceToDeskthing,
+  DeviceToDeskthingData,
   DEVICE_DESKTHING,
   SongEvent,
   MusicEventPayloads
-} from '@DeskThing/types'
+} from '@deskthing/types'
 import Logger from './Logger'
 
 /**
@@ -46,7 +46,7 @@ export class ActionHandler {
     return ActionHandler.instance
   }
 
-  private sendMessage = async (data: DeviceToDeskthing) => {
+  private sendMessage = async (data: DeviceToDeskthingData) => {
     const send = useWebSocketStore.getState().send
     await send(data)
   }
@@ -77,7 +77,7 @@ export class ActionHandler {
       handler(action)
     } else {
       console.warn(`No handler found for action: ${action.id}`)
-      const socketData: DeviceToDeskthing = {
+      const socketData: DeviceToDeskthingData = {
         type: DEVICE_DESKTHING.ACTION,
         app: 'server',
         payload: action
@@ -88,7 +88,7 @@ export class ActionHandler {
 
   private async handleAppAction(action: Action | ActionReference): Promise<void> {
     try {
-      const socketData: DeviceToDeskthing = {
+      const socketData: DeviceToDeskthingData = {
         type: DEVICE_DESKTHING.ACTION,
         app: 'server',
         payload: action
@@ -202,7 +202,7 @@ export class ActionHandler {
 
   Swap = async (action: Action) => {
     const currentView = useSettingsStore.getState().preferences.currentView.name
-    const socketData: DeviceToDeskthing = {
+    const socketData: DeviceToDeskthingData = {
       app: 'server',
       type: DEVICE_DESKTHING.SET,
       request: 'update_pref_index',

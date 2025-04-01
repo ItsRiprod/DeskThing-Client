@@ -1,4 +1,4 @@
-import { LOGGING_LEVELS, App, AppSettings, ClientManifest, MiniplayerSettings, Theme, Action, ActionReference, AUDIO_REQUESTS, KeyReference, SongData } from '@DeskThing/types'
+import { LOGGING_LEVELS, App, AppSettings, ClientManifest, MiniplayerSettings, Theme, Action, ActionReference, AUDIO_REQUESTS, KeyReference, SongData } from '@deskthing/types'
 import { CombinedButtonMapping, Log } from '.'
 
 

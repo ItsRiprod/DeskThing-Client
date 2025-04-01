@@ -17,8 +17,10 @@
   </head>
   <body style="background: black;">
     <div id="root">
-      <img id="appstart-img" width="100%" height="100%" src="/images/appstart.png" alt="App Start Image" />
-    </div>
+      <div style="width: 100%; height: 100%; max-height: 98vh; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+        <img id="appstart-img" style="width: 100%; height: 100%; object-fit: cover; object-position: center;" src="/images/appstart.png" alt="App Start Image" />
+      </div>
+    </div> 
     <!-- Only loads this .js file if it is connected via ADB or Bluetooth -->
     <script src="/manifest-loader.js"></script>
     <!-- Then load the main script -->

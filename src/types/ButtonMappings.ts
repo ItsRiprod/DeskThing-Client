@@ -1,4 +1,4 @@
-import { Action, ActionReference, EventMode } from "@DeskThing/types"
+import { Action, ActionReference, EventMode } from "@deskthing/types"
 
 export type Profile = {
     version: string

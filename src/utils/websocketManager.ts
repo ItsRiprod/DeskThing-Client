@@ -1,5 +1,5 @@
 import Logger from './Logger'
-import { DEVICE_DESKTHING, DeviceToDeskthingData, DESKTHING_DEVICE, DeskThingToDeviceData, DeskThingToDeviceCore } from '@DeskThing/types'
+import { DEVICE_DESKTHING, DeviceToDeskthingData, DESKTHING_DEVICE, DeskThingToDeviceData, DeskThingToDeviceCore } from '@deskthing/types'
 
 type SocketEventListener = (msg: DeskThingToDeviceCore & { app?: string }) => void
 type ConnectionStatus = 'connected' | 'disconnected' | 'reconnecting'

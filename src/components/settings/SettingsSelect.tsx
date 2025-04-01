@@ -27,7 +27,7 @@ export const SettingsSelectComponent: React.FC<SettingsSelectProps> = ({
   return (
     <SettingComponent setting={setting} className={className}>
       {setting.type == 'select' && (
-        <div className="w-96 max-w-s relative">
+        <div className="w-full max-w-s relative">
           <button
             disabled={setting.disabled}
             onClick={() => setIsOpen(!isOpen)}

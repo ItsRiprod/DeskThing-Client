@@ -6,8 +6,8 @@ import SelectionWheel from './SelectionWheel'
 import VolumeOverlay from './Volume'
 import { useActionStore } from '@src/stores/actionStore'
 import { useEffect, useState } from 'react'
-import { ServerStatus } from './ConnectionStatus'
 import YouAreHere from './YouAreHere'
+import { ServerStatus } from './ConnectionStatus'
 import ScreenSaverWrapper from './ScreenSaver/ScreenSaverWrapper'
 
 interface OverlayProps {

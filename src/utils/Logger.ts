@@ -1,5 +1,5 @@
 
-import { DEVICE_DESKTHING, Log, LOGGING_LEVELS } from '@DeskThing/types'
+import { DEVICE_DESKTHING, Log, LOGGING_LEVELS } from '@deskthing/types'
 import { SettingsState, useSettingsStore } from '@src/stores/settingsStore'
 import { useWebSocketStore, WebSocketState } from '@src/stores/websocketStore'
 

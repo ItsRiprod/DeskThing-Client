@@ -113,16 +113,18 @@ const LandingPage: React.FC = () => {
       <button
         disabled={currentStep === 0 || !showNextSteps}
         onClick={() => handleNextStep(true)}
-        className={`bottom-4 left-4 fixed disabled:opacity-0 transition-opacity`}
+        className={`bottom-4 left-4 flex items-center fixed disabled:opacity-0 transition-opacity`}
       >
         <IconArrowLeft iconSize={64} />
+        <p>Previous</p>
       </button>
       {currentStep !== steps.length - 1 && (
         <button
           disabled={currentStep == steps.length - 1 || !showNextSteps}
           onClick={() => handleNextStep()}
-          className={`bottom-4 right-4 fixed disabled:opacity-0 transition-opacity`}
+          className={`bottom-4 right-4 fixed flex items-center disabled:opacity-0 transition-opacity`}
         >
+          <p>Next</p>
           <IconArrowRight iconSize={64} />
         </button>
       )}

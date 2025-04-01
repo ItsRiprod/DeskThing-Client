@@ -19,18 +19,7 @@ const AppTray: React.FC = () => {
   const currentView = useSettingsStore((store) => store.preferences.currentView)
   const usePullTabs = useSettingsStore((store) => store.preferences.showPullTabs)
   const setPreferences = useSettingsStore((store) => store.updatePreferences)
-  const [height, setHeight] = useState('h-0')
   const [tabVisible, setTabVisible] = useState(true)
-
-  useEffect(() => {
-    setHeight(
-      appTrayState === ViewMode.PEEK
-        ? 'h-36'
-        : appTrayState === ViewMode.HIDDEN
-          ? 'h-0'
-          : 'h-screen'
-    )
-  }, [appTrayState])
 
   useEffect(() => {
     let timer: NodeJS.Timeout
@@ -43,12 +32,13 @@ const AppTray: React.FC = () => {
   }, [appTrayState, setPreferences])
 
   useEffect(() => {
+    console.log('Changing the state')
     setTabVisible(true)
     const timer = setTimeout(() => {
       setTabVisible(false)
     }, 2000)
     return () => clearTimeout(timer)
-  }, [appTrayState, currentView])
+  }, [appTrayState])
 
   const onClick = () => {
     setTabVisible(true)
@@ -62,24 +52,28 @@ const AppTray: React.FC = () => {
   }
 
   const gotoSettings = () => {
-    setPreferences({ currentView: {
-      name: 'settings',
-      enabled: true,
-      running: true,
-      timeStarted: 0,
-      prefIndex: 0
-    } })
+    setPreferences({
+      currentView: {
+        name: 'settings',
+        enabled: true,
+        running: true,
+        timeStarted: 0,
+        prefIndex: 0
+      }
+    })
     setPreferences({ appTrayState: ViewMode.PEEK })
   }
 
   const gotoDashboard = () => {
-    setPreferences({ currentView: {
-      name: 'dashboard',
-      enabled: true,
-      running: true,
-      timeStarted: 0,
-      prefIndex: 0
-    } })
+    setPreferences({
+      currentView: {
+        name: 'dashboard',
+        enabled: true,
+        running: true,
+        timeStarted: 0,
+        prefIndex: 0
+      }
+    })
     setPreferences({ appTrayState: ViewMode.PEEK })
   }
 
@@ -91,7 +85,13 @@ const AppTray: React.FC = () => {
 
   return (
     <div
-      className={`w-screen flex flex-col absolute top-0 ${appTrayState == ViewMode.FULL ? 'bg-zinc-950 transition-colors' : 'bg-zinc-950'} transition-[height] z-10 ${height}`}
+      className={`${
+        appTrayState === ViewMode.PEEK
+          ? 'h-36'
+          : appTrayState === ViewMode.HIDDEN
+            ? 'h-0 mb-8'
+            : 'h-screen'
+      } w-screen flex flex-col absolute top-0 ${appTrayState == ViewMode.FULL ? 'bg-zinc-950' : 'bg-zinc-950'} transition-[colors,height] z-10`}
     >
       {usePullTabs && (
         <div

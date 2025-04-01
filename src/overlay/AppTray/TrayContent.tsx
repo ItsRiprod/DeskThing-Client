@@ -19,11 +19,11 @@ const TrayContent = () => {
 
   return (
     <div
-      className={`${appTrayState != ViewMode.FULL ? 'overflow-hidden' : 'pb-28 overflow-y-auto'} grid justify-items-center grid-cols-1 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 p-2 w-full overflow-hidden max-h-full h-fit`}
+      className={`${appTrayState != ViewMode.FULL ? 'overflow-hidden' : 'pb-28 overflow-y-auto'} space-y-2 grid justify-items-center grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 p-2 w-full overflow-hidden max-h-full h-fit`}
     >
       {appTrayState == ViewMode.PEEK
         ? actionKeys.map((aKey) => (
-            <div key={aKey} className=" h-28 w-28">
+            <div key={aKey} className=" h-24 w-24">
               <Key keyId={aKey} />
             </div>
           ))
@@ -32,10 +32,11 @@ const TrayContent = () => {
           apps.map((app) => (
             <div
               style={{ borderColor: `${primary || '#22c55e'}` }}
-              className={`w-28 h-28 flex items-center justify-center ${app.name == currentView.name && 'border-green-500 border-2 rounded-full'}`}
+              className={`w-36 h-36 flex items-center flex-col justify-center bg-neutral-800 p-4 rounded-3xl ${app.name == currentView.name && 'border-green-500 border-2'}`}
               key={app.name}
             >
               <AppTrayButton app={app} key={app.name} />
+              <p className="text-ellipsis whitespace-nowrap w-full text-center text-sm">{app.manifest?.label}</p>
             </div>
           ))}
     </div>

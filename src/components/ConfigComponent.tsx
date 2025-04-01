@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import { useSettingsStore } from '@src/stores/settingsStore'
-import { SETTING_TYPES, ViewMode, VolMode } from '@deskthing/types'
+import { DEVICE_DESKTHING, SETTING_TYPES, ViewMode, VolMode } from '@deskthing/types'
 import { IconArrowLeft, IconArrowRight, IconRefresh, IconTransfer } from '@src/assets/Icons'
 import { SettingsSelectComponent } from './settings/SettingsSelect'
 import { SettingsColorComponent } from './settings/SettingsColor'
 import { SettingsBooleanComponent } from './settings/SettingsBoolean'
 import Button from './ui/Button'
+import { useWebSocketStore } from '@src/stores'
 
 interface ConfigComponentProps {
   onFinish: () => void
@@ -24,6 +25,8 @@ export const ConfigComponent: React.FC<ConfigComponentProps> = ({ onFinish }) =>
   const updatePreferences = useSettingsStore((store) => store.updatePreferences)
   const preferences = useSettingsStore((store) => store.preferences)
   const [isResetting, setIsResetting] = useState(false)
+  const [isSyncing, setIsSyncing] = useState(false)
+  const send = useWebSocketStore((state) => state.send)
 
   const handleNext = () => {
     if (step < steps.length - 1) {
@@ -31,6 +34,19 @@ export const ConfigComponent: React.FC<ConfigComponentProps> = ({ onFinish }) =>
     } else {
       onFinish()
     }
+  }
+
+  const handleSyncToServer = async () => {
+    setIsSyncing(true)
+    await send({
+      type: DEVICE_DESKTHING.CONFIG,
+      request: 'set',
+      payload: preferences,
+      app: 'server'
+    })
+    setTimeout(() => {
+      setIsSyncing(false)
+    }, 1000)
   }
 
   const handleBack = () => {
@@ -86,13 +102,16 @@ export const ConfigComponent: React.FC<ConfigComponentProps> = ({ onFinish }) =>
             <SettingsSelectComponent
               handleSettingChange={(value) =>
                 updatePreferences({
-                  ScreensaverType: { ...preferences.ScreensaverType, type: value as 'black' | 'logo' | 'clock' }
+                  ScreensaverType: {
+                    ...preferences.ScreensaverType,
+                    type: value as 'black' | 'logo' | 'clock'
+                  }
                 })
               }
               setting={{
                 value: preferences.ScreensaverType.type,
                 type: SETTING_TYPES.SELECT,
-                label: 'Screensaver',
+                label: 'ScreenSaver',
                 description: 'Choose a background for the screensaver',
                 options: [
                   { value: 'black', label: 'Black' },
@@ -301,10 +320,13 @@ export const ConfigComponent: React.FC<ConfigComponentProps> = ({ onFinish }) =>
         <div className="flex h-full flex-col ">
           <h3 className="text-lg mb-4 font-semibold">Syncing Settings</h3>
           <div className="flex flex-col justify-start items-start">
-            <p className="font-geistMono italic text-xs">Pending implementation</p>
-            <Button className="bg-red-500 text-white px-4 py-2 my-2 rounded-md">
-              <IconTransfer />
-              <p className="font-semibold ml-2">Sync Config With Server</p>
+            <Button
+              disabled={isSyncing}
+              className="bg-red-500 text-white px-4 py-2 my-2 rounded-md"
+              onClick={handleSyncToServer}
+            >
+              <IconTransfer className={`${isSyncing && 'animate-pulse'}`} />
+              <p className="font-semibold ml-2">Save Config On Server</p>
             </Button>
             <Button
               className="bg-cyan-500 disabled:bg-cyan-600 my-2 items-center"

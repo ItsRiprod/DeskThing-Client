@@ -11,13 +11,11 @@ import { AppTriggerButton, AppTriggerAction, AppTriggerKey } from '@src/types'
 import {
   CLIENT_REQUESTS,
   ClientToDeviceData,
-  ClientToDeviceGeneric,
-  DeskThingToDeviceData,
   DEVICE_CLIENT,
   DEVICE_DESKTHING,
   DeviceToClientCore,
   DeviceToClientData,
-  EventMode,
+  EventMode
 } from '@deskthing/types'
 import { useRef, useEffect } from 'react'
 import Logger from '@src/utils/Logger'
@@ -108,15 +106,28 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }: WebPageProps): JSX.Ele
     payload: Extract<ClientToDeviceData, { request: 'key'; app: 'client'; type: 'get' }>['payload']
   ) => {
     const actionUrl = getKeyUrl(payload)
-    send({ type: payload.id, app: 'client', payload: actionUrl })
+    send({
+      type: payload.id,
+      app: 'client',
+      payload: actionUrl,
+      request: 'set'
+    } as DeviceToClientCore)
   }
 
   // Handles any action icon requests from the iframe to the main app
   const handleActionIcon = (
-    payload: Extract<ClientToDeviceData, { request: 'action'; app: 'client'; type: 'get' }>['payload']
+    payload: Extract<
+      ClientToDeviceData,
+      { request: 'action'; app: 'client'; type: 'get' }
+    >['payload']
   ) => {
     const actionUrl = getActionUrl(payload)
-    send({ type: payload.id, app: 'client', payload: actionUrl })
+    send({
+      type: payload.id,
+      app: 'client',
+      payload: actionUrl,
+      request: 'set'
+    } as DeviceToClientCore)
   }
 
   const handleLog = (data: Extract<ClientToDeviceData, { app: 'client'; type: 'log' }>) => {
@@ -147,7 +158,7 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }: WebPageProps): JSX.Ele
     manifest: handleManifest
   }
 
-  const send = (data: DeviceToClientData<ClientToDeviceGeneric>) => {
+  const send = (data: DeviceToClientData) => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
       const augmentedData = { ...data, source: 'deskthing' }
       iframeRef.current.contentWindow.postMessage(augmentedData, '*')
@@ -158,7 +169,7 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }: WebPageProps): JSX.Ele
     const removeListener = addWebsocketListener((data) => {
       if (data.app != currentView) return
 
-      send(data as DeskThingToDeviceData)
+      send(data as unknown as DeviceToClientData)
     })
 
     return () => {
@@ -201,7 +212,8 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }: WebPageProps): JSX.Ele
           payload: appSettings[currentView]
         })
       }
-      currentTime && send({ type: DEVICE_CLIENT.TIME, app: 'client', request: 'set', payload: currentTime })
+      currentTime &&
+        send({ type: DEVICE_CLIENT.TIME, app: 'client', request: 'set', payload: currentTime })
     }
 
     const id = setTimeout(sendDefaultData, 1000)

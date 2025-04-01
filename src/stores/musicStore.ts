@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import {
   AUDIO_REQUESTS,
-  DeviceToDeskthing,
+  ClientPlatformIDs,
+  DeviceToDeskthingData,
   SongData,
   SongEvent
 } from '@deskthing/types'
@@ -9,6 +10,7 @@ import useWebSocketStore from './websocketStore'
 import { useMappingStore } from './mappingStore'
 import { SocketData, SocketMusic } from '@src/types'
 import Logger from '@src/utils/Logger'
+import { useSettingsStore } from './settingsStore'
 
 /**
  * The `useMusicStore` is a Zustand store that manages the state of the music player.
@@ -18,7 +20,7 @@ import Logger from '@src/utils/Logger'
 export interface MusicState {
   song?: SongData | null
   setSong: (song: SongData) => void
-  requestMusicData: () => void
+  requestMusicData: (force?: boolean) => void
   next: () => void
   previous: () => void
   rewind: () => void
@@ -38,12 +40,22 @@ export const useMusicStore = create<MusicState>((set, get) => ({
     Logger.info(`Received song ${newData.id}`)
     const currentSong = get().song
 
+    // Encoding the url for use by the app 
+    if (newData.thumbnail && newData.thumbnail.startsWith('http')) {
+      const context = useSettingsStore.getState().manifest?.context
+      if (context.id == ClientPlatformIDs.CarThing || context.ip == 'localhost') {
+        newData.thumbnail = `${context.ip}:${context.port}/proxy/fetch/${encodeURIComponent(newData.thumbnail)}`
+
+      }
+    }
+
     if (!currentSong) {
       set({ song: newData })
       return
     }
 
     const hasChanges = Object.keys(newData).some((key) => newData[key] !== currentSong[key])
+
 
     if (hasChanges) {
       set({ song: { ...currentSong, ...newData } })
@@ -68,8 +80,8 @@ export const useMusicStore = create<MusicState>((set, get) => ({
     updateIcons()
   },
 
-  requestMusicData: () => {
-    createWSAction({ request: AUDIO_REQUESTS.SONG, app: 'music', type: SongEvent.GET })
+  requestMusicData: (force?: boolean) => {
+    createWSAction({ request: AUDIO_REQUESTS.SONG, app: 'music', type: SongEvent.GET, payload: force })
   },
 
   next: () => {
@@ -207,7 +219,7 @@ export const useMusicStore = create<MusicState>((set, get) => ({
 const debounceTimers: { [key in AUDIO_REQUESTS]?: NodeJS.Timeout } = {}
 
 const createWSAction = async (
-  songData: Extract<DeviceToDeskthing, { app: 'music' }>
+  songData: Extract<DeviceToDeskthingData, { app: 'music' }>
 ): Promise<void> => {
   try {
     const send = useWebSocketStore.getState().send

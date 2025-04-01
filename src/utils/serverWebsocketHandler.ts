@@ -15,7 +15,7 @@
 import { useAppStore, useClientStore, useMappingStore, useSettingsStore, useWebSocketStore } from '@src/stores'
 import { useTimeStore } from '@src/stores/timeStore'
 import Logger from './Logger'
-import { DEVICE_CLIENT, DESKTHING_DEVICE, DeskThingToDeviceCore, DEVICE_DESKTHING, DeviceToDeskthingData, DeskThingToDeviceData } from '@DeskThing/types'
+import { DEVICE_CLIENT, DESKTHING_DEVICE, DeskThingToDeviceCore, DEVICE_DESKTHING, DeviceToDeskthingData, DeskThingToDeviceData } from '@deskthing/types'
 
 
 type DeskThingToDevice<T extends DESKTHING_DEVICE> = Extract<DeskThingToDeviceCore, { type: T }>
@@ -114,6 +114,12 @@ const HANDLE_META_DATA = (data: DeskThingToDevice<DESKTHING_DEVICE.META_DATA>) =
   // TODO: Handle the rest of this payload
 }
 
+const HANDLE_CONFIG = (data: DeskThingToDevice<DESKTHING_DEVICE.CONFIG>) => {
+  const updateConfig = useSettingsStore.getState().updatePreferences
+  console.log('Received config', data)
+  updateConfig(data.payload)
+}
+
 const socketHandlers: SocketHandler = {
   [DESKTHING_DEVICE.GET]: handleGetManifest,
   [DESKTHING_DEVICE.TIME]: handleSetTime,
@@ -127,7 +133,8 @@ const socketHandlers: SocketHandler = {
   [DESKTHING_DEVICE.APPS]: HANDLE_APPS,
   [DESKTHING_DEVICE.ICON]: HANDLE_ICON,
   [DESKTHING_DEVICE.META_DATA]: HANDLE_META_DATA,
-  [DESKTHING_DEVICE.MUSIC]: HANDLE_MUSIC
+  [DESKTHING_DEVICE.MUSIC]: HANDLE_MUSIC,
+  [DESKTHING_DEVICE.CONFIG]: HANDLE_CONFIG
 }
 
 export const handleServerSocket = (data: DeskThingToDeviceCore) => {

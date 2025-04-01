@@ -79,7 +79,7 @@ const Miniplayer: React.FC = () => {
       Math.random() * 1000 + 1000
     )
 
-    getSong()
+    getSong(true)
     onClick()
   }
 
