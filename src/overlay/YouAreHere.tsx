@@ -25,7 +25,7 @@ export const YouAreHere: FC<YouAreHereProps> = ({ setShow }) => {
   const [isOpen, setIsOpen] = useState(true)
   const location = useLocation()
   const hasDoneOnboarding = useSettingsStore((state) => state.preferences.onboarding)
-  const setPreferences = useSettingsStore((state) => state.updatePreferences)
+  const setCurrentView = useSettingsStore((state) => state.updateCurrentView)
 
   useEffect(() => {
     if (hasDoneOnboarding) {
@@ -51,19 +51,19 @@ export const YouAreHere: FC<YouAreHereProps> = ({ setShow }) => {
   }
 
   const handleDashboard = () => {
-    setPreferences({ currentView: {
+    setCurrentView({
       name: 'dashboard',
       enabled: false,
       running: false,
       timeStarted: 0,
       prefIndex: 0
-    } })
+    })
     handleClose()
   }
 
   return (
     <div
-      className={`fixed justify-between border-gray-500 bg-black z-10 w-full px-4 h-full ${isOpen ? 'md:max-h-36 border-t-2' : 'max-h-0'} transition-[max-height] overflow-hidden bottom-0 flex items-center justify-center`}
+      className={`fixed justify-between border-gray-500 bg-black z-10 w-full px-4 h-fit ${isOpen ? 'md:max-h-36 border-t-2' : 'max-h-0'} transition-[max-height] overflow-hidden bottom-0 flex items-center justify-center`}
     >
       <p>Page: {location.pathname}</p>
       <div className="flex">

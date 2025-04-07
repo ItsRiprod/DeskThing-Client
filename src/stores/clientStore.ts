@@ -5,7 +5,8 @@ import {
   ClientConfigurations,
   ViewMode,
   VolMode,
-  Client
+  Client,
+  ConnectionState
 } from '@deskthing/types'
 import { create } from 'zustand'
 import { useSettingsStore } from './settingsStore'
@@ -33,46 +34,49 @@ const defaultManifest: ClientManifest = {
   repository: ''
 }
 
-const defaultPreferences: ClientConfigurations = {
-  profileId: 'unset',
-  version: '0.11.0',
-  miniplayer: {
-    state: ViewMode.PEEK,
-    visible: true,
-    position: 'bottom'
-  },
-  appTrayState: ViewMode.PEEK,
-  theme: {
-    scale: 'medium',
-    primary: '#22c55e',
-    textLight: '#ffffff',
-    textDark: '#000000',
-    icons: '#ffffff',
-    background: '#000000'
-  },
+const defaultConfig: ClientConfigurations = {
+  profileId: 'unset', 
+  version: '',
+  appTrayState: ViewMode.HIDDEN,
   volume: VolMode.WHEEL,
-  currentView: {
-    name: 'landing',
-    enabled: true,
-    running: true,
-    timeStarted: 0,
-    prefIndex: 0
-  },
-  ShowNotifications: true,
+  ShowNotifications: false,
   Screensaver: {
-    name: 'default',
-    enabled: true,
-    running: true,
+    name: '',
+    enabled: false,
+    running: false,
     timeStarted: 0,
-    prefIndex: 0
+    prefIndex: 0,
+    meta: undefined,
+    manifest: {
+      id: '',
+      label: '',
+      requires: [],
+      version: '',
+      description: '',
+      author: '',
+      platforms: [],
+      homepage: '',
+      repository: '',
+      updateUrl: '',
+      tags: [],
+      requiredVersions: {
+        server: '',
+        client: ''
+      },
+      template: '',
+      version_code: 0,
+      compatible_server: [],
+      compatible_client: [],
+      isAudioSource: false,
+      isScreenSaver: false,
+      isLocalApp: false,
+      isWebApp: false
+    }
   },
+  ScreensaverType: undefined,
   onboarding: false,
   showPullTabs: false,
-  saveLocation: true,
-  ScreensaverType: {
-    version: 1,
-    type: 'clock'
-  },
+  saveLocation: false,
   use24hour: false
 }
 
@@ -80,13 +84,18 @@ const defaultPreferences: ClientConfigurations = {
  * Will get filled in by the server
  */
 const defaultClient: Client = {
-  id: '',
-  connectionId: 'unspecified-id',
+  clientId: 'unspecified-id',
   connected: false,
+  identifiers: {},
+  connectionState: ConnectionState.Disconnected,
   timestamp: 0,
-
-  currentConfiguration: defaultPreferences,
-  currentProfileID: 'unset',
+  currentConfiguration: defaultConfig,
+  currentMapping: {
+    profileId: 'unset',
+    mapping: {},
+    actions: [],
+    keys: []
+  },
 
   manifest: defaultManifest
 }
@@ -103,24 +112,23 @@ export interface ClientState {
 export const useClientStore = create<ClientState>()((set, get) => ({
   client: defaultClient,
   updateClient: (newClient) => {
-    if (newClient.currentConfiguration && newClient.currentConfiguration.profileId !== get().client.currentProfileID) {
+    if (newClient.currentConfiguration && (newClient.currentConfiguration?.profileId || undefined) !== get().client.currentConfiguration?.profileId || undefined) {
       const updatePreferences = useSettingsStore.getState().updatePreferences
       updatePreferences(newClient.currentConfiguration)
     }
 
-    if (newClient.currentMapping && newClient.currentMapping.profileId !== get().client.currentMappingID) {
+    if (newClient.currentMapping && (newClient.currentMapping?.profileId || undefined) !== get().client.currentMapping?.profileId || undefined) {
         const setProfile = useMappingStore.getState().setProfile
         setProfile(newClient.currentMapping)
     }
 
     
-    console.log('status update to', newClient.connectionId)
+    console.log('client ID updated to', newClient.clientId)
 
     set((state) => ({
-      client: { ...state.client, ...newClient, currentConfiguration: undefined, currentMapping: undefined }
+      client: { ...state.client, ...newClient, currentConfiguration: { profileId: (newClient.currentConfiguration?.profileId || undefined)}, currentMapping: { profileId: (newClient.currentMapping?.profileId || undefined) } } as Client
     }))
-  },
-  updateConfiguration: (newConfig) =>
+  },  updateConfiguration: (newConfig) =>
     set((state) => ({
       client: {
         ...state.client,
@@ -133,7 +141,7 @@ export const useClientStore = create<ClientState>()((set, get) => ({
     })),
   updateConnectionStatus: (connected) =>
     set((state) => ({
-      client: { ...state.client, connected, timestamp: Date.now() }
+      client: { ...state.client, connected, timestamp: Date.now() } as Client
     })),
   resetClient: () => set({ client: defaultClient })
 }))

@@ -32,11 +32,11 @@ export interface WebSocketState {
 export const useWebSocketStore = create<WebSocketState>((set, get) => {
   
   const manifest = useSettingsStore.getState().manifest
-  const connectionId = useClientStore.getState().client.connectionId
+  const clientId = useClientStore.getState().client.clientId
   
   const wsUrl = `ws://${manifest.context.ip}:${manifest.context.port}`
 
-  const manager = new WebSocketManager(connectionId, wsUrl)
+  const manager = new WebSocketManager(clientId, wsUrl)
 
   manager.addStatusListener((status) => {
     if (status == 'reconnecting') {
@@ -59,9 +59,9 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
   })
 
   useClientStore.subscribe((state) => {
-    if (state.client.connectionId !== manager.getConnectionId()) {
-      console.log('status update to', state.client.connectionId)
-      manager.setId(state.client.connectionId)
+    if (state.client.clientId !== manager.getclientId()) {
+      console.log('status update to', state.client.clientId)
+      manager.setId(state.client.clientId)
     }
   })
 

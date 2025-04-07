@@ -23,7 +23,7 @@ const TrayContent = () => {
     >
       {appTrayState == ViewMode.PEEK
         ? actionKeys.map((aKey) => (
-            <div key={aKey} className=" h-24 w-24">
+            <div key={aKey} className="mb-12 h-24 w-24">
               <Key keyId={aKey} />
             </div>
           ))
@@ -36,7 +36,9 @@ const TrayContent = () => {
               key={app.name}
             >
               <AppTrayButton app={app} key={app.name} />
-              <p className="text-ellipsis whitespace-nowrap w-full text-center text-sm">{app.manifest?.label}</p>
+              <p className="text-ellipsis whitespace-nowrap w-full text-center text-sm">
+                {app.manifest?.label}
+              </p>
             </div>
           ))}
     </div>

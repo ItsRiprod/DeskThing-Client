@@ -57,8 +57,8 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="p-4 h-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 overflow-y-auto">
-      <section className="bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-4 shadow-2xl border border-zinc-700/30 backdrop-blur-sm hover:shadow-zinc-800/20 transition-all duration-300">
+    <div className="p-4 h-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 overflow-y-auto">
+      <section className="bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-4 shadow-2xl border border-zinc-700/30 backdrop-blur-sm hover:shadow-zinc-800/20 transition-all duration-300 m-2">
         <h2 className="text-xl font-bold text-gray-100 mb-4 flex items-center">
           <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">Connection Status</span>
         </h2>
@@ -75,13 +75,13 @@ const DashboardPage = () => {
         </div>
       </section>
 
-      <section className="bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-4 shadow-2xl border border-zinc-700/30 backdrop-blur-sm hover:shadow-zinc-800/20 transition-all duration-300 flex items-center justify-center">
+      <section className="bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-4 shadow-2xl border border-zinc-700/30 backdrop-blur-sm hover:shadow-zinc-800/20 transition-all duration-300 flex items-center justify-center m-2">
         <Button onClick={handleClockRoute} className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium py-2 px-6 rounded-lg transform hover:scale-105 transition-all duration-300">
           Open Clock
         </Button>
       </section>
 
-      <section className="bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-4 shadow-2xl border border-zinc-700/30 backdrop-blur-sm hover:shadow-zinc-800/20 transition-all duration-300">
+      <section className="bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-4 shadow-2xl border border-zinc-700/30 backdrop-blur-sm hover:shadow-zinc-800/20 transition-all duration-300 m-2">
         <h2 className="text-xl font-bold text-gray-100 mb-4 flex items-center">
           <span className="bg-gradient-to-r from-purple-500 to-pink-400 bg-clip-text text-transparent">Button Mappings</span>
         </h2>
@@ -90,7 +90,7 @@ const DashboardPage = () => {
         </div>
       </section>
 
-      <section className="bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-4 shadow-2xl border border-zinc-700/30 backdrop-blur-sm hover:shadow-zinc-800/20 transition-all duration-300">
+      <section className="bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-4 shadow-2xl border border-zinc-700/30 backdrop-blur-sm hover:shadow-zinc-800/20 transition-all duration-300 m-2">
         <h2 className="text-xl font-bold text-gray-100 mb-4">
           <span className="bg-gradient-to-r from-green-500 to-emerald-400 bg-clip-text text-transparent">Music Player</span>
         </h2>
@@ -108,7 +108,7 @@ const DashboardPage = () => {
         </div>
       </section>
 
-      <section className="bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-4 shadow-2xl border border-zinc-700/30 backdrop-blur-sm hover:shadow-zinc-800/20 transition-all duration-300">
+      <section className="bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-4 shadow-2xl border border-zinc-700/30 backdrop-blur-sm hover:shadow-zinc-800/20 transition-all duration-300 m-2">
         <h2 className="text-xl font-bold text-gray-100 mb-4">
           <span className="bg-gradient-to-r from-red-500 to-orange-400 bg-clip-text text-transparent">Settings</span>
         </h2>

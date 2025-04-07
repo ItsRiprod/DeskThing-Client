@@ -14,7 +14,7 @@ interface ProgressBarProps {
 
  * The component also manages the state of the progress bar, including the total length of the song, the current progress, and whether the user is currently dragging the progress bar. It updates the progress bar's appearance based on the current progress and the user's theme settings.
  */
-const ProgressBar: React.FC<ProgressBarProps> = memo(() => {
+const ProgressBar: React.FC<ProgressBarProps> = memo(({ className }) => {
   const miniplayerState = useSettingsStore((store) => store.preferences.miniplayer)
   const primary = useSettingsStore((store) => store.preferences.theme.primary)
   const setMiniplayerState = useSettingsStore((store) => store.updatePreferences)
@@ -35,7 +35,7 @@ const ProgressBar: React.FC<ProgressBarProps> = memo(() => {
 
     if (songData && !isDragging) {
       if (songData.id != prevId) {
-        setTotalLength(songData.track_duration || 999)
+        setTotalLength(songData.track_duration || 30000)
         setCurrentProgress(songData.track_progress || 0)
       }
 
@@ -54,16 +54,27 @@ const ProgressBar: React.FC<ProgressBarProps> = memo(() => {
   }, [songData, totalLength, isDragging])
 
   useEffect(() => {
+    // Checking if the song is done
+    let isValid = true
+    let timeoutId: NodeJS.Timeout | undefined = undefined
     if (totalLength <= progress && !isDragging) {
-      setTotalLength(9999)
+      setTotalLength(30000)
       setCurrentProgress(0)
       setIsDragging(false)
-      requestSongData()
+      if (isValid) {
+        requestSongData()
+      }
 
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         requestSongData()
       }, 2000)
     }
+
+    return () => {
+      isValid = false
+      clearTimeout(timeoutId)
+    }
+
   }, [progress, totalLength, isDragging])
 
   const handleMouseDown = (
@@ -141,7 +152,7 @@ const ProgressBar: React.FC<ProgressBarProps> = memo(() => {
 
   return (
     <button
-      className={`w-screen ${isDragging ? 'h-6' : 'h-2'} transition-[height] bg-zinc-900`}
+      className={`${className} w-screen ${isDragging ? 'h-6' : 'h-2'} transition-[height] bg-zinc-900`}
       onClick={onClick}
       onMouseDown={handleMouseDown}
       onTouchStart={handleMouseDown}
@@ -157,6 +168,10 @@ const ProgressBar: React.FC<ProgressBarProps> = memo(() => {
         className="h-full w-full bottom-0 bg-gray-200"
       ></div>
     </button>
+  )
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.className === nextProps.className
   )
 })
 

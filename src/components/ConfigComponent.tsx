@@ -46,6 +46,7 @@ export const ConfigComponent: React.FC<ConfigComponentProps> = ({ onFinish }) =>
     })
     setTimeout(() => {
       setIsSyncing(false)
+      updatePreferences({ onboarding: true })
     }, 1000)
   }
 

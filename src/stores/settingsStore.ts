@@ -2,7 +2,6 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import {
   App,
-  Client,
   ClientConfigurations,
   ClientConnectionMethod,
   ClientManifest,
@@ -86,7 +85,7 @@ const defaultPreferences: ClientConfigurations = {
   showPullTabs: false,
   saveLocation: true,
   ScreensaverType: {
-    version: 1,
+    version: '0',
     type: 'clock'
   },
   use24hour: false
@@ -113,9 +112,22 @@ export const useSettingsStore = create<SettingsState>()(
           manifest: { ...state.manifest, ...newSettings }
         })),
       updatePreferences: (newPreferences) =>
-        set((state) => ({
+        set((state) => {
+          if (newPreferences.currentView?.name != state.preferences.currentView?.name) {
+            const send = useWebSocketStore.getState().send
+            send({
+              type: DEVICE_DESKTHING.VIEW,
+              request: 'change',
+              app: 'server',
+              payload: {
+                currentApp: newPreferences.currentView?.name,
+                previousApp: state.preferences.currentView?.name,
+              }
+            })
+          }
+          return {
           preferences: { ...state.preferences, ...newPreferences }
-        })),
+        }}),
       updateCurrentView: (newView) => {
         const send = useWebSocketStore.getState().send
         send({

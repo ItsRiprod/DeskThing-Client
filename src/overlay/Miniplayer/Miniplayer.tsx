@@ -136,25 +136,28 @@ const Miniplayer: React.FC = () => {
     >
       {isPullTabVisible && (
         <div
-          className={`absolute rounded-tr-xl flex justify-center -top-16 items-center h-16 w-16 bg-zinc-900 transition-opacity duration-300 ${tabVisible ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute rounded-t-lg flex justify-center -top-12 items-center h-12 w-24 bg-zinc-900/90 backdrop-blur-md shadow-lg transition-all duration-300 ${tabVisible ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-2'}`}
           onMouseEnter={() => setTabVisible(true)}
           onTouchStart={() => setTabVisible(true)}
         >
-          <Button className="mr-2" onClick={onToggleHeight}>
+          <Button 
+            className="hover:bg-zinc-800 rounded-full p-2 transition-colors duration-200" 
+            onClick={onToggleHeight}
+          >
             <IconArrowDown
-              className={`${miniplayer.state == ViewMode.HIDDEN && 'rotate-180'} transition-transform`}
+              className={`w-6 h-6 ${miniplayer.state == ViewMode.HIDDEN ? 'rotate-180' : ''} transition-transform duration-200 ease-in-out`}
             />
           </Button>
         </div>
       )}
       <ProgressBar />
       <div
-        className={`${miniplayer.state == 'peek' ? height : 'h-0'} transition-[height] overflow-hidden flex w-full items-center justify-center`}
+        className={`${miniplayer.state == ViewMode.PEEK ? height : 'h-0'} transition-[height] overflow-hidden flex w-full items-center justify-center`}
       >
         {!isAudioSource && (
           <button
             onClick={refreshSong}
-            className={`${height} ${width} flex-shrink-0 flex items-center justify-center`}
+            className={`${height} ${width} ${miniplayer.state == ViewMode.HIDDEN ? 'max-h-0 overflow-hidden' : 'flex-shrink-0'} flex items-center justify-center`}
           >
             {song?.thumbnail ? (
               <img src={song.thumbnail} className="w-full h-full object-cover" />
@@ -200,7 +203,7 @@ const Miniplayer: React.FC = () => {
           {<DynamicAction keyId="Action7" />}
           {!isAudioSource && expanded && (
             <DynamicAction>
-              <ActionComponent className="w-1/2 h-full" action={fullscreenAction} />
+              <ActionComponent className="!w-1/2 h-full" action={fullscreenAction} />
             </DynamicAction>
           )}
         </div>

@@ -1,13 +1,23 @@
+async function fetchManifest(url) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.error(`Failed to fetch ${url}: Status ${response.status} ${response.statusText}`);
+      throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.log(`Failed to fetch manifest from ${url}:`, error);
+    throw error;
+  }
+}
+
 (function loadManifest() {
   // First set default values
   window.manifest = window.manifest || {};
   
   // Try to fetch dynamic manifest from server
-  fetch('/manifest.json')
-    .then(response => {
-      if (!response.ok) throw new Error('Network response was not ok');
-      return response.json();
-    })
+  fetchManifest('/manifest.json')
     .then(dynamicManifest => {
       // Merge with any existing values
       console.log(dynamicManifest)
@@ -15,13 +25,15 @@
       document.dispatchEvent(new Event('manifestLoaded'));
     })
     .catch(error => {
-      console.log('Using default manifest: ', error);
+      console.log('Trying default manifest: ', error);
       // If fetch fails, load the default manifest
-      fetch('/manifest.default.json')
-        .then(response => response.json())
+      fetchManifest('/manifest.default.json')
         .then(defaultManifest => {
           window.manifest = { ...window.manifest, ...defaultManifest };
           document.dispatchEvent(new Event('manifestLoaded'));
+        })
+        .catch(error => {
+          console.log('Failed to load any manifest', error);
         });
     });
 })();

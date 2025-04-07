@@ -53,7 +53,7 @@ const ActionIcon: React.FC<ActionProps> = ({ url, className }) => {
   }, [getActionUrl, url])
 
   return (
-    <Icon color={iconColor} className={className || 'w-full h-full'}>
+    <Icon color={iconColor} className={`${className || 'w-full h-full'}  animate-pop-in`}>
       {svgContent ? <svg dangerouslySetInnerHTML={{ __html: svgContent }} /> : <IconLogoGear />}
     </Icon>
   )

@@ -84,6 +84,7 @@ button:active {
   position: fixed;
   color: white;
   font-family: 'Geist', sans-serif;
+  max-height: var(--vh);
 }
 
 .bg-gradient-radial {

@@ -19,20 +19,20 @@ export class WebSocketManager {
   private pongTimeout: NodeJS.Timeout | null = null
   private missedPongs = 0
   private readonly MAX_MISSED_PONGS = 3
-  private connectionId: string | null = null
+  private clientId: string | null = null
   private code = Math.random() * 1000000
 
-  constructor(connectionId: string, url: string) {
-    this.connectionId = connectionId
+  constructor(clientId: string, url: string) {
+    this.clientId = clientId
     this.url = url
   }
 
-  getConnectionId() {
-    return this.connectionId
+  getclientId() {
+    return this.clientId
   }
 
   setId(id: string) {
-    this.connectionId = id
+    this.clientId = id
   }
 
   async closeExisting() {
@@ -95,8 +95,16 @@ export class WebSocketManager {
       const data = JSON.parse(event.data) as DeskThingToDeviceCore & { app: string }
       if (data.app == 'client') {
         if (data.type == DESKTHING_DEVICE.PONG) {
+          if (data.payload) {
+            // Update the clientId with the one from the ping
+            this.setId(data.payload)
+          }
           this.resetPongTimeout()
         } else if (data.type == DESKTHING_DEVICE.PING) {
+          if (data.payload) {
+            // Update the clientId with the one from the ping
+            this.setId(data.payload)
+          }
           this.sendMessage({ app: 'server', type: DEVICE_DESKTHING.PONG })
         }
       }
@@ -126,7 +134,7 @@ export class WebSocketManager {
 
   sendMessage(message: DeviceToDeskthingData) {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      const socketMessage = { ...message, connectionId: this.connectionId }
+      const socketMessage = { ...message, clientId: this.clientId }
       console.debug(`[${message.app} ${message.type}]`, socketMessage)
       this.socket.send(JSON.stringify(socketMessage))
     } else {

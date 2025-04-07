@@ -7,6 +7,7 @@ import NowPlaying from '@src/pages/nowplaying'
 import UtilityPage from '@src/pages/settings'
 import DashboardPage from '@src/pages/dashboard'
 import ClockPage from '@src/pages/clock'
+import Logger from '@src/utils/Logger'
 
 /**
  * A list of system application names that are considered "core" or "system" apps in the application.
@@ -39,9 +40,7 @@ const NavRouter: React.FC = () => {
   const preferences = useSettingsStore((store) => store.preferences)
 
   useEffect(() => {
-    if (!preferences.saveLocation) return
-
-    const currentView = preferences.currentView.name
+    const currentView = preferences.currentView?.name || 'dashboard'
     if (preferences.onboarding) {
       if (SystemApps.includes(currentView)) {
         navigate('/' + currentView)
@@ -49,6 +48,7 @@ const NavRouter: React.FC = () => {
         navigate('/app/' + currentView)
       }
     } else {
+      Logger.info('User onboarding incomplete, navigating to landing page')
       navigate('/')
     }
   }, [navigate, preferences])
@@ -67,7 +67,7 @@ const NavRouter: React.FC = () => {
         <Route path={'/utility/:app'} element={<UtilityPage />} />
         <Route path={'/app/:app'} element={<AppPage />} />
         <Route path={'/app'} element={<AppPage />} />
-        <Route path={'*'} element={<LandingPage />} />
+        <Route path={'*'} element={<DashboardPage />} />
       </Routes>
     </>
   )

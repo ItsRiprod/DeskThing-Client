@@ -21,8 +21,9 @@
         <img id="appstart-img" style="width: 100%; height: 100%; object-fit: cover; object-position: center;" src="/images/appstart.png" alt="App Start Image" />
       </div>
     </div> 
-    <!-- Only loads this .js file if it is connected via ADB or Bluetooth -->
     <script src="/manifest-loader.js"></script>
+    <!-- Only loads this .js file if it is connected via ADB or Bluetooth -->
+    <script src="/manifest.js"></script>
     <!-- Then load the main script -->
     <script type="module" src="/src/main.tsx"></script>
   </body>

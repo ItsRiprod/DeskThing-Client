@@ -40,12 +40,13 @@ export const useMusicStore = create<MusicState>((set, get) => ({
     Logger.info(`Received song ${newData.id}`)
     const currentSong = get().song
 
-    // Encoding the url for use by the app 
+    // Encoding the url for use by the app
     if (newData.thumbnail && newData.thumbnail.startsWith('http')) {
       const context = useSettingsStore.getState().manifest?.context
       if (context.id == ClientPlatformIDs.CarThing || context.ip == 'localhost') {
-        newData.thumbnail = `${context.ip}:${context.port}/proxy/fetch/${encodeURIComponent(newData.thumbnail)}`
+        if (newData.thumbnail.includes(`${context.ip}:${context.port}`)) return // already parsed as a corrected IP
 
+        newData.thumbnail = `http://${context.ip}:${context.port}/proxy/fetch/${encodeURIComponent(newData.thumbnail)}`
       }
     }
 
@@ -55,7 +56,6 @@ export const useMusicStore = create<MusicState>((set, get) => ({
     }
 
     const hasChanges = Object.keys(newData).some((key) => newData[key] !== currentSong[key])
-
 
     if (hasChanges) {
       set({ song: { ...currentSong, ...newData } })
@@ -81,7 +81,12 @@ export const useMusicStore = create<MusicState>((set, get) => ({
   },
 
   requestMusicData: (force?: boolean) => {
-    createWSAction({ request: AUDIO_REQUESTS.SONG, app: 'music', type: SongEvent.GET, payload: force })
+    createWSAction({
+      request: AUDIO_REQUESTS.SONG,
+      app: 'music',
+      type: SongEvent.GET,
+      payload: force
+    })
   },
 
   next: () => {

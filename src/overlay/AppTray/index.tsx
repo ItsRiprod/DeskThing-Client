@@ -89,23 +89,26 @@ const AppTray: React.FC = () => {
         appTrayState === ViewMode.PEEK
           ? 'h-36'
           : appTrayState === ViewMode.HIDDEN
-            ? 'h-0 mb-8'
-            : 'h-screen'
+            ? 'h-0'
+            : 'h-full'
       } w-screen flex flex-col absolute top-0 ${appTrayState == ViewMode.FULL ? 'bg-zinc-950' : 'bg-zinc-950'} transition-[colors,height] z-10`}
     >
       {usePullTabs && (
         <div
-          className={`fixed flex justify-center items-center h-28 w-14 bg-zinc-900 transition-opacity duration-300 ${tabVisible ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute rounded-b-lg flex justify-center top-0 items-center h-12 w-24 bg-zinc-900/90 backdrop-blur-md shadow-lg transition-all duration-300 ${tabVisible ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform -translate-y-2'}`}
           onMouseEnter={() => setTabVisible(true)}
           onTouchStart={() => setTabVisible(true)}
         >
-          <Button className="mr-2" onClick={onClick}>
+          <Button
+            className="hover:bg-zinc-800 rounded-full p-2 transition-colors duration-200"
+            onClick={onClick}
+          >
             <IconArrowDown
-              className={`${appTrayState == ViewMode.FULL && 'rotate-180'} transition-transform`}
+              className={`w-6 h-6 ${appTrayState == ViewMode.FULL ? 'rotate-180' : ''} transition-transform duration-200 ease-in-out`}
             />
           </Button>
         </div>
-      )}
+      )}{' '}
       <TrayContent />
       <div
         className={`${appTrayState == ViewMode.FULL ? 'h-14' : 'h-0'} transition-[height] mb-5 flex justify-between overflow-hidden w-screen bg-black absolute bottom-0`}
@@ -124,8 +127,8 @@ const AppTray: React.FC = () => {
           </Button>
         </div>
       </div>
-      <button
-        className="w-screen absolute bg-zinc-900 bottom-0 h-5 flex items-center justify-center"
+        <button
+        className={`${appTrayState === ViewMode.HIDDEN ? 'opacity-0 top-5' : ' bottom-0 '} w-screen absolute bg-zinc-900 h-5 flex items-center justify-center`}
         onClick={onClick}
       >
         <IconEllipsis />
