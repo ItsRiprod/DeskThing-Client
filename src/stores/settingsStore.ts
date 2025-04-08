@@ -35,8 +35,8 @@ const defaultManifest: ClientManifest = {
     method: ClientConnectionMethod.Unknown,
     id: ClientPlatformIDs.Unknown,
     name: 'Unknown Connection Method',
-    ip: 'localhost',
-    port: 8891
+    ip: undefined,
+    port: undefined
   },
   reactive: false,
   author: '',

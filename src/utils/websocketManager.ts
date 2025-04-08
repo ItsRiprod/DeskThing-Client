@@ -1,5 +1,10 @@
 import Logger from './Logger'
-import { DEVICE_DESKTHING, DeviceToDeskthingData, DESKTHING_DEVICE, DeskThingToDeviceData, DeskThingToDeviceCore } from '@deskthing/types'
+import {
+  DEVICE_DESKTHING,
+  DeviceToDeskthingData,
+  DESKTHING_DEVICE,
+  DeskThingToDeviceCore
+} from '@deskthing/types'
 
 type SocketEventListener = (msg: DeskThingToDeviceCore & { app?: string }) => void
 type ConnectionStatus = 'connected' | 'disconnected' | 'reconnecting'
@@ -22,9 +27,13 @@ export class WebSocketManager {
   private clientId: string | null = null
   private code = Math.random() * 1000000
 
-  constructor(clientId: string, url: string) {
+  private closeTimeoutId: NodeJS.Timeout | null = null
+  private reconnectId: NodeJS.Timeout | null = null
+
+  constructor(clientId: string, url?: string) {
     this.clientId = clientId
-    this.url = url
+    this.url = url || this.url
+    console.debug('WebSocketManager initialized with URL:', this.url)
   }
 
   getclientId() {
@@ -60,35 +69,65 @@ export class WebSocketManager {
   async connect(url?: string) {
     this.url = url || this.url
 
+    const id = Math.floor(Math.random() * 10000).toString().padStart(4, '0')
+
     if (this.url == undefined || !this.url) {
-      console.error('No WebSocket URL provided')
+      console.warn(`[${id}] No WebSocket URL provided`)
       return
+    } else {
+      console.debug(`[${id}] Connecting to WebSocket: ${this.url}`)
     }
 
-    if (this.url != this.socket?.url) {
-      await this.closeExisting()
-      console.log(`Creating a new WebSocket instance on ${this.url}`)
-      this.socket = new WebSocket(this.url)
-    }
+    await this.closeExisting()
+
+    console.log(`[${id}] Creating a new WebSocket instance on ${this.url}`)
+    this.socket = new WebSocket(this.url)
+    console.debug(`[${id}] Created new WebSocket instance`, this.socket.url)
+
+    const connectionPromise = new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error(`[${id}] Connection timeout`))
+      }, 10000)
+
+      this.socket!.onopen = () => {
+        clearTimeout(timeout)
+        console.info(`[${id}] Connected to ${this.url}`)
+        this.reconnecting = false
+        this.startHeartbeat()
+        this.notifyStatusChange('connected')
+        resolve()
+      }
+
+      this.socket!.onerror = (error) => {
+        clearTimeout(timeout)
+        console.error(`[${id}] WebSocket error:`, error)
+        reject(error)
+      }
+    })
 
     this.socket.onopen = () => {
-      Logger.info(`Connected to ${this.url}`)
+      console.info(`[${id}] Connected to ${this.url}`)
       this.reconnecting = false
       this.startHeartbeat()
       this.notifyStatusChange('connected')
     }
 
     this.socket.onclose = (reason) => {
-      Logger.info('Disconnected, attempting to reconnect...', this.code, reason)
+      console.warn(`[${id}] Disconnected, attempting to reconnect...`, this.code, reason)
       this.stopHeartbeat()
       this.notifyStatusChange('disconnected')
-      setTimeout(() => {
+
+      if (this.closeTimeoutId) {
+        clearTimeout(this.closeTimeoutId)
+      }
+
+      this.closeTimeoutId = setTimeout(() => {
         this.reconnect()
-      }, 3000)
+      }, 5000)
     }
 
     this.socket.onerror = (error) => {
-      console.error('WebSocket error:', error)
+      console.error(`[${id}] WebSocket error:`, error)
     }
 
     this.socket.onmessage = (event) => {
@@ -111,6 +150,16 @@ export class WebSocketManager {
 
       this.notifyListeners(data)
     }
+
+    try {
+      // Wait for the connection to be established
+      await connectionPromise
+      return true
+    } catch (error) {
+      console.error(`[${id}] Failed to establish connection:`, error)
+      this.disconnect()
+      return false
+    }
   }
 
   disconnect() {
@@ -125,7 +174,11 @@ export class WebSocketManager {
 
     this.disconnect()
 
-    setTimeout(() => {
+    if (this.reconnectId) {
+      clearTimeout(this.reconnectId)
+    }
+
+    this.reconnectId = setTimeout(() => {
       Logger.info('Conecting...')
       this.connect()
       this.reconnecting = false
@@ -133,13 +186,21 @@ export class WebSocketManager {
   }
 
   sendMessage(message: DeviceToDeskthingData) {
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      const socketMessage = { ...message, clientId: this.clientId }
-      console.debug(`[${message.app} ${message.type}]`, socketMessage)
-      this.socket.send(JSON.stringify(socketMessage))
-    } else {
-      console.error('WebSocket is not connected')
+    if (!this.socket) {
+      console.error('Socket is not initialized')
+      console.debug(`Failed to send ${message.type}`)
+      return
     }
+
+    if (this.socket.readyState !== WebSocket.OPEN) {
+      console.error('Socket is not open. The state is', this.socket.readyState)
+      console.debug(`Failed to send ${message.type}`)
+      return
+    }
+
+    const socketMessage = { ...message, clientId: this.clientId }
+    console.debug(`[${message.app} ${message.type}]`, socketMessage)
+    this.socket.send(JSON.stringify(socketMessage))
   }
 
   addListener(listener: SocketEventListener) {

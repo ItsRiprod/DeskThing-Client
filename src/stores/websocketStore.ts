@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { WebSocketManager } from '../utils/websocketManager' 
 import { useSettingsStore } from './settingsStore'
 import { useMusicStore } from './musicStore'
-import { DeviceToDeskthingData, DeskThingToDeviceData, DeskThingToDeviceCore } from '@deskthing/types'
+import { DeviceToDeskthingData, DeskThingToDeviceCore } from '@deskthing/types'
 import { useClientStore } from './clientStore'
 
 /**
@@ -34,7 +34,15 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
   const manifest = useSettingsStore.getState().manifest
   const clientId = useClientStore.getState().client.clientId
   
-  const wsUrl = `ws://${manifest.context.ip}:${manifest.context.port}`
+  let wsUrl: string | undefined = undefined
+
+  if (manifest.context.ip && manifest.context.port) {
+    wsUrl = `ws://${manifest.context.ip}:${manifest.context.port}`
+  } else {
+    console.debug('WebSocket URL not ready yet, waiting...')
+  }
+
+  console.log('WebSocket URL:', wsUrl)
 
   const manager = new WebSocketManager(clientId, wsUrl)
 
@@ -49,11 +57,21 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
     })
   })
   
-  manager.connect()
+  if (wsUrl) {
+    manager.connect()
+  }
 
   useSettingsStore.subscribe((state) => {
+    if (!state.manifest.context.ip || !state.manifest.context.port) {
+      console.debug('WebSocket URL not ready yet, waiting...')
+      return
+    }
+
     const newWsUrl = `ws://${state.manifest.context.ip}:${state.manifest.context.port}`
     if (newWsUrl !== wsUrl) {
+      console.debug('WebSocket URL changed, reconnecting...')
+      manager.disconnect()
+      wsUrl = newWsUrl
       manager.connect(newWsUrl)
     }
   })
