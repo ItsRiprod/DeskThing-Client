@@ -86,7 +86,11 @@ export class WebSocketManager {
 
     const connectionPromise = new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => {
-        reject(new Error(`[${id}] Connection timeout`))
+        if (this.socket.readyState === WebSocket.CONNECTING) {
+          reject(new Error(`[${id}] Connection timeout`))
+        } else {
+          resolve()
+        }
       }, 10000)
 
       this.socket!.onopen = () => {
@@ -157,7 +161,13 @@ export class WebSocketManager {
       return true
     } catch (error) {
       console.error(`[${id}] Failed to establish connection:`, error)
-      this.disconnect()
+      if (this.closeTimeoutId) {
+        clearTimeout(this.closeTimeoutId)
+      }
+
+      this.closeTimeoutId = setTimeout(() => {
+        this.reconnect()
+      }, 5000)
       return false
     }
   }
