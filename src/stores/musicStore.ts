@@ -46,7 +46,7 @@ export const useMusicStore = create<MusicState>((set, get) => ({
       if (context.id == ClientPlatformIDs.CarThing || context.ip == 'localhost') {
         if (newData.thumbnail.includes(`${context.ip}:${context.port}`)) return // already parsed as a corrected IP
 
-        newData.thumbnail = `http://${context.ip}:${context.port}/proxy/fetch/${encodeURIComponent(newData.thumbnail)}`
+        newData.thumbnail = `http://${context.ip}:${context.port}/proxy/v1?url=${encodeURIComponent(newData.thumbnail)}`
       }
     }
 

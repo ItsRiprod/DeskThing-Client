@@ -165,7 +165,7 @@ const Miniplayer: React.FC = () => {
               <IconAlbum className="h-full w-full p-4" />
             )}
             <div
-              className={`${refreshing ? '' : 'opacity-0'} bg-black/50 duration-1000 transition-opacity absolute flex items-center justify-center ${expanded ? height : 'h-0'} ${width}`}
+              className={`${refreshing ? '' : 'opacity-0'} ${miniplayer.state == ViewMode.HIDDEN ? 'max-h-0 overflow-hidden' : 'flex-shrink-0'} bg-black/50 duration-1000 transition-opacity absolute flex items-center justify-center ${expanded ? height : 'h-0'} ${width}`}
             >
               <IconLoading
                 className={`${refreshing ? 'animate-spin opacity-100' : 'opacity-0'} w-1/2 h-1/2 rounded-full`}
