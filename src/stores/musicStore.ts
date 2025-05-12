@@ -41,12 +41,19 @@ export const useMusicStore = create<MusicState>((set, get) => ({
     const currentSong = get().song
 
     // Encoding the url for use by the app
-    if (newData.thumbnail && newData.thumbnail.startsWith('http')) {
-      const context = useSettingsStore.getState().manifest?.context
-      if (context.id == ClientPlatformIDs.CarThing || context.ip == 'localhost') {
-        if (newData.thumbnail.includes(`${context.ip}:${context.port}`)) return // already parsed as a corrected IP
+    if (newData.thumbnail) {
 
-        newData.thumbnail = `http://${context.ip}:${context.port}/proxy/v1?url=${encodeURIComponent(newData.thumbnail)}`
+      // Handle any http urls
+      if (newData.thumbnail.startsWith('http')) {
+        const context = useSettingsStore.getState().manifest?.context
+        if (context.id == ClientPlatformIDs.CarThing || context.ip == 'localhost') {
+          if (newData.thumbnail.includes(`${context.ip}:${context.port}`)) return // already parsed as a corrected IP
+          
+          newData.thumbnail = `http://${context.ip}:${context.port}/proxy/v1?url=${encodeURIComponent(newData.thumbnail)}`
+        }
+      } else if (newData.thumbnail.startsWith('/')) {
+        const context = useSettingsStore.getState().manifest?.context
+        newData.thumbnail = `http://${context.ip}:${context.port}${newData.thumbnail}`
       }
     }
 
@@ -58,7 +65,7 @@ export const useMusicStore = create<MusicState>((set, get) => ({
     const hasChanges = Object.keys(newData).some((key) => newData[key] !== currentSong[key])
 
     if (hasChanges) {
-      set({ song: { ...currentSong, ...newData } })
+      set({ song: { ...currentSong, ...newData } as SongData })
     }
 
     const updateIcons = async () => {
@@ -195,9 +202,14 @@ export const useMusicStore = create<MusicState>((set, get) => ({
     })
   },
 
-  setRepeat: (state: 'context' | 'track' | 'off') => {
+  setRepeat: (state: 'context' | 'all' | 'track' | 'off') => {
     const previousState = get().song
-    set({ song: { ...previousState, repeat_state: state } })
+
+    if (state == 'context') {
+      state = 'all'
+    }
+
+    set({ song: { ...previousState, repeat_state: state } as SongData })
     createWSAction({
       request: AUDIO_REQUESTS.REPEAT,
       payload: state,
