@@ -58,7 +58,6 @@ const Miniplayer: React.FC = () => {
   useEffect(() => {
     setHeight(theme.scale == 'small' ? 'h-16' : theme.scale == 'medium' ? 'h-32' : 'h-48')
     setWidth(theme.scale == 'small' ? 'w-16' : theme.scale == 'medium' ? 'w-32' : 'w-48')
-    getSong()
   }, [theme])
 
   const refreshSong = (e: MouseEvent<HTMLButtonElement>) => {

@@ -182,6 +182,7 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }: WebPageProps): JSX.Ele
       send({ type: DEVICE_CLIENT.MUSIC, app: 'client', payload: music })
     }
   }, [music])
+
   useEffect(() => {
     if (apps) {
       send({ type: DEVICE_CLIENT.APPS, app: 'client', payload: apps })

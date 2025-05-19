@@ -61,12 +61,11 @@ const ProgressBar: React.FC<ProgressBarProps> = memo(({ className }) => {
       setTotalLength(30000)
       setCurrentProgress(0)
       setIsDragging(false)
-      if (isValid) {
-        requestSongData()
-      }
-
-      timeoutId = setTimeout(() => {
-        requestSongData()
+      
+      timeoutId = setTimeout(() => { // manually request song data after a delay to avoid race conditions
+        if (isValid) {
+          requestSongData()
+        }
       }, 2000)
     }
 
@@ -96,8 +95,12 @@ const ProgressBar: React.FC<ProgressBarProps> = memo(({ className }) => {
       setTotalLength(9999)
       setCurrentProgress(0)
 
+      let oldSongId = songData?.id
+
       setTimeout(() => {
-        requestSongData()
+        if (oldSongId == songData?.id) {
+          requestSongData() // attempt to request manually if the song didn't change
+        }
       }, 2000)
     } else if (progress <= 0) {
       previous()

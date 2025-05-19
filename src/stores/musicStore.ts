@@ -239,18 +239,29 @@ const createWSAction = async (
   songData: Extract<DeviceToDeskthingData, { app: 'music' }>
 ): Promise<void> => {
   try {
+
     const send = useWebSocketStore.getState().send
 
     // Clear any existing timeout for this request type
     if (debounceTimers[songData.request]) {
       clearTimeout(debounceTimers[songData.request])
-    }
+      // Set a new timeout
+      debounceTimers[songData.request] = setTimeout(() => {
+        send(songData)
+        delete debounceTimers[songData.request]
+      }, 300) // 100ms debounce delay
 
-    // Set a new timeout
-    debounceTimers[songData.request] = setTimeout(() => {
+    } else {
+
+      // send first then wait on second
       send(songData)
-      delete debounceTimers[songData.request]
-    }, 300) // 100ms debounce delay
+      
+      debounceTimers[songData.request] = setTimeout(() => {
+        // do nothing timer
+        delete debounceTimers[songData.request]
+      }, 300) // 100ms debounce delay
+    }
+      
   } catch (error) {
     throw error
   }
