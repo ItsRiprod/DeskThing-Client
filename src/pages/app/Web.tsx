@@ -188,6 +188,7 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }: WebPageProps): JSX.Ele
       send({ type: DEVICE_CLIENT.APPS, app: 'client', payload: apps })
     }
   }, [apps])
+  
   useEffect(() => {
     if (appSettings && appSettings[currentView]) {
       send({
@@ -197,6 +198,7 @@ const WebPage: React.FC<WebPageProps> = ({ currentView }: WebPageProps): JSX.Ele
       })
     }
   }, [appSettings, currentView])
+  
   useEffect(() => {
     if (currentTime) {
       send({ type: DEVICE_CLIENT.TIME, app: 'client', request: 'set', payload: currentTime })

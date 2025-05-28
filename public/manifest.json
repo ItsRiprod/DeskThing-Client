@@ -6,9 +6,9 @@
   "reactive": true,
   "repository": "https://github.com/ItsRiprod/Deskthing-Client/",
   "author": "Riprod",
-  "version": "0.11.0",
+  "version": "0.11.2",
   "compatibility": {
-    "server": ">=0.11.0",
+    "server": ">=0.11.7",
     "app": ">=0.11.0"
   },
   "context": {

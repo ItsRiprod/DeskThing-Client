@@ -92,8 +92,8 @@ const HANDLE_MUSIC = (_data: DeskThingToDevice<DESKTHING_DEVICE.MUSIC>) => {
 
 const HANDLE_SETTINGS = (data: DeskThingToDevice<DESKTHING_DEVICE.SETTINGS>) => {
   const updateAppSettings = useAppStore.getState().updateAppSettings
-  const { app, ...updatedSettings } = data.payload
-  updateAppSettings(app, updatedSettings)
+  const { app, settings } = data.payload
+  updateAppSettings(app, settings)
 }
 
 const HANDLE_APPS = (data: DeskThingToDevice<DESKTHING_DEVICE.APPS>) => {

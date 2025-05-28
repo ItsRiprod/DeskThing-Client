@@ -56,7 +56,6 @@ export const useTimeStore = create<TimeStore>((set, get) => ({
     const ampm = is24Hour ? '' : hours >= 12 ? 'PM' : 'AM'
     const formattedHours = is24Hour ? hours : hours % 12 || 12
     const formattedTime = `${formattedHours}:${minutes.toString().padStart(2, '0')}${!is24Hour ? ' ' + ampm : ''}`
-    Logger.info(`Time is: ${formattedTime}`)
 
     set({ currentTimeFormatted: formattedTime })
   }
